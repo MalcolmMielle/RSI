@@ -43,7 +43,8 @@ BOOST_AUTO_TEST_CASE(trying)
 	BOOST_CHECK_EQUAL(fuzzy.circleIsEmpty(roi, circle), true);
 	
 	FuzzyOpening fuzzy_2;
-	fuzzy_2.setSize(51);
+	fuzzy_2.setSize(50);
+	fuzzy_2.fast(true);
 	
 	cv::Mat map = cv::imread("../Test/mapgate.png", CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out;

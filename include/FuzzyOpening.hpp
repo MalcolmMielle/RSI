@@ -30,15 +30,31 @@ std::string type2str(int type) {
 }
 
 
-
+/**
+ * @brief Fuzzy opening on an image
+ * Calculate the size of the biggest circle that any pixel can be fitted in. Circles don't have to be centered on the pixel considered.
+ */
 class FuzzyOpening{
 	
 protected:
+	/**
+	 * @brief Max distance from a point to a wall to be consider an open space.
+	 * All point that can fit in a circle with at least radius _size will be considered the same
+	 */
 	int _size;
+	/**
+	 * @brief Fast or accurate
+	 */
+	bool _fast;
 	
 public:
-	FuzzyOpening(): _size(3){};
+	FuzzyOpening(): _size(3), _fast(false){};
 	void setSize(int i){_size = i;}
+	
+	///@brief Determine if the algorithm needs to run fast or accuratly. Cannot be fast AND accurate for now
+	void fast(bool fast){_fast = fast;}
+	///@brief Determine if the algorithm needs to run fast or accuratly. Cannot be fast AND accurate for now
+	void accurate(bool acc){_fast = !acc;}
 	
 	///@brief return true or false depending on if the circle discribed by circle is empty in input
 	bool circleIsEmpty(cv::Mat& input, cv::Mat& circle);
@@ -73,7 +89,7 @@ private:
 	void opening(cv::Mat& src, cv::Mat& dest, int size){
 // 		cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(size, size), cv::Point(-1, -1) );
 		cv::Mat kernel = cv::Mat::zeros(size, size, CV_8U);
-// 		std::cout << kernel << std::endl;
+		std::cout << kernel << std::endl;
 		if(size%2 != 0){
 			cv::circle(kernel, cv::Point2i(size/2, size/2), size/2, cv::Scalar(1), -1);
 		}
@@ -83,10 +99,10 @@ private:
 			cv::circle(kernel, cv::Point2i((size/2)-1, (size/2)), (size/2)-1, cv::Scalar(1), -1);
 			cv::circle(kernel, cv::Point2i((size/2), (size/2)-1), (size/2)-1, cv::Scalar(1), -1);
 		}
-// 		cv::imshow("circle__", kernel);
-// 		cv::waitKey(0);
+		cv::imshow("circle__", kernel);
+		cv::waitKey(0);
 		
-// 		std::cout << kernel << std::endl << std::endl;
+		std::cout << kernel << std::endl << std::endl;
 		cv::morphologyEx(src, dest, cv::MORPH_OPEN, kernel);
 	};
 	
@@ -99,22 +115,27 @@ void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int va
 	
 // 	std::cout << "OUTPUT " << std::endl << output << std::endl;
 	//Making circle;
-	cv::Mat circle = cv::Mat::zeros(value, value, CV_32F);
-	if(value%2 != 0){
-		cv::circle(circle, cv::Point2i(value/2, value/2), value/2, cv::Scalar(1), -1);
+	cv::Mat element;
+	
+	//TODO : make circle drawing faster ! The problem is escentially the drawing time of the circles
+	//If the algorithm doesn't need to run fast, we run a circluar element for more accurate result
+	if(_fast == false){
+		element = cv::Mat::zeros(value * 2 , value * 2, CV_32F);
+		cv::circle(element, cv::Point2i((value)-1, (value)-1), (value)-1, cv::Scalar(1), -1);
+		cv::circle(element, cv::Point2i((value), (value)), (value)-1, cv::Scalar(1), -1);
+		cv::circle(element, cv::Point2i((value)-1, (value)), (value)-1, cv::Scalar(1), -1);
+		cv::circle(element, cv::Point2i((value), (value)-1), (value)-1, cv::Scalar(1), -1);
 	}
+	//To go fast we use a rectangular element for comparison
 	else{
-		cv::circle(circle, cv::Point2i((value/2)-1, (value/2)-1), (value/2)-1, cv::Scalar(255), -1);
-		cv::circle(circle, cv::Point2i((value/2), (value/2)), (value/2)-1, cv::Scalar(255), -1);
-		cv::circle(circle, cv::Point2i((value/2)-1, (value/2)), (value/2)-1, cv::Scalar(255), -1);
-		cv::circle(circle, cv::Point2i((value/2), (value/2)-1), (value/2)-1, cv::Scalar(255), -1);
+		element = cv::Mat::ones(value * 2 , value * 2, CV_32F);
 	}
 	
 // 	std::cout << "CERLCE " << std::endl << circle << std::endl;
 	
-	if(input.rows != circle.rows || input.cols != circle.cols){
+	if(input.rows != element.rows || input.cols != element.cols){
 		std::ostringstream str_test;
-		str_test <<  "Input and cirle are not the same at line " << __LINE__ << " in file " << __FILE__ << "." << std::endl << "Input rows and col : " << input.rows << " " << input.cols << " circle : " << circle.rows << " " << circle.cols ;
+		str_test <<  "Input and cirle are not the same at line " << __LINE__ << " in file " << __FILE__ << "." << std::endl << "Input rows and col : " << input.rows << " " << input.cols << " element : " << element.rows << " " << element.cols ;
 		throw std::runtime_error(str_test.str() );
 	}
 	
@@ -122,12 +143,12 @@ void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int va
 	for(int row = 0 ; row < input.rows ; row++){
 		float* p = input.ptr<float>(row); //point to each row
 		float* p_output = output.ptr<float>(row); //point to each row
-		float* p_circle = circle.ptr<float>(row); //point to each row
+		float* p_element = element.ptr<float>(row); //point to each row
 		for(int col = 0 ; col < input.cols ; col++){
 			//p[j] <- how to access element
 	// 				std::cout << (int)p[j]<< std::endl;
 // 			std::cout << "Comparing " << (float)p[col] << " and " << value << " while circle " << p_circle[col] << std::endl;
-			if((float)p[col] > 0 && (float)p_output[col] < value && p_circle[col] > 0){
+			if((float)p[col] > 0 && (float)p_output[col] < value && (float)p_element[col] > 0){
 				p_output[col] = value;
 			}
 // 			if((float)p[col] == 0 && p_circle[col] > 0){
@@ -173,20 +194,24 @@ void FuzzyOpening::swypeThroughSrc(const cv::Mat& src, cv::Mat& output, int size
 	cv::Mat roi_output_final = output(cv::Rect(pad, pad, old_rows, old_cols));
 // 	std::cout << roi_output_final << std::endl;
 	//Update result 
-// 	int count = 0;
-	for(int row = pad ; row < distance_image.rows - pad + 1 ; row++){
+	int count = 0;
+	for(int row = pad ; row < distance_image.rows - pad + 1 /*&& count < 15000*/ ; row++){
 		float* p = distance_image.ptr<float>(row); //point to each row
 		float* p_output = output.ptr<float>(row); //point to each row
-		for(int col = pad ; col < distance_image.cols - pad + 1 ; col++){
+		for(int col = pad ; col < distance_image.cols - pad + 1 /*&& count < 15000*/ ; col++){
 			
 			int dist_to_obstacle = (float)p[col];
+			dist_to_obstacle;
 			if(dist_to_obstacle > _size){
 				dist_to_obstacle = _size;
 			}
+			else{
+// 				std::cout << "size is good " << dist_to_obstacle <<  std::endl;
+			}
 // 			std::cout << row << " " << col << " " << " dist : " <<dist_to_obstacle << " same " << (float)p[col] << " | " ;
 			
-			cv::Mat roi = distance_image(cv::Rect(col - (dist_to_obstacle/2), row - (dist_to_obstacle/2), dist_to_obstacle, dist_to_obstacle));
-			cv::Mat roi_output = output(cv::Rect(col - (dist_to_obstacle/2), row - (dist_to_obstacle/2), dist_to_obstacle, dist_to_obstacle));
+			cv::Mat roi = distance_image(cv::Rect(col - (dist_to_obstacle), row - (dist_to_obstacle), dist_to_obstacle * 2, dist_to_obstacle * 2));
+			cv::Mat roi_output = output(cv::Rect(col - (dist_to_obstacle), row - (dist_to_obstacle), dist_to_obstacle * 2, dist_to_obstacle * 2));
 			if((int)dist_to_obstacle > 0){
 				addPointValueInCircle(roi, roi_output, dist_to_obstacle);
 // 				std::cout << std::endl;
@@ -194,13 +219,27 @@ void FuzzyOpening::swypeThroughSrc(const cv::Mat& src, cv::Mat& output, int size
 // 				int a ;
 // 				std::cin >> a;
 // 				count++;
-// 				if(count % 10 == 0){
-// // 					std::cout << "LOL" << std::endl;
+// 				if(count % 15000 == 0){
+					
+// 					std::cout << "Hello " << count << std::endl;
 // 					cv::Mat copy;
 // 					roi_output_final.copyTo(copy);
 // 					cv::normalize(copy, copy, 0, 1, cv::NORM_MINMAX, CV_32F);
 // 					cv::imshow("out", copy);
-// 					
+// // 					
+// // 					cv::Mat roi_tmp_draw = cv::Mat::zeros(roi_output_final.rows, roi_output_final.cols, CV_32F);
+// // 					if(dist_to_obstacle%2 != 0){
+// // 						cv::circle(roi_tmp_draw, cv::Point2i(col - pad , row - pad ) , dist_to_obstacle, cv::Scalar(1), -1);
+// // 					}
+// // 					else{
+// // 						cv::circle(roi_tmp_draw, cv::Point2i(col-1 - pad , row -1 - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
+// // 						cv::circle(roi_tmp_draw, cv::Point2i(col - pad , row - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
+// // 						cv::circle(roi_tmp_draw, cv::Point2i(col -1 - pad , row - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
+// // 						cv::circle(roi_tmp_draw, cv::Point2i(col - pad , row - -1 - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
+// // 					}
+// // 					
+// // 					cv::imshow("circle moving", roi_tmp_draw);
+// // 					
 // 					cv::waitKey(1);
 // 				}
 			}
