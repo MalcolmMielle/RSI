@@ -191,7 +191,7 @@ void FuzzyOpening::swypeThroughSrc(const cv::Mat& src, cv::Mat& output, int size
 	cv::copyMakeBorder( distance_image, distance_image, pad, pad, pad, pad, cv::BORDER_CONSTANT, 0 );
 	
 	output = cv::Mat::ones(distance_image.rows, distance_image.cols, CV_32F);
-	cv::Mat roi_output_final = output(cv::Rect(pad, pad, old_rows, old_cols));
+	cv::Mat roi_output_final = output(cv::Rect(pad, pad, old_cols, old_rows));
 // 	std::cout << roi_output_final << std::endl;
 	//Update result 
 	int count = 0;

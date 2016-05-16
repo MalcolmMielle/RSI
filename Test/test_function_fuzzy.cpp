@@ -46,7 +46,11 @@ BOOST_AUTO_TEST_CASE(trying)
 	fuzzy_2.setSize(50);
 	fuzzy_2.fast(true);
 	
-	cv::Mat map = cv::imread("../Test/mapgate.png", CV_LOAD_IMAGE_GRAYSCALE);
+	int argc = boost::unit_test::framework::master_test_suite().argc;
+	char** argv = boost::unit_test::framework::master_test_suite().argv;
+	
+	char* str = argv[1];
+	cv::Mat map = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out;
 	fuzzy_2.swypeThroughSrc(map, out, 35);
 // 	std::cout << out << std::endl;
