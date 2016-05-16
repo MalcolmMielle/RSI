@@ -59,52 +59,11 @@ public:
 	///@brief return true or false depending on if the circle discribed by circle is empty in input
 	bool circleIsEmpty(cv::Mat& input, cv::Mat& circle);
 	//Start with biggest circle and go down until empty
-	void swypeThroughSrc(const cv::Mat& src, cv::Mat& output, int size);
+	void fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size);
 	void addPointValueInCircle(cv::Mat& input, cv::Mat& output, int value);
 	
 	
-	void fuzzyOpen(cv::Mat& src, cv::Mat& dest){
-		
-		src.convertTo(src, CV_8UC1);
-		
-		src.copyTo(dest);
-		dest = cv::Scalar(0);
-		
-		for(size_t i = 1 ; i < _size ;  i = i+1){
-			cv::Mat tmp;
-			opening(src, tmp, i);
-			dest = dest + tmp;
-			
-			std::cout << "zone " << i << " to " << _size <<std::endl;
-			
-			cv::imshow("dest tmp", dest);
-			cv::imshow("dest tmp tmp", tmp);
-			std::cout << cv::Mat::zeros(i, i, CV_8U) << std::endl << std::endl;
-			std::cout << tmp << std::endl << "over" << std::endl;
-			cv::waitKey(0);
-		}
-	}
-	
 private:
-	void opening(cv::Mat& src, cv::Mat& dest, int size){
-// 		cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(size, size), cv::Point(-1, -1) );
-		cv::Mat kernel = cv::Mat::zeros(size, size, CV_8U);
-		std::cout << kernel << std::endl;
-		if(size%2 != 0){
-			cv::circle(kernel, cv::Point2i(size/2, size/2), size/2, cv::Scalar(1), -1);
-		}
-		else{
-			cv::circle(kernel, cv::Point2i((size/2)-1, (size/2)-1), (size/2)-1, cv::Scalar(1), -1);
-			cv::circle(kernel, cv::Point2i((size/2), (size/2)), (size/2)-1, cv::Scalar(1), -1);
-			cv::circle(kernel, cv::Point2i((size/2)-1, (size/2)), (size/2)-1, cv::Scalar(1), -1);
-			cv::circle(kernel, cv::Point2i((size/2), (size/2)-1), (size/2)-1, cv::Scalar(1), -1);
-		}
-		cv::imshow("circle__", kernel);
-		cv::waitKey(0);
-		
-		std::cout << kernel << std::endl << std::endl;
-		cv::morphologyEx(src, dest, cv::MORPH_OPEN, kernel);
-	};
 	
 };
 
@@ -162,7 +121,7 @@ void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int va
 
 }
 
-void FuzzyOpening::swypeThroughSrc(const cv::Mat& src, cv::Mat& output, int size)
+void FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 {
 	//Calcul distance image
 	cv::Mat distance_image, label;

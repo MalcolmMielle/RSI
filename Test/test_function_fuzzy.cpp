@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	char* str = argv[1];
 	cv::Mat map = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out;
-	fuzzy_2.swypeThroughSrc(map, out, 35);
+	fuzzy_2.fuzzyOpening(map, out, 35);
 // 	std::cout << out << std::endl;
 	
 	cv::normalize(out, out, 0, 1, cv::NORM_MINMAX, CV_32F);
