@@ -10,13 +10,15 @@ endif()
 
 include_directories(include)
 
-add_executable(rsi main.cpp)
-target_link_libraries(rsi ${OpenCV_LIBS})
+add_subdirectory(src)
+add_subdirectory(include)
+
+# add_executable(rsi main.cpp)
+# target_link_libraries(rsi ${OpenCV_LIBS})
 
 add_executable(test_function_fuzzy Test/test_function_fuzzy.cpp)
-target_link_libraries(test_function_fuzzy ${OpenCV_LIBS} -lboost_unit_test_framework)
+target_link_libraries(test_function_fuzzy ${OpenCV_LIBS} Fuzzylib -lboost_unit_test_framework)
 
-install(TARGETS rsi RUNTIME DESTINATION bin)
+# install(TARGETS rsi RUNTIME DESTINATION bin)
 
-add_subdirectory(include)
 add_subdirectory(Test)
