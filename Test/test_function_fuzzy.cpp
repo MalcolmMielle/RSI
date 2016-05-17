@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 // 	std::cout << out << std::endl;
 	
-	cv::imshow("out", out);
+	cv::imshow("out final", out);
 	cv::waitKey(0);
 	
 	
