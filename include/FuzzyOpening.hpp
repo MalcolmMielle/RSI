@@ -46,10 +46,23 @@ protected:
 	 * @brief Fast or accurate
 	 */
 	bool _fast;
+	/**
+	 * @brief vector of element object of different size for not having to generate them each time
+	 */
+// 	std::vector<cv::Mat> _elements;
+	/**
+	 * @brief id of element
+	 * 0 : circle
+	 * 1 : rectangle
+	 */
+// 	size_t _element_id;
 	
 public:
 	FuzzyOpening(): _size(3), _fast(false){};
 	void setSize(int i){_size = i;}
+	
+// 	void generateElements();
+// 	void generateCircle(size_t size, cv::Mat& out);
 	
 	///@brief Determine if the algorithm needs to run fast or accuratly. Cannot be fast AND accurate for now
 	void fast(bool fast){_fast = fast;}
@@ -63,9 +76,19 @@ public:
 	void addPointValueInCircle(cv::Mat& input, cv::Mat& output, int value);
 	
 	
+	
 private:
 	
 };
+
+// void FuzzyOpening::generateElements()
+// {
+// 	for(size_t i = 0 ; i < _size ; ++i){
+// // 		if()
+// 	}
+// 
+// }
+
 
 //Needs to be int now
 void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int value)
@@ -79,11 +102,15 @@ void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int va
 	//TODO : make circle drawing faster ! The problem is escentially the drawing time of the circles
 	//If the algorithm doesn't need to run fast, we run a circluar element for more accurate result
 	if(_fast == false){
-		element = cv::Mat::zeros(value * 2 , value * 2, CV_32F);
-		cv::circle(element, cv::Point2i((value)-1, (value)-1), (value)-1, cv::Scalar(1), -1);
-		cv::circle(element, cv::Point2i((value), (value)), (value)-1, cv::Scalar(1), -1);
-		cv::circle(element, cv::Point2i((value)-1, (value)), (value)-1, cv::Scalar(1), -1);
-		cv::circle(element, cv::Point2i((value), (value)-1), (value)-1, cv::Scalar(1), -1);
+		element = cv::Mat::zeros((value * 2) + 2 , (value * 2) + 2, CV_32F);
+		cv::circle(element, cv::Point2i((value), (value)), (value), cv::Scalar(1), -1);
+// 		cv::circle(element, cv::Point2i((value), (value)), (value)-1, cv::Scalar(1), -1);
+// 		cv::circle(element, cv::Point2i((value)-1, (value)), (value)-1, cv::Scalar(1), -1);
+// 		cv::circle(element, cv::Point2i((value), (value)-1), (value)-1, cv::Scalar(1), -1);
+		
+		//Needs to be not even
+// 		element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2*value +1, 2*value +1), cv::Point(value-1 , value-1 ) );
+// 		std::cout << value << std::endl << element << std::endl;
 	}
 	//To go fast we use a rectangular element for comparison
 	else{
@@ -92,9 +119,9 @@ void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int va
 	
 // 	std::cout << "CERLCE " << std::endl << circle << std::endl;
 	
-	if(input.rows != element.rows || input.cols != element.cols){
+	if(input.rows > element.rows || input.cols > element.cols){
 		std::ostringstream str_test;
-		str_test <<  "Input and cirle are not the same at line " << __LINE__ << " in file " << __FILE__ << "." << std::endl << "Input rows and col : " << input.rows << " " << input.cols << " element : " << element.rows << " " << element.cols ;
+		str_test <<  "Input is bigger than elemtn at line " << __LINE__ << " in file " << __FILE__ << "." << std::endl << "Input rows and col : " << input.rows << " " << input.cols << " element : " << element.rows << " " << element.cols ;
 		throw std::runtime_error(str_test.str() );
 	}
 	

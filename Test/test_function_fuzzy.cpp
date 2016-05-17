@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	FuzzyOpening fuzzy_2;
 	fuzzy_2.setSize(50);
-	fuzzy_2.fast(true);
+	fuzzy_2.fast(false);
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
