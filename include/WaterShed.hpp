@@ -339,16 +339,23 @@ inline void Watershed::fuse()
 		}
 		
 		
-		
-		if(_zones[base].getValue() != _zones[to_fuse].getValue() || base == to_fuse){
-			std::ostringstream str_test;
-			str_test <<  "Fusing zone that shouldn't be fused at line " << __LINE__ << " in file " << __FILE__ << "." << std::endl;
-			throw std::runtime_error(str_test.str() );	
+		if(base != to_fuse){
+			
+			if(_zones[base].getValue() != _zones[to_fuse].getValue() || base == to_fuse){
+				std::cout << min << " " << max << std::endl;
+				std::cout << _zones[base].getValue() << " " << _zones[to_fuse].getValue() << std::endl;
+				std::ostringstream str_test;
+				str_test <<  "Fusing zone that shouldn't be fused at line " << __LINE__ << " in file " << __FILE__ << "." << std::endl;
+				throw std::runtime_error(str_test.str() );	
+			}
+			
+			for(size_t j = 0 ; j < _zones[max].size() ; ++j){
+	// 			std::cout << " j : " << j << " with size " << _zones[to_fuse].size() << std::endl;
+				_zones[min].push_back(_zones[max][j]);
+			}
 		}
-		
-		for(size_t j = 0 ; j < _zones[max].size() ; ++j){
-// 			std::cout << " j : " << j << " with size " << _zones[to_fuse].size() << std::endl;
-			_zones[min].push_back(_zones[max][j]);
+		else{
+			std::cout << "Already fused" << std::endl;
 		}
 		
 		
