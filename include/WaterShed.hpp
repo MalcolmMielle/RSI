@@ -5,6 +5,7 @@
 #include "Zone.hpp"
 
 bool sortFunction(std::pair < size_t, size_t > i, std::pair < size_t, size_t > j){return (i.second > j.second); }
+bool sortZone(Zone i, Zone j){return (i.size() > j.size()); }
 
 
 //TODO convert Mat to Eigen !
@@ -280,14 +281,14 @@ inline void Watershed::fuse()
 	//Sort the index backward from higest value for second so that we erase the zone from the back without changing the indexes.
 	std::sort(_index_of_zones_to_fuse_after.begin(), _index_of_zones_to_fuse_after.end(), sortFunction);
 	
-// 	for(size_t i = 0 ; i < _zones.size() ; ++i){
-// 		std::cout << "Zone " << i << " of size " << _zones[i].size() << std::endl;
-// 	}
-// 	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
-// 		int base = _index_of_zones_to_fuse_after[i].first;
-// 		int to_fuse = _index_of_zones_to_fuse_after[i].second;
-// 		std::cout << "Zone to fuse " << _index_of_zones_to_fuse_after[i].first << " " << _index_of_zones_to_fuse_after[i].second << " with values " << _zones[base].getValue() << " " << _zones[to_fuse].getValue() << std::endl;
-// 	}
+	for(size_t i = 0 ; i < _zones.size() ; ++i){
+		std::cout << "Zone " << i << " of size " << _zones[i].size() << std::endl;
+	}
+	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
+		int base = _index_of_zones_to_fuse_after[i].first;
+		int to_fuse = _index_of_zones_to_fuse_after[i].second;
+		std::cout << "Zone to fuse " << _index_of_zones_to_fuse_after[i].first << " " << _index_of_zones_to_fuse_after[i].second << " with values " << _zones[base].getValue() << " " << _zones[to_fuse].getValue() << std::endl;
+	}
 // 	exit(0);
 	
 	
@@ -302,25 +303,25 @@ inline void Watershed::fuse()
 		//Search the value in the mapping and update it
 		if ( mapping.find(_index_of_zones_to_fuse_after[i].first) == mapping.end() ) {
 		// not found
-// 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
 			base = _index_of_zones_to_fuse_after[i].first;
 		} else {
 		// found
-// 			std::cout << "FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			std::cout << "FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
 			base = mapping[_index_of_zones_to_fuse_after[i].first];
-// 			std::cout << "Now base is " << base << std::endl;
+			std::cout << "Now base is " << base << std::endl;
 		}
 		if ( mapping.find(_index_of_zones_to_fuse_after[i].second) == mapping.end() ) {
 		// not found
-// 			std::cout << "not FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			std::cout << "not FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
 			to_fuse = _index_of_zones_to_fuse_after[i].second;
 			
 // 			mapping[_index_of_zones_to_fuse_after[i].second] = base;
 		} else {
 		// found
-// 			std::cout << "FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			std::cout << "FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
 			to_fuse = mapping[_index_of_zones_to_fuse_after[i].second];
-// 			std::cout << " now fuse " << to_fuse << std::endl;
+			std::cout << " now fuse " << to_fuse << std::endl;
 // 			mapping[to_fuse] = base;
 			
 		}
@@ -328,18 +329,17 @@ inline void Watershed::fuse()
 		//Always copy to the smalles number
 		int max = to_fuse;
 		int min = base;
-		if(max < min){
-			max = base;
-			min = to_fuse;
-			mapping[max] = min;
-			mapping[_index_of_zones_to_fuse_after[i].first] = min;
-		}else{
-			mapping[max] = min;
-			mapping[_index_of_zones_to_fuse_after[i].second] = min;
-		}
-		
-		
-		if(base != to_fuse){
+		if(min != max){
+			
+			if(max < min){
+				max = base;
+				min = to_fuse;
+				mapping[max] = min;
+				mapping[_index_of_zones_to_fuse_after[i].first] = min;
+			}else{
+				mapping[max] = min;
+				mapping[_index_of_zones_to_fuse_after[i].second] = min;
+			}
 			
 			if(_zones[base].getValue() != _zones[to_fuse].getValue() || base == to_fuse){
 				std::cout << min << " " << max << std::endl;
@@ -364,14 +364,11 @@ inline void Watershed::fuse()
 	std::map<size_t, size_t>::reverse_iterator iter;
 // 	std::cout << "PRINTTT" << std::endl;
 	for (iter = mapping.rbegin(); iter != mapping.rend(); ++iter) {
-// 		std::cout << iter->first << " " << iter->second << "\n";
+		std::cout << iter->first << " " << iter->second << "\n";
 		_zones.erase(_zones.begin() + iter->first);
 	}
-	
-// 	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
-// 		int to_fuse = _index_of_zones_to_fuse_after[i].second;
-// 		_zones.erase(_zones.begin() + to_fuse);
-// 	}
+
+	std::sort(_zones.begin(), _zones.end(), sortZone);
 	
 }
 

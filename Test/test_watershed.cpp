@@ -51,11 +51,11 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::cout << "WHATERSHED" << std::endl;
 	watershed.watershed(out_tmp);
 	
-	watershed.print();
+// 	watershed.print();
 	
 	cv::imshow("out_tmp", out);
 	cv::waitKey(0);
-	watershed.draw(out_tmp, 100);
+	watershed.draw(out_tmp, 0);
 	
 	
 	
