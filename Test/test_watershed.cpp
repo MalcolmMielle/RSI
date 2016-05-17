@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	cv::Mat out_tmp;
 // 	cv::GaussianBlur(out, out_tmp, cv::Size(3, 3), 10);
-	cv::medianBlur(out, out_tmp, 3);
+	cv::medianBlur(out, out_tmp, 11);
 // 	cv::bilateralFilter(out, out_tmp, 5, 10, 0);
 // 	cv::GaussianBlur(out, out_tmp, cv::Size(0, 0), 3);
 // 	cv::addWeighted(out, 1.5, out_tmp, -0.5, 0, out_tmp);
@@ -52,8 +52,11 @@ BOOST_AUTO_TEST_CASE(trying)
 	watershed.watershed(out_tmp);
 	
 	watershed.print();
-// 	cv::imshow("out", out);
-// 	cv::waitKey(0);
+	
+	cv::imshow("out_tmp", out);
+	cv::waitKey(0);
+	watershed.draw(out_tmp, 100);
+	
 	
 	
 }

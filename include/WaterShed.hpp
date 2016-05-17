@@ -48,6 +48,47 @@ public:
 			std::cout << " x : " << _zones[i][j].x << " y : " << _zones[i][j].y << std::endl;
 		}
 	}
+	
+	void draw(cv::Mat& draw, int size){
+// 		std::cout << "_zone size " << _zones.size() << std::endl;
+		
+		for(size_t i = 0 ; i < _zones.size() ; ++i){
+			if(_zones[i].size() > size){
+				cv::Mat draw_tmp = cv::Mat::zeros(draw.rows, draw.cols, CV_8U);
+				for(size_t j = 0 ; j < _zones[i].size() ; ++j){
+					draw_tmp.at<uchar>(_zones[i][j].x, _zones[i][j].y) = 255;
+				}
+				cv::imshow("Zones " , draw_tmp);
+				cv::waitKey(0);
+				
+			}
+		
+		}
+	
+	}
+	
+	void slowdraw(cv::Mat& draw, int size){
+		std::cout << "_zone size " << _zones.size() << std::endl;
+		cv::Mat draw_tmp = cv::Mat::zeros(draw.rows, draw.cols, CV_8U);
+		for(size_t i = 0 ; i < _zones.size() ; ++i){
+			if ( i > 1){
+				
+				if(_zones[i].size() > size){
+					
+					for(size_t j = 0 ; j < _zones[i].size() ; ++j){
+						draw_tmp.at<uchar>(_zones[i][j].x, _zones[i][j].y) = 255;
+					}
+// 					std::cout << "VALUE " << i << std::endl;
+					
+				}
+				
+			}
+		}
+		if(_zones.size() >1){
+			cv::imshow("Zones " , draw_tmp);
+			cv::waitKey(1);
+		}
+	}
 };
 
 inline void Watershed::watershed(cv::Mat& in)
@@ -93,7 +134,7 @@ inline void Watershed::makeZones(cv::Mat& input)
 		uint32_t* p = in.ptr<uint32_t>(row); //point to each row
 		uint32_t* p_zone_star = zones_star.ptr<uint32_t>(row); //point to each row
 		for(int col = 0 ; col < in.cols ; col++){
-			
+// 			slowdraw(in, 0);
 // 			std::cout << "Step : " << step << " row and col " << row << " " << col << std::endl;
 			++step;
 			//It's not a wall
@@ -249,10 +290,55 @@ inline void Watershed::fuse()
 // 	}
 // 	exit(0);
 	
+	
+	
+	std::map<size_t, size_t> mapping;
+	
 	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
-// 		std::cout << " i : " << i << std::endl;
-		int base = _index_of_zones_to_fuse_after[i].first;
-		int to_fuse = _index_of_zones_to_fuse_after[i].second;
+// 		
+		int base;
+		int to_fuse;
+// 		std::cout << std::endl;
+		//Search the value in the mapping and update it
+		if ( mapping.find(_index_of_zones_to_fuse_after[i].first) == mapping.end() ) {
+		// not found
+// 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			base = _index_of_zones_to_fuse_after[i].first;
+		} else {
+		// found
+// 			std::cout << "FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			base = mapping[_index_of_zones_to_fuse_after[i].first];
+// 			std::cout << "Now base is " << base << std::endl;
+		}
+		if ( mapping.find(_index_of_zones_to_fuse_after[i].second) == mapping.end() ) {
+		// not found
+// 			std::cout << "not FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			to_fuse = _index_of_zones_to_fuse_after[i].second;
+			
+// 			mapping[_index_of_zones_to_fuse_after[i].second] = base;
+		} else {
+		// found
+// 			std::cout << "FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			to_fuse = mapping[_index_of_zones_to_fuse_after[i].second];
+// 			std::cout << " now fuse " << to_fuse << std::endl;
+// 			mapping[to_fuse] = base;
+			
+		}
+		
+		//Always copy to the smalles number
+		int max = to_fuse;
+		int min = base;
+		if(max < min){
+			max = base;
+			min = to_fuse;
+			mapping[max] = min;
+			mapping[_index_of_zones_to_fuse_after[i].first] = min;
+		}else{
+			mapping[max] = min;
+			mapping[_index_of_zones_to_fuse_after[i].second] = min;
+		}
+		
+		
 		
 		if(_zones[base].getValue() != _zones[to_fuse].getValue() || base == to_fuse){
 			std::ostringstream str_test;
@@ -260,18 +346,25 @@ inline void Watershed::fuse()
 			throw std::runtime_error(str_test.str() );	
 		}
 		
-		for(size_t j = 0 ; j < _zones[to_fuse].size() ; ++j){
+		for(size_t j = 0 ; j < _zones[max].size() ; ++j){
 // 			std::cout << " j : " << j << " with size " << _zones[to_fuse].size() << std::endl;
-			_zones[base].push_back(_zones[to_fuse][j]);
+			_zones[min].push_back(_zones[max][j]);
 		}
 		
 		
 	}
 	
-	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
-		int to_fuse = _index_of_zones_to_fuse_after[i].second;
-		_zones.erase(_zones.begin() + to_fuse);
+	std::map<size_t, size_t>::reverse_iterator iter;
+// 	std::cout << "PRINTTT" << std::endl;
+	for (iter = mapping.rbegin(); iter != mapping.rend(); ++iter) {
+// 		std::cout << iter->first << " " << iter->second << "\n";
+		_zones.erase(_zones.begin() + iter->first);
 	}
+	
+// 	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
+// 		int to_fuse = _index_of_zones_to_fuse_after[i].second;
+// 		_zones.erase(_zones.begin() + to_fuse);
+// 	}
 	
 }
 
