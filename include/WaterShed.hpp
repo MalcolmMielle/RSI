@@ -42,6 +42,12 @@ public:
 		std::cout << "Number of zones " << _zones.size() << std::endl;
 		
 	}
+	
+	void printZone(int i){
+		for(size_t j = 0 ; j < _zones[i].size() ; ++j){
+			std::cout << " x : " << _zones[i][j].x << " y : " << _zones[i][j].y << std::endl;
+		}
+	}
 };
 
 inline void Watershed::watershed(cv::Mat& in)
@@ -68,9 +74,12 @@ inline void Watershed::makeZones(cv::Mat& input)
 {
 	std::cout << "Make zone : " << std::endl;
 	cv::Mat in;
-	input.convertTo(in, CV_8U);
+	input.convertTo(in, CV_32SC1);
 	// Mat with 0 when pixel has not been seen and a nuumber when it belong to a zone
 	cv::Mat zones_star = cv::Mat::zeros(in.rows, in.cols, in.depth());
+	
+	std::cout << "ZONE : " << type2str(zones_star.type()) << std::endl;
+// 	exit(0);
 	
 // 	std::cout << "Make zone : " <<in.rows << " " << in.cols << std::endl;
 	
@@ -81,13 +90,13 @@ inline void Watershed::makeZones(cv::Mat& input)
 	// Swype in one way and add pixel to zone 
 	int step = 0 ;
 	for(int row = 0 ; row < in.rows ; row++){
-		uchar* p = in.ptr(row); //point to each row
-		uchar* p_zone_star = zones_star.ptr(row); //point to each row
+		uint32_t* p = in.ptr<uint32_t>(row); //point to each row
+		uint32_t* p_zone_star = zones_star.ptr<uint32_t>(row); //point to each row
 		for(int col = 0 ; col < in.cols ; col++){
 			
 // 			std::cout << "Step : " << step << " row and col " << row << " " << col << std::endl;
 			++step;
-			//Itś not a wall
+			//It's not a wall
 			if(p[col] != 0){
 				//p[j] <- how to access element
 // 						std::cout << (int)p[col]<< std::endl;
@@ -96,20 +105,33 @@ inline void Watershed::makeZones(cv::Mat& input)
 				
 // 				std::cout << "Zone index size " << zone_index.size() << std::endl;
 				//New zone
+				if(row == 9 && col == 33){
+					std::cout <<"NOW for value "<< (int)p[col] <<std::endl;
+				}
 				if(zone_index.size() == 0){
+					if(row == 9 && col == 33){
+						std::cout <<"Newzone : "<< _zones.size() <<std::endl;
+					}
 					Zone new_zone;
 // 					std::cout << (int)p[col]<< std::endl;
 					new_zone.setValue(p[col]);
 					new_zone.push_back(cv::Point2i(row, col));
 					_zones.push_back(new_zone);
-// 					std::cout << "PUSHING " << _zones.size() - 1 << std::endl;
-					p_zone_star[col] = _zones.size() - 1;
-// 					std::cout << zones_star << std::endl;
+// 					std::cout << "PUSHING " << _zones.size() << std::endl;
+					p_zone_star[col] = (int)_zones.size() - 1;
+// 					std::cout << "value pushed compare to size " << (int)p_zone_star[col] << std::endl;
 					
 				}
 				else{
+					if(row == 9 && col == 33){
+						std::cout <<"Not new Zone"<<std::endl;
+					}
 					_zones[ zone_index[0] ].push_back(cv::Point2i(row, col));
 					p_zone_star[col] = zone_index [0];
+					
+					if(_zones[ zone_index[0] ].getValue() != p[col]){
+						throw std::runtime_error("Different value between the place and the zone it's added to");
+					}
 					
 					//If more than one zone push the fusion later if it doesn't already exist
 					if(zone_index.size() > 1){
@@ -148,6 +170,9 @@ inline void Watershed::makeZones(cv::Mat& input)
 				p_zone_star[col] = 0;
 				_zones[0 ].push_back(cv::Point2i(row, col));
 			}
+// 			if(row == 9 && col == 33){
+// 				exit(0);
+// 			}
 		}
 		
 	}
@@ -171,14 +196,17 @@ inline void Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_s
 				
 // 				std::cout << "YES " ;
 				if(row != row_tmp || col != col_tmp){
-					uchar* p = input.ptr(row_tmp);
-					uchar* p_star = zones_star.ptr(row_tmp);
+					uint32_t* p = input.ptr<uint32_t>(row_tmp);
+					uint32_t* p_star = zones_star.ptr<uint32_t>(row_tmp);
 					//Same value and visited before
 // 					std::cout << "Visited before " << (int)p_star[col_tmp] << std::endl;
 					if(value == p[col_tmp] && p_star[col_tmp] > 0){
 						
-// 						std::cout << "Same? " << (int)p_star[col_tmp] << " -> " << _zones[p_star[col_tmp]].getValue() <<"  " << value << std::endl;
+// 						std::cout << "Same for zone? " << (int)p_star[col_tmp] << " -> " << _zones[p_star[col_tmp]].getValue() <<"  " << value << " value in mat " <<  (int)p[col_tmp] << std::endl;
 						if(_zones[p_star[col_tmp]].getValue() != value){
+// 							std::cout << input << std::endl;
+							printZone(p_star[col_tmp]);
+							std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
 							throw std::runtime_error("Value and zone mismatch");
 						}
 						//SAME ZONE

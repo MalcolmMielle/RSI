@@ -35,13 +35,17 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::cout << "Done opening " << std::endl;
 	out.convertTo(out, CV_8U);
 	
-	std::cout << out << std::endl;
+// 	std::cout << out << std::endl;
 	
-// 	cv::medianBlur(out, out, 3);
+	
 	cv::Mat out_tmp;
-	cv::bilateralFilter(out, out_tmp, 5, 10, 0);
+// 	cv::GaussianBlur(out, out_tmp, cv::Size(3, 3), 10);
+	cv::medianBlur(out, out_tmp, 3);
+// 	cv::bilateralFilter(out, out_tmp, 5, 10, 0);
+// 	cv::GaussianBlur(out, out_tmp, cv::Size(0, 0), 3);
+// 	cv::addWeighted(out, 1.5, out_tmp, -0.5, 0, out_tmp);
 	
-	std::cout << "FILTER " << std::endl << out_tmp << std::endl;
+// 	std::cout << "FILTER " << std::endl << out << std::endl;
 	
 	Watershed watershed;
 	std::cout << "WHATERSHED" << std::endl;
