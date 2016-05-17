@@ -149,9 +149,10 @@ void FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 		}
 // 		std::cout << std::endl;
 	}
-	cv::normalize(roi_output_final, roi_output_final, 0, 1, cv::NORM_MINMAX, CV_32F);
 	
-// 	std::cout << out << std::endl;
+	cv::normalize(roi_output_final, roi_output_final, 0, 255, cv::NORM_MINMAX, CV_32F);
+	
+// 	std::cout << roi_output_final << std::endl;
 	
 // 	cv::imshow("out", roi_output_final);
 // 	cv::waitKey(0);
