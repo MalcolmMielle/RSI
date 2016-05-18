@@ -68,23 +68,22 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 						bool flag_exist = false;
 						for(size_t i = 1 ; i < zone_index.size() ; ++i){
 							
+							//Sort them by index value
+							size_t min = zone_index[0];
+							size_t max = zone_index[i];
+							if(min > zone_index[i]){
+								min = zone_index[i];
+								max = zone_index[0];
+							}
+							
 							//Make sure the pair does not already exist
 							for(size_t j = 0 ; j < _index_of_zones_to_fuse_after.size() ; ++j){
-								if( (zone_index[0] == _index_of_zones_to_fuse_after[j].first &&\
-									zone_index[i] == _index_of_zones_to_fuse_after[j].second)\
-									 || (zone_index[0] == _index_of_zones_to_fuse_after[j].second &&\
-									zone_index[i] == _index_of_zones_to_fuse_after[j].first )){
+								if( (min == _index_of_zones_to_fuse_after[j].first &&\
+									max == _index_of_zones_to_fuse_after[j].second) ){
 									flag_exist = true;
 								}
 							}
 							if(flag_exist == false){
-								size_t min = zone_index[0];
-								size_t max = zone_index[i];
-								if(min > zone_index[i]){
-									min = zone_index[i];
-									max = zone_index[0];
-								}
-								
 								_index_of_zones_to_fuse_after.push_back(std::pair<size_t, size_t>(min, max) );
 							}
 						}
