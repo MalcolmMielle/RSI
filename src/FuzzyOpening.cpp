@@ -1,7 +1,7 @@
 #include "FuzzyOpening.hpp"
 
 //Needs to be int now
-void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int value)
+void AASS::RSI::FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int value)
 {
 // 	std::cout << "INPUT " << std::endl << input << std::endl;
 	
@@ -58,7 +58,7 @@ void FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& output, int va
 
 }
 
-void FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
+void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 {
 	//Calcul distance image
 	cv::Mat distance_image, label;
@@ -162,7 +162,7 @@ void FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 }
 
 //I don't need that in the end 
-bool FuzzyOpening::circleIsEmpty(cv::Mat& input, cv::Mat& circle)
+bool AASS::RSI::FuzzyOpening::circleIsEmpty(cv::Mat& input, cv::Mat& circle)
 {
 	for(int row = 0 ; row < input.rows ; row++){
 		uchar* p = input.ptr(row); //point to each row

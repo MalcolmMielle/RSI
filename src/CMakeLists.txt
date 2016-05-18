@@ -1,3 +1,3 @@
 add_library(Fuzzylib
-			FuzzyOpening.cpp
+			FuzzyOpening.cpp Watershed.cpp
 			)

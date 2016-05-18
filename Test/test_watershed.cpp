@@ -11,13 +11,13 @@
 #include <ctime>
 
 #include "WaterShed.hpp"
-
+#include "FuzzyOpening.hpp"
 
 
 BOOST_AUTO_TEST_CASE(trying)
 {
 	
-	FuzzyOpening fuzzy_2;
+	AASS::RSI::FuzzyOpening fuzzy_2;
 	fuzzy_2.setSize(50);
 	fuzzy_2.fast(false);
 	
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 // 	std::cout << "FILTER " << std::endl << out << std::endl;
 	
-	Watershed watershed;
+	AASS::RSI::Watershed watershed;
 	std::cout << "WHATERSHED" << std::endl;
 	watershed.watershed(out_tmp);
 	

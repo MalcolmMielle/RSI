@@ -17,7 +17,7 @@
 BOOST_AUTO_TEST_CASE(trying)
 {
 	
-	FuzzyOpening fuzzy;
+	AASS::RSI::FuzzyOpening fuzzy;
 	cv::Mat base = cv::imread("../Test/points.png", CV_LOAD_IMAGE_GRAYSCALE);
 
 	//Making circle
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	roi = base(cv::Rect(11, 11, size, size));
 	BOOST_CHECK_EQUAL(fuzzy.circleIsEmpty(roi, circle), true);
 	
-	FuzzyOpening fuzzy_2;
+	AASS::RSI::FuzzyOpening fuzzy_2;
 	fuzzy_2.setSize(50);
 	fuzzy_2.fast(false);
 	
