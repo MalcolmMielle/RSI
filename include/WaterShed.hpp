@@ -3,6 +3,7 @@
 
 #include "Zone.hpp"
 #include "Utils.hpp"
+#include "bettergraph/SimpleGraph.hpp"
 
 namespace AASS{
 	namespace RSI{
@@ -16,7 +17,11 @@ namespace AASS{
 			
 		protected :
 			std::vector < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after;
+			std::map<size_t, size_t> _mapping;
 			std::deque< Zone > _zones;
+			//int as edge because we don't care aboput edge 
+			std::vector < std::pair < size_t, size_t > > _index_of_edges;
+			bettergraph::SimpleGraph<Zone, int> _graph;
 			
 		public:
 			Watershed(){
@@ -129,8 +134,11 @@ namespace AASS{
 			* @param row row of studied pixel
 			* @param col col of studied pixel
 			* @param zone_index std::vector containing the index of all connected pixel from the same type of zone (zone with the same value)
+			* @param zone_edges std::vector containing the index of all connected pixel from a different type of zone (zone with the same value)
 			*/
-			void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< size_t >& zone_index);
+			void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< size_t >& zone_index, std::vector< size_t >& zone_edges);
+			
+			void createGraph();
 		};
 
 	}

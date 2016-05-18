@@ -13,6 +13,8 @@ void AASS::RSI::Watershed::watershed(cv::Mat& in)
 	//Prune small zones
 	
 	//Return zones and links
+	
+	createGraph();
 
 }
 
@@ -29,6 +31,7 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 	cv::Mat zones_star = cv::Mat::zeros(in.rows, in.cols, in.depth());
 	
 	_index_of_zones_to_fuse_after.clear();
+	_graph.clear();
 
 	// Swype in one way and add pixel to zones
 	int step = 0 ;
@@ -44,7 +47,9 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 			
 			if(p[col] != 0){
 				std::vector<size_t> zone_index;
-				isolatedOrNot(p[col], in, zones_star, row, col, zone_index);
+				std::vector<size_t> zone_edges;
+				
+				isolatedOrNot(p[col], in, zones_star, row, col, zone_index, zone_edges);
 				
 				//New zone since the pixel is connected to no  already seen + same value pixel
 				if(zone_index.size() == 0){
@@ -90,6 +95,34 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 						
 					}
 					
+					//Adding edges if needs be done
+					if(zone_edges.size() > 1){
+						bool flag_exist = false;
+						for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+							
+							//Sort them by index value
+							size_t min = p_zone_star[col];
+							size_t max = zone_index[i];
+							if(min > zone_index[i]){
+								min = zone_index[i];
+								max = p_zone_star[col];
+							}
+							
+							//Make sure the pair does not already exist
+							for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
+								if( (min == _index_of_edges[j].first &&\
+									max == _index_of_edges[j].second) ){
+									flag_exist = true;
+								}
+							}
+							if(flag_exist == false){
+								_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
+							}
+						}
+						
+					}
+					
+					
 				}
 				
 				
@@ -104,13 +137,17 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 	
 }
 
-void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector<size_t>& zone_index)
+void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector<size_t>& zone_index, std::vector< size_t >& zone_edges)
 {
 
+	if(zones_star.size() != input.size()){
+		throw std::runtime_error("Zone start and input of different sizes");
+	}
+	
 	for(int row_tmp = row - 1 ; row_tmp <= row + 1 ; ++row_tmp){
 		for(int col_tmp = col - 1 ; col_tmp <= col + 1 ; ++col_tmp){
 			//Inside mat
-			if(row_tmp >= 0 && col_tmp >=0 && row_tmp <= input.rows && col_tmp <= input.cols){
+			if(row_tmp >= 0 && col_tmp >=0 && row_tmp < input.rows && col_tmp < input.cols){
 				//Not the center point
 				
 				if(row != row_tmp || col != col_tmp){
@@ -121,7 +158,8 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 						
 						if(_zones[p_star[col_tmp]].getValue() != value){
 							printZone(p_star[col_tmp]);
-							std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
+							std::cout << "Size of matrix : " << zones_star.size() << std::endl;
+							std::cout << "At : row col " << row_tmp << " " << col_tmp << " we should not have " << _zones[p_star[col_tmp]].getValue() << " != " << value << std::endl;
 							throw std::runtime_error("Value and zone mismatch");
 						}
 						//SAME ZONE
@@ -135,6 +173,27 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 							zone_index.push_back(p_star[col_tmp]);
 						}
 					}
+					//Check for other value bordering
+// 					if(value != p[col_tmp] && p_star[col_tmp] > 0){
+// 						
+// 						std::cout << "Was ? " << value << " != " << _zones[p_star[col_tmp]].getValue() << " " << p[col_tmp] << std::endl;
+// 						
+// 						if(_zones[p_star[col_tmp]].getValue() == value){
+// // 							printZone(p_star[col_tmp]);
+// 							std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
+// 							throw std::runtime_error("Value and zone are the same in edges");
+// 						}
+// 						//SAME ZONE
+// 						bool flag_seen = false;
+// 						for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+// 							if(zone_edges[i] == p_star[col_tmp]){
+// 								flag_seen = true;
+// 							}
+// 						}
+// 						if(flag_seen == false){
+// 							zone_edges.push_back(p_star[col_tmp]);
+// 						}
+// 					}
 				}
 			}
 		}
@@ -157,35 +216,34 @@ void AASS::RSI::Watershed::fuse()
 // 		std::cout << "Zone to fuse " << _index_of_zones_to_fuse_after[i].first << " " << _index_of_zones_to_fuse_after[i].second << " with values " << _zones[base].getValue() << " " << _zones[to_fuse].getValue() << std::endl;
 // 	}
 	
-	std::map<size_t, size_t> mapping;
-	
+	_mapping.clear();	
 	//Create the full mapping
 	for(size_t i = 0 ; i < _index_of_zones_to_fuse_after.size() ; ++i){
 // 		
 		int base;
 		int to_fuse;
 		//Search the value in the mapping and update it
-		if ( mapping.find(_index_of_zones_to_fuse_after[i].first) == mapping.end() ) {
+		if ( _mapping.find(_index_of_zones_to_fuse_after[i].first) == _mapping.end() ) {
 		// not found
-			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+// 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
 			base = _index_of_zones_to_fuse_after[i].first;
 		} else {
 		// found
-			std::cout << "FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
-			base = mapping[_index_of_zones_to_fuse_after[i].first];
-			std::cout << "Now base is " << base << std::endl;
+// 			std::cout << "FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			base = _mapping[_index_of_zones_to_fuse_after[i].first];
+// 			std::cout << "Now base is " << base << std::endl;
 		}
-		if ( mapping.find(_index_of_zones_to_fuse_after[i].second) == mapping.end() ) {
+		if ( _mapping.find(_index_of_zones_to_fuse_after[i].second) == _mapping.end() ) {
 		// not found
-			std::cout << "not FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+// 			std::cout << "not FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
 			to_fuse = _index_of_zones_to_fuse_after[i].second;
 			
 // 			mapping[_index_of_zones_to_fuse_after[i].second] = base;
 		} else {
 		// found
-			std::cout << "FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
-			to_fuse = mapping[_index_of_zones_to_fuse_after[i].second];
-			std::cout << " now fuse " << to_fuse << std::endl;
+// 			std::cout << "FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			to_fuse = _mapping[_index_of_zones_to_fuse_after[i].second];
+// 			std::cout << " now fuse " << to_fuse << std::endl;
 // 			mapping[to_fuse] = base;
 			
 		}
@@ -198,11 +256,11 @@ void AASS::RSI::Watershed::fuse()
 			if(max < min){
 				max = base;
 				min = to_fuse;
-				mapping[max] = min;
-				mapping[_index_of_zones_to_fuse_after[i].first] = min;
+				_mapping[max] = min;
+				_mapping[_index_of_zones_to_fuse_after[i].first] = min;
 			}else{
-				mapping[max] = min;
-				mapping[_index_of_zones_to_fuse_after[i].second] = min;
+				_mapping[max] = min;
+				_mapping[_index_of_zones_to_fuse_after[i].second] = min;
 			}
 			
 			if(_zones[base].getValue() != _zones[to_fuse].getValue() || base == to_fuse){
@@ -221,12 +279,16 @@ void AASS::RSI::Watershed::fuse()
 	}
 	
 	std::map<size_t, size_t>::reverse_iterator iter;
-	for (iter = mapping.rbegin(); iter != mapping.rend(); ++iter) {
+	for (iter = _mapping.rbegin(); iter != _mapping.rend(); ++iter) {
 		for(size_t j = 0 ; j < _zones[iter->first].size() ; ++j){
 			_zones[iter->second].push_back(_zones[ iter->first][j]);
 		}
 		_zones.erase(_zones.begin() + iter->first );
 	}
 	std::sort(_zones.begin(), _zones.end(), sortZone);
+	
+}
+
+void AASS::RSI::Watershed::createGraph(){
 	
 }
