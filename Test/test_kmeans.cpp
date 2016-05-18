@@ -12,7 +12,7 @@ using namespace std;
 int main() {
     Mat src;
 
-    src = imread("../Test/fruit.png", CV_LOAD_IMAGE_GRAYSCALE);
+    src = imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
     imshow("original", src);
 
     blur(src, src, Size(15,15));
@@ -61,6 +61,7 @@ int main() {
 	
 	AASS::RSI::Kmeans kmeans;
 	cv::Mat dest;
+	kmeans.setK(2);
 	kmeans.kmeansColor(src, dest);
 	
 	cv::imshow("custom kmean" , dest);

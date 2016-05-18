@@ -10,6 +10,9 @@
 
 #include <ctime>
 
+#include "vodigrex/voronoidiagram/ThinkerVoronoi.hpp"
+#include "vodigrex/linefollower/LineFollowerGraph.hpp"
+
 #include "WaterShed.hpp"
 #include "FuzzyOpening.hpp"
 #include "Kmean.hpp"
@@ -27,8 +30,10 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	char* str = argv[1];
 	cv::Mat map = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat sketch = cv::imread("../Test/labsketch_trimmed.png", CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out;
 	cv::imshow("Base input ", map);
+	cv::imshow("Sketch input ", sketch);
 	fuzzy_2.fuzzyOpening(map, out, 35);
 // 	std::cout << out << std::endl;
 	
@@ -69,18 +74,54 @@ BOOST_AUTO_TEST_CASE(trying)
 	kmeans.setK(4);
 	kmeans.kmeansColor(out, out_tmp);
 	
+	
+	cv::threshold(out_tmp, out_tmp, 10, 255, CV_THRESH_BINARY_INV);
+	
+// 	cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size( 11, 11 ), cv::Point( -1, -1 ) );
+	cv::medianBlur(out_tmp, out_tmp, 11);
+	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+// 	cv::medianBlur(out_tmp, out_tmp, 11);
+	
 	cv::imshow("kmenas", out_tmp);
-	AASS::RSI::Watershed watershed;
-	std::cout << "WHATERSHED" << std::endl;
-	watershed.watershed(out_tmp);
 	
-	watershed.print();
+	AASS::vodigrex::ThinkerVoronoi tv;
+	AASS::vodigrex::LineFollowerGraph<> lg;
 	
-	std::cout << "Final zone number " << watershed.size() <<std::endl;
+	tv.think(out_tmp);
+	cv::Mat res = tv.getResult();
 	
-	cv::imshow("out_tmp", out_tmp);
+	cv::imshow("Voronoi", res);
+	
+	lg.inputMap(res);
+	lg.thin();
+	
+	
+	AASS::vodigrex::ThinkerVoronoi tv_sketch;
+	AASS::vodigrex::LineFollowerGraph<> lg_sketch;
+	
+	tv_sketch.think(sketch);
+	cv::Mat res_sketch = tv_sketch.getResult();
+	
+	cv::imshow("Voronoi_sketch", res_sketch);
+	
+	
+// 	AASS::RSI::Watershed watershed;
+// 	std::cout << "WHATERSHED" << std::endl;
+// 	watershed.watershed(out_tmp);
+// 	
+// 	watershed.print();
+// 	
+// 	std::cout << "Final zone number " << watershed.size() <<std::endl;
+// 	
+// 	cv::imshow("out_tmp", out_tmp);
 	cv::waitKey(0);
-	watershed.drawAllZones(out_tmp, 0);
+// 	watershed.drawAllZones(out_tmp, 0);
 	
 	
 	
