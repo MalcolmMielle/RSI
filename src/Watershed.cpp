@@ -102,10 +102,13 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 							
 							//Sort them by index value
 							size_t min = p_zone_star[col];
-							size_t max = zone_index[i];
-							if(min > zone_index[i]){
-								min = zone_index[i];
+							size_t max = zone_edges[i];
+							if(min > zone_edges[i]){
+								min = zone_edges[i];
 								max = p_zone_star[col];
+							}
+							if(min == max){
+								throw std::runtime_error("linking zone to itself !");
 							}
 							
 							//Make sure the pair does not already exist
@@ -174,26 +177,26 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 						}
 					}
 					//Check for other value bordering
-// 					if(value != p[col_tmp] && p_star[col_tmp] > 0){
-// 						
-// 						std::cout << "Was ? " << value << " != " << _zones[p_star[col_tmp]].getValue() << " " << p[col_tmp] << std::endl;
-// 						
-// 						if(_zones[p_star[col_tmp]].getValue() == value){
-// // 							printZone(p_star[col_tmp]);
-// 							std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
-// 							throw std::runtime_error("Value and zone are the same in edges");
-// 						}
-// 						//SAME ZONE
-// 						bool flag_seen = false;
-// 						for(size_t i = 0 ; i < zone_edges.size() ; ++i){
-// 							if(zone_edges[i] == p_star[col_tmp]){
-// 								flag_seen = true;
-// 							}
-// 						}
-// 						if(flag_seen == false){
-// 							zone_edges.push_back(p_star[col_tmp]);
-// 						}
-// 					}
+					if(value != p[col_tmp] && p_star[col_tmp] > 0){
+						
+// 						std::cout << "Was ? " << value << " != " << _zones[p_star[col_tmp]].getValue() << " " << p[col_tmp] << std::endl << "zone : " << p_star[col_tmp] << std::endl;
+						
+						if(_zones[p_star[col_tmp]].getValue() == value){
+// 							printZone(p_star[col_tmp]);
+							std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
+							throw std::runtime_error("Value and zone are the same in edges");
+						}
+						//SAME ZONE
+						bool flag_seen = false;
+						for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+							if(zone_edges[i] == p_star[col_tmp]){
+								flag_seen = true;
+							}
+						}
+						if(flag_seen == false){
+							zone_edges.push_back(p_star[col_tmp]);
+						}
+					}
 				}
 			}
 		}
@@ -202,6 +205,9 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 
 void AASS::RSI::Watershed::fuse()
 {
+	
+	initMappingAlive();
+	
 	std::cout << "FUSE" << std::endl;
 	
 	//Sort the index backward from higest value for second so that we erase the zone from the back without changing the indexes.
@@ -256,10 +262,12 @@ void AASS::RSI::Watershed::fuse()
 			if(max < min){
 				max = base;
 				min = to_fuse;
-				_mapping[max] = min;
+				
+				updateMapping(max, min);
+// 				_mapping[max] = min;
 				_mapping[_index_of_zones_to_fuse_after[i].first] = min;
 			}else{
-				_mapping[max] = min;
+				updateMapping(max, min);
 				_mapping[_index_of_zones_to_fuse_after[i].second] = min;
 			}
 			
@@ -283,6 +291,7 @@ void AASS::RSI::Watershed::fuse()
 		for(size_t j = 0 ; j < _zones[iter->first].size() ; ++j){
 			_zones[iter->second].push_back(_zones[ iter->first][j]);
 		}
+		std::cout << iter->first << " -> " << iter->second << std::endl;
 		_zones.erase(_zones.begin() + iter->first );
 	}
 	std::sort(_zones.begin(), _zones.end(), sortZone);
@@ -290,5 +299,74 @@ void AASS::RSI::Watershed::fuse()
 }
 
 void AASS::RSI::Watershed::createGraph(){
+	
+	std::cout << "Create graph " << std::endl;
+	std::map<size_t, int>::iterator iter;
+	for (iter = _mapping_of_node_alive.begin(); iter != _mapping_of_node_alive.end(); ++iter) {
+		std::cout << iter->first << " -> " << iter->second << std::endl;
+	}
+	
+	std::cout << "Number of edges " << _index_of_edges.size() << std::endl;
+	
+	std::vector <Vertex> vertices_zones;
+	
+	//Adding all vertices
+	for(size_t i = 0 ; i < _zones.size() ; ++i){
+		std::cout << "Adding a vertex " << i << std::endl;
+		Vertex v;
+		_graph.addVertex(v, _zones[i]);
+		vertices_zones.push_back(v);
+	}
+	
+	std::cout << "adding the edges" << std::endl;
+	
+	//Adding all edge
+	for(size_t i = 0 ; i < _index_of_edges.size() ; ++i){
+		std::cout << " edge : "<< _index_of_edges[i].first << " " << _index_of_edges[i].second << std::endl;
+		int base;
+		int destination;
+		//Search the value in the mapping and update it
+		if ( _mapping.find(_index_of_edges[i].first) == _mapping.end() ) {
+		// not found
+// 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			base = _index_of_edges[i].first;
+		} else {
+		// found
+// 			std::cout << "FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			base = _mapping[_index_of_edges[i].first];
+// 			std::cout << "Now base is " << base << std::endl;
+		}
+		if ( _mapping.find(_index_of_edges[i].second) == _mapping.end() ) {
+		// not found
+// 			std::cout << "not FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			destination = _index_of_edges[i].second;
+			
+// 			mapping[_index_of_zones_to_fuse_after[i].second] = base;
+		} else {
+		// found
+// 			std::cout << "FOUND fuse " << _index_of_zones_to_fuse_after[i].second << std::endl;
+			destination = _mapping[_index_of_edges[i].second];
+// 			std::cout << " now fuse " << to_fuse << std::endl;
+// 			mapping[to_fuse] = base;
+		}
+		Edge e;
+		std::cout << "actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
+		if ( _mapping_of_node_alive[base] > 0) {
+		// found
+// 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			base =  _mapping_of_node_alive[base];
+		}
+		if ( _mapping_of_node_alive[destination] > 0) {
+		// found
+// 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
+			destination =  _mapping_of_node_alive[destination];
+		}
+		
+		std::cout << "actual actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
+		_graph.addEdge(e, vertices_zones[ base ], vertices_zones[ destination ]);
+	}
+	
+	std::cout << "Graph vertices : " << _graph.getNumVertices() << " egdes : " << _graph.getNumEdges() << std::endl;
+	
 	
 }

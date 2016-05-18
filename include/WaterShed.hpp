@@ -16,8 +16,20 @@ namespace AASS{
 		class Watershed{
 			
 		protected :
+			
+			typedef boost::adjacency_list<
+				boost::listS, boost::listS, boost::undirectedS, 
+				Zone,
+				int, 
+				boost::no_property > GraphType;
+			typedef typename bettergraph::SimpleGraph<Zone, int>::VertexIterator VertexIterator;
+			typedef typename bettergraph::SimpleGraph<Zone, int>::Vertex Vertex;
+			typedef typename bettergraph::SimpleGraph<Zone, int>::Edge Edge;
+			typedef typename bettergraph::SimpleGraph<Zone, int>::EdgeIterator EdgeIterator;	
+			
 			std::vector < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after;
 			std::map<size_t, size_t> _mapping;
+			std::map<size_t, int> _mapping_of_node_alive;
 			std::deque< Zone > _zones;
 			//int as edge because we don't care aboput edge 
 			std::vector < std::pair < size_t, size_t > > _index_of_edges;
@@ -139,6 +151,35 @@ namespace AASS{
 			void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< size_t >& zone_index, std::vector< size_t >& zone_edges);
 			
 			void createGraph();
+			
+			/// @brief Add key to Map and update the whole structure
+			void updateMapping(int from, int to){
+				_mapping_of_node_alive[from] = -1;
+				_mapping[from] = to;
+				std::map<size_t, size_t>::iterator iter;
+				for (iter = _mapping.begin(); iter != _mapping.end(); ++iter) {
+					if(iter->second == from){
+						iter->second = to ;
+					}
+				}
+				
+				std::map<size_t, int>::iterator iter_2;
+				for (iter_2 = _mapping_of_node_alive.begin(); iter_2 != _mapping_of_node_alive.end(); ++iter_2) {
+					if(iter_2->first > from){
+						iter_2->second = iter_2->second - 1 ;
+					}
+				}
+			}
+			
+			///@brief init _mapping_of_node_alive
+			void initMappingAlive(){
+				std::map<size_t, int>::iterator iter;
+				for (size_t i = 0 ; i < _zones.size() ; ++i){
+					_mapping_of_node_alive[i] = i;
+				}
+			}
+			
+			
 		};
 
 	}
