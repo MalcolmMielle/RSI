@@ -150,7 +150,7 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 // 		std::cout << std::endl;
 	}
 	
-	cv::normalize(roi_output_final, roi_output_final, 0, 255, cv::NORM_MINMAX, CV_32F);
+	cv::normalize(roi_output_final, roi_output_final, 0, 255, cv::NORM_MINMAX, CV_8U);
 	
 // 	std::cout << roi_output_final << std::endl;
 	
