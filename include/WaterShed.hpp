@@ -5,7 +5,7 @@
 #include "Zone.hpp"
 
 bool sortFunction(std::pair < size_t, size_t > i, std::pair < size_t, size_t > j){return (i.second > j.second); }
-bool sortZone(Zone i, Zone j){return (i.size() > j.size()); }
+bool sortZone(Zone i, Zone j){return (i.size() > j.size  ()); }
 
 
 //TODO convert Mat to Eigen !
@@ -24,12 +24,16 @@ public:
 	};
 	
 	size_t size(){return _zones.size();}
-	void watershed(cv::Mat& in);
-	void makeZones(cv::Mat& input);
-	void fuse();
-	void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< size_t >& zone_index);
 	
-	void sortBiggest2Smallest();
+	/**
+	 * @brief Main algorithm : extract all zone of same value from Matrix and store them in _zones
+	 * @param in Matrix from where the zone are to be extracted
+	 */
+	void watershed(cv::Mat& in);
+
+	/**
+	 * @brief Print all zone and values
+	 */
 	void print(){
 		std::cout << "Print watershed" << std::endl;
 		
@@ -44,13 +48,21 @@ public:
 		
 	}
 	
+	/**
+	 * @brief Print zone number i
+	 */
 	void printZone(int i){
 		for(size_t j = 0 ; j < _zones[i].size() ; ++j){
 			std::cout << " x : " << _zones[i][j].x << " y : " << _zones[i][j].y << std::endl;
 		}
 	}
 	
-	void draw(cv::Mat& draw, int size){
+	/**
+	 * @brief Draw all zones one by one
+	 * @param draw input Matrix defining the size of the drawing matrix
+	 * @param size Minimum size of zone for it to be drawn
+	 */ 
+	void drawAllZones(cv::Mat& draw, int size){
 // 		std::cout << "_zone size " << _zones.size() << std::endl;
 		
 		for(size_t i = 0 ; i < _zones.size() ; ++i){
@@ -68,6 +80,9 @@ public:
 	
 	}
 	
+	/**
+	 * @brief Testing drawing sortFunction
+	 */
 	void slowdraw(cv::Mat& draw, int size){
 		std::cout << "_zone size " << _zones.size() << std::endl;
 		cv::Mat draw_tmp = cv::Mat::zeros(draw.rows, draw.cols, CV_8U);
@@ -90,6 +105,22 @@ public:
 			cv::waitKey(1);
 		}
 	}
+	
+	
+private :
+	/**
+	 * @brief Create a first version of the zone in Matrix
+	 * Swype through the in put matrix once and extract a certain number of zones stored in _zones. 
+	 * Actual zones might be separated in multiple parts and one needs to use the function  Watershed::fuse after. Zones to be fused are stored by id in _index_of_zones_to_fuse_after
+	 * @param input Input matrix with the values
+	 */ 
+	void makeZones(cv::Mat& input);
+	/**
+	 * @brief Fuse zone that were meant to be together
+	 * Zones to be fused are stored by id in _index_of_zones_to_fuse_after. It uses linear copy of deck and a map of all the matching to perform the fusion
+	 */
+	void fuse();
+	void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< size_t >& zone_index);
 };
 
 inline void Watershed::watershed(cv::Mat& in)
@@ -349,10 +380,10 @@ inline void Watershed::fuse()
 				throw std::runtime_error(str_test.str() );	
 			}
 			
-			for(size_t j = 0 ; j < _zones[max].size() ; ++j){
-	// 			std::cout << " j : " << j << " with size " << _zones[to_fuse].size() << std::endl;
-				_zones[min].push_back(_zones[max][j]);
-			}
+// 			for(size_t j = 0 ; j < _zones[max].size() ; ++j){
+// 	// 			std::cout << " j : " << j << " with size " << _zones[to_fuse].size() << std::endl;
+// 				_zones[min].push_back(_zones[max][j]);
+// 			}
 		}
 		else{
 			std::cout << "Already fused" << std::endl;
@@ -364,10 +395,14 @@ inline void Watershed::fuse()
 	std::map<size_t, size_t>::reverse_iterator iter;
 // 	std::cout << "PRINTTT" << std::endl;
 	for (iter = mapping.rbegin(); iter != mapping.rend(); ++iter) {
-		std::cout << iter->first << " " << iter->second << "\n";
-		_zones.erase(_zones.begin() + iter->first);
+// 		std::cout << iter->first << " " << iter->second << "\n";
+		for(size_t j = 0 ; j < _zones[iter->first].size() ; ++j){
+// 			std::cout << " j : " << j << " with size " << _zones[iter->first].size() << std::endl;
+			_zones[iter->second].push_back(_zones[ iter->first][j]);
+		}
+// 		std::cout << "ERASE "<< std::endl;
+		_zones.erase(_zones.begin() + iter->first );
 	}
-
 	std::sort(_zones.begin(), _zones.end(), sortZone);
 	
 }

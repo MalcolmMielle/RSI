@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	cv::imshow("out_tmp", out);
 	cv::waitKey(0);
-	watershed.draw(out_tmp, 0);
+	watershed.drawAllZones(out_tmp, 0);
 	
 	
 	
