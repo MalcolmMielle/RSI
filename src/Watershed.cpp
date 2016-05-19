@@ -24,12 +24,20 @@ void AASS::RSI::Watershed::watershed(cv::Mat& in)
 */
 void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 {
+	
+// 	cv::imshow("input water ", input);
+// 	cv::waitKey(0);
 	std::cout << "Make zone : " << std::endl;
 	cv::Mat in;
+// 	std::cout << input << std::endl;
 	input.convertTo(in, CV_32SC1);
+// 	std::cout << input <<std::endl;
+// 	exit(0);
 	// Mat with 0 when pixel has not been seen or is a wall and a number when it belong to a zone
 	cv::Mat zones_star = cv::Mat::zeros(in.rows, in.cols, in.depth());
 	
+// 	std::cout << in <<std::endl;
+// 	exit(0);
 	_index_of_zones_to_fuse_after.clear();
 	_graph.clear();
 
@@ -44,8 +52,8 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 			++step;
 			
 			//If the pixel is not a wall
-			
-			if(p[col] != 0){
+// 			std::cout << p[col] << std::endl;
+// 			if(p[col] != 0){
 				std::vector<size_t> zone_index;
 				std::vector<size_t> zone_edges;
 				
@@ -129,11 +137,12 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 				}
 				
 				
-			}
-			else{
-				p_zone_star[col] = 0;
-				_zones[0 ].push_back(cv::Point2i(row, col));
-			}
+// 			}
+// 			else{
+// 				std::cout << "Pushing Wall" << std::endl;
+// 				p_zone_star[col] = 0;
+// 				_zones[0].push_back(cv::Point2i(row, col));
+// 			}
 		}
 		
 	}
@@ -205,10 +214,21 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 
 void AASS::RSI::Watershed::fuse()
 {
+	for(size_t i = 0 ; i < _zones.size() ; ++i){
+		if(_zones[i].isEmpty()){
+			print();
+			throw std::runtime_error("The zone is empty and it shouldn't happen");
+		}
+	}
+	
 	
 	initMappingAlive();
 	
 	std::cout << "FUSE" << std::endl;
+	
+	print();
+	
+	std::cout << " ^- Before the fuse" << std::endl;
 	
 	//Sort the index backward from higest value for second so that we erase the zone from the back without changing the indexes.
 	std::sort(_index_of_zones_to_fuse_after.begin(), _index_of_zones_to_fuse_after.end(), sortFunction);
@@ -294,7 +314,11 @@ void AASS::RSI::Watershed::fuse()
 		std::cout << iter->first << " -> " << iter->second << std::endl;
 		_zones.erase(_zones.begin() + iter->first );
 	}
-	std::sort(_zones.begin(), _zones.end(), sortZone);
+// 	std::sort(_zones.begin(), _zones.end(), sortZone);
+	
+	print();
+	std::cout << "Removed " << _mapping.size() << " zones " << std::endl;
+	std::cout << " ^- AFTER the fuse" << std::endl;
 	
 }
 
@@ -314,6 +338,9 @@ void AASS::RSI::Watershed::createGraph(){
 	for(size_t i = 0 ; i < _zones.size() ; ++i){
 		std::cout << "Adding a vertex " << i << std::endl;
 		VertexZone v;
+		if(_zones[i].isEmpty()){
+			throw std::runtime_error("The zone is empty and it shouldn't happen");
+		}
 		_graph.addVertex(v, _zones[i]);
 		vertices_zones.push_back(v);
 	}

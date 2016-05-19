@@ -75,25 +75,52 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::waitKey(0);
 	int K = 4;
 	while(K != 0){
-		AASS::RSI::Kmeans kmeans;
-		kmeans.setK(K);
-		kmeans.kmeansColor(out, out_tmp);
+// 		AASS::RSI::Kmeans kmeans;
+// 		kmeans.setK(K);
+// 		kmeans.kmeansColor(out, out_tmp);
 		
 		AASS::RSI::Kmeans kmeans_slam;
 		kmeans_slam.setK(K);
 		kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 		
-		cv::imshow("kmenas", out_tmp);
+// 		std::cout << out_tmp_slam << std::endl;
+// 		exit(0);
+		//Still good here
+// 		std::cout << out_tmp_slam << std::endl;
+		
+// 		cv::imshow("kmenas", out_tmp);
 		cv::imshow("kmenas SLAM", out_tmp_slam);
 
 		
-// 		AASS::RSI::Watershed watershed;
-// 		std::cout << "WHATERSHED" << std::endl;
-// 		watershed.watershed(out_tmp);
+		AASS::RSI::Watershed watershed;
+		std::cout << "WHATERSHED SLAM" << std::endl;
+		
+// 		std::cout << out_tmp_slam << std::endl;
+// 		exit(0);
+		
+		watershed.watershed(out_tmp_slam);
+		
+// 		Still good
+// 		std::cout << out_tmp_slam << std::endl;
 // 		
 // 		watershed.print();
 // 		
 // 		std::cout << "Final zone number " << watershed.size() <<std::endl;
+		cv::Mat graphmat;
+		slam.copyTo(graphmat);
+		
+		AASS::RSI::GraphZone graph_slam;
+		graph_slam = watershed.getGraph();
+		
+		int color_wall_slam = kmeans_slam.getColors()[0];
+		
+		std::cout << "WALLS ARE " << color_wall_slam << std::endl;
+		kmeans_slam.printColors();
+		
+		graph_slam.removeVertexValue(color_wall_slam);
+		
+		graph_slam.draw(graphmat);
+		cv::imshow("GRAPH", graphmat);
 		
 // 		cv::imshow("out_tmp", out_tmp);
 		cv::waitKey(0);

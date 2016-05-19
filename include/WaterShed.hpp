@@ -35,11 +35,11 @@ namespace AASS{
 		public:
 			Watershed(){
 				//Cheat for obstacle being 0
-				Zone z; _zones.push_back(z);
+// 				Zone z; _zones.push_back(z);
 			};
 			
 			size_t size(){return _zones.size();}
-			
+			GraphZone& getGraph(){return _graph;}
 			/**
 			* @brief Main algorithm : extract all zone of same value from Matrix and store them in _zones
 			* @param in Matrix from where the zone are to be extracted

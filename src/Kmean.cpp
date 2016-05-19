@@ -5,8 +5,6 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 	cv::Mat input;
 	std::cout << "TYPE " << type2str(in.type()) << std::endl;
 	in.convertTo(input, CV_8UC1);
-	cv::Mat bestLabels, centers;
-	
 	
 	cv::Mat p = cv::Mat::zeros(input.cols*input.rows, 3, CV_32F);
 	std::vector<cv::Mat> bgr;
@@ -31,7 +29,7 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 // 				std::cout << "second p " << std::endl << p << std::endl;
 // 				exit(0);
 // 				std::cout << "DATA "<< std::endl << p << std::endl;
-	cv::kmeans(p, _K, bestLabels, cv::TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 3, cv::KMEANS_PP_CENTERS, centers);
+	cv::kmeans(p, _K, _bestLabels, cv::TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 3, cv::KMEANS_PP_CENTERS, _centers);
 	
 	int colors[_K];
 	for(int i=0; i<_K; i++) {
@@ -47,16 +45,16 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 // 				//              endl;
 // 				}
 	
-	std::cout << "TYPE " << type2str(centers.type()) << " size " << centers.rows << " " << centers.cols << std::endl;
+	std::cout << "TYPE " << type2str(_centers.type()) << " size " << _centers.rows << " " << _centers.cols << std::endl;
 // 				
-	uint32_t* pointer_label = bestLabels.ptr<uint32_t>(0); //point to each row
+	uint32_t* pointer_label = _bestLabels.ptr<uint32_t>(0); //point to each row
 	
 	for(int row = 0 ; row < input.rows ; row++){
 		uchar* pointer = dest.ptr<uchar>(row); //point to each row
 		
 		for(int col = 0 ; col < input.cols ; col++){
 // 						std::cout << "AT " << pointer_label[(row * input.cols) + col] << std::endl;
-			float* pointer_center = centers.ptr<float>(pointer_label[(row * input.cols) + col]);
+			float* pointer_center = _centers.ptr<float>(pointer_label[(row * input.cols) + col]);
 			
 // 						std::cout << "Center : " << pointer_center[0] << " " << pointer_center[1] << " " << pointer_center[2] * 255 << " " << std::endl;
 // 						std::cout << "Value in base " << (int) in.at<uchar>(pointer_center[0] * in.rows, pointer_center[1] * in.cols) << std::endl;
@@ -64,9 +62,21 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 // 						pointer[col] = (uchar)(colors[ pointer_label[(row * input.cols) + col] ]);
 // 						not working
 // 						pointer[col] = (uchar)(pointer_center[2] * 255);
+// 			std::cout << "adding " << (int) ( ((float)pointer_center[2] * 255) ) << std::endl;
 			pointer[col] = (int) ( ((float)pointer_center[2] * 255) );
 		}				
 	} 
+// 	exit(0);
+	//Add all colors to colors
+	for(int row = 0 ; row < _centers.rows ; row++){
+		float* pointer_center = _centers.ptr<float>(row); //point to each row
+		
+		
+// 						std::cout << "AT " << pointer_label[(row * input.cols) + col] << std::endl;
+		_colors.push_back( (int) ( ((float)pointer_center[2] * 255) ) );
+		
+	}
+	std::sort(_colors.begin(), _colors.end());
 	
 // 				for(int row = 0 ; row < centers.rows ; row++){
 // 					uchar* pointer = dest.ptr<uchar>(row); //point to each row
@@ -80,4 +90,6 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 // 				std::cout << centers << std::endl;
 // 				cv::normalize(dest, dest, 0, 255, cv::NORM_MINMAX, CV_8U);
 // 				dest.convertTo(dest, CV_8U);
+	
+// 	std::cout << dest << std::endl;
 }
