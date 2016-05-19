@@ -3,6 +3,7 @@
 
 #include "Zone.hpp"
 #include "Utils.hpp"
+#include "GraphZone.hpp"
 #include "bettergraph/SimpleGraph.hpp"
 
 namespace AASS{
@@ -17,15 +18,11 @@ namespace AASS{
 			
 		protected :
 			
-			typedef boost::adjacency_list<
-				boost::listS, boost::listS, boost::undirectedS, 
-				Zone,
-				int, 
-				boost::no_property > GraphType;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::VertexIterator VertexIterator;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::Vertex Vertex;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::Edge Edge;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::EdgeIterator EdgeIterator;	
+			typedef typename GraphZone::GraphType GraphZoneType;
+			typedef typename GraphZone::VertexIterator VertexZoneIterator;
+			typedef typename GraphZone::Vertex VertexZone;
+			typedef typename GraphZone::Edge EdgeZone;
+			typedef typename GraphZone::EdgeIterator EdgeZoneIterator;	
 			
 			std::vector < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after;
 			std::map<size_t, size_t> _mapping;
@@ -33,7 +30,7 @@ namespace AASS{
 			std::deque< Zone > _zones;
 			//int as edge because we don't care aboput edge 
 			std::vector < std::pair < size_t, size_t > > _index_of_edges;
-			bettergraph::SimpleGraph<Zone, int> _graph;
+			GraphZone _graph;
 			
 		public:
 			Watershed(){

@@ -22,25 +22,34 @@ BOOST_AUTO_TEST_CASE(trying)
 	fuzzy_2.setSize(50);
 	fuzzy_2.fast(false);
 	
+	AASS::RSI::FuzzyOpening fuzzy_slam;
+	fuzzy_slam.setSize(50);
+	fuzzy_slam.fast(false);
+	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 	
 	char* str = argv[1];
 	cv::Mat map = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
-	cv::Mat out;
+	cv::Mat slam = cv::imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat out, out_slam;
 	cv::imshow("Base input ", map);
+	cv::imshow("SLAM", slam);
 	fuzzy_2.fuzzyOpening(map, out, 35);
+	fuzzy_slam.fuzzyOpening(slam, out_slam, 35);
 // 	std::cout << out << std::endl;
 	
 // 	cv::normalize(out, out, 0, 1, cv::NORM_MINMAX, CV_32F);
 	
 	std::cout << "Done opening " << std::endl;
 	out.convertTo(out, CV_8U);
+	out_slam.convertTo(out_slam, CV_8U);
 	
 // 	std::cout << out << std::endl;
 	
 	
 	cv::Mat out_tmp;
+	cv::Mat out_tmp_slam;
 // 	cv::GaussianBlur(out, out_tmp, cv::Size(3, 3), 10);
 // 	cv::medianBlur(out, out_tmp, 11);
 // 	cv::bilateralFilter(out, out_tmp, 5, 10, 0);
@@ -63,25 +72,35 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	cv::resize(out_tmp, out_tmp, cv::Size(out_tmp.cols*2, out_tmp.rows*2 ), 0, 0, cv::INTER_NEAREST);
 	
 // 	std::cout << "out_tmp" << out_tmp << std::endl;
-	
-	
-	AASS::RSI::Kmeans kmeans;
-	kmeans.setK(4);
-	kmeans.kmeansColor(out, out_tmp);
-	
-	cv::imshow("kmenas", out_tmp);
-	AASS::RSI::Watershed watershed;
-	std::cout << "WHATERSHED" << std::endl;
-	watershed.watershed(out_tmp);
-	
-	watershed.print();
-	
-	std::cout << "Final zone number " << watershed.size() <<std::endl;
-	
-	cv::imshow("out_tmp", out_tmp);
 	cv::waitKey(0);
-	watershed.drawAllZones(out_tmp, 0);
-	
+	int K = 4;
+	while(K != 0){
+		AASS::RSI::Kmeans kmeans;
+		kmeans.setK(K);
+		kmeans.kmeansColor(out, out_tmp);
+		
+		AASS::RSI::Kmeans kmeans_slam;
+		kmeans_slam.setK(K);
+		kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
+		
+		cv::imshow("kmenas", out_tmp);
+		cv::imshow("kmenas SLAM", out_tmp_slam);
+
+		
+// 		AASS::RSI::Watershed watershed;
+// 		std::cout << "WHATERSHED" << std::endl;
+// 		watershed.watershed(out_tmp);
+// 		
+// 		watershed.print();
+// 		
+// 		std::cout << "Final zone number " << watershed.size() <<std::endl;
+		
+// 		cv::imshow("out_tmp", out_tmp);
+		cv::waitKey(0);
+// 		watershed.drawAllZones(out_tmp, 0);
+		std::cout << "Value of K : " ;
+		std::cin >> K;
+	}
 	
 	
 }

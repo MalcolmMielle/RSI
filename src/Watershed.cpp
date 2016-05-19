@@ -308,12 +308,12 @@ void AASS::RSI::Watershed::createGraph(){
 	
 	std::cout << "Number of edges " << _index_of_edges.size() << std::endl;
 	
-	std::vector <Vertex> vertices_zones;
+	std::vector <VertexZone> vertices_zones;
 	
 	//Adding all vertices
 	for(size_t i = 0 ; i < _zones.size() ; ++i){
 		std::cout << "Adding a vertex " << i << std::endl;
-		Vertex v;
+		VertexZone v;
 		_graph.addVertex(v, _zones[i]);
 		vertices_zones.push_back(v);
 	}
@@ -349,7 +349,7 @@ void AASS::RSI::Watershed::createGraph(){
 // 			std::cout << " now fuse " << to_fuse << std::endl;
 // 			mapping[to_fuse] = base;
 		}
-		Edge e;
+		EdgeZone e;
 		std::cout << "actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
 		if ( _mapping_of_node_alive[base] > 0) {
 		// found
