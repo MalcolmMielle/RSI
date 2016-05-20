@@ -83,6 +83,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		kmeans_slam.setK(K);
 		kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 		
+// 		out_tmp_slam = out_slam;
 // 		std::cout << out_tmp_slam << std::endl;
 // 		exit(0);
 		//Still good here
@@ -100,6 +101,8 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		watershed.watershed(out_tmp_slam);
 		
+		std::cout << "WATERSHED DONE" << std::endl;
+		
 // 		Still good
 // 		std::cout << out_tmp_slam << std::endl;
 // 		
@@ -110,12 +113,19 @@ BOOST_AUTO_TEST_CASE(trying)
 		slam.copyTo(graphmat);
 		
 		AASS::RSI::GraphZone graph_slam;
+		std::cout << "Getting the graph" << std::endl;
 		graph_slam = watershed.getGraph();
 		
-		int color_wall_slam = kmeans_slam.getColors()[0];
+		std::cout << "HGetting the color" << std::endl;
+		int color_wall_slam = 0 ;
+		if(kmeans_slam.getColors().size() >0 ){
+			color_wall_slam = kmeans_slam.getColors()[0];
+		}
 		
 		std::cout << "WALLS ARE " << color_wall_slam << std::endl;
 		kmeans_slam.printColors();
+		
+		std::cout << "REmove Vertex" << std::endl;
 		
 		graph_slam.removeVertexValue(color_wall_slam);
 		
