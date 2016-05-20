@@ -34,7 +34,10 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 // 	std::cout << input <<std::endl;
 // 	exit(0);
 	// Mat with 0 when pixel has not been seen or is a wall and a number when it belong to a zone
-	cv::Mat zones_star = cv::Mat::zeros(in.rows, in.cols, in.depth());
+	cv::Mat zones_star = cv::Mat::ones(in.rows, in.cols, in.depth());
+	zones_star = - zones_star;
+// 	std::cout << zones_star << std::endl;
+	
 	
 // 	std::cout << in <<std::endl;
 // 	exit(0);
@@ -44,105 +47,98 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 	// Swype in one way and add pixel to zones
 	int step = 0 ;
 	for(int row = 0 ; row < in.rows ; row++){
-		uint32_t* p = in.ptr<uint32_t>(row); //point to each row
-		uint32_t* p_zone_star = zones_star.ptr<uint32_t>(row); //point to each row
+		int* p = in.ptr<int>(row); //point to each row
+		int* p_zone_star = zones_star.ptr<int>(row); //point to each row
 		for(int col = 0 ; col < in.cols ; col++){
 // 			slowdraw(in, 0);
 // 			std::cout << "Step : " << step << " row and col " << row << " " << col << std::endl;
 			++step;
 			
 			//If the pixel is not a wall
-// 			std::cout << p[col] << std::endl;
-// 			if(p[col] != 0){
-				std::vector<size_t> zone_index;
-				std::vector<size_t> zone_edges;
+
+			std::vector<size_t> zone_index;
+			std::vector<size_t> zone_edges;
+			
+			isolatedOrNot(p[col], in, zones_star, row, col, zone_index, zone_edges);
+			
+			//New zone since the pixel is connected to no  already seen + same value pixel
+			if(zone_index.size() == 0){
+// 				std::cout << "New Zone" << std::endl;
+				Zone new_zone;
+				new_zone.setValue(p[col]);
+				new_zone.push_back(cv::Point2i(row, col));
+				_zones.push_back(new_zone);
+				p_zone_star[col] = (int)_zones.size() - 1;					
+			}
+			//If the pixel is part of (an) already seen zone(s)
+			else{
+// 				std::cout << " NOT new Zone" << std::endl;
+				_zones[ zone_index[0] ].push_back(cv::Point2i(row, col));
+				p_zone_star[col] = zone_index [0];
 				
-				isolatedOrNot(p[col], in, zones_star, row, col, zone_index, zone_edges);
-				
-				//New zone since the pixel is connected to no  already seen + same value pixel
-				if(zone_index.size() == 0){
-					Zone new_zone;
-					new_zone.setValue(p[col]);
-					new_zone.push_back(cv::Point2i(row, col));
-					_zones.push_back(new_zone);
-					p_zone_star[col] = (int)_zones.size() - 1;					
+				if(_zones[ zone_index[0] ].getValue() != p[col]){
+					throw std::runtime_error("Different value between the place and the zone it's added to");
 				}
-				//If the pixel is part of (an) already seen zone(s)
-				else{
-					_zones[ zone_index[0] ].push_back(cv::Point2i(row, col));
-					p_zone_star[col] = zone_index [0];
-					
-					if(_zones[ zone_index[0] ].getValue() != p[col]){
-						throw std::runtime_error("Different value between the place and the zone it's added to");
-					}
-					
-					//If more than one zone push the value of other zones to _index_of_zones_to_fuse_after to fuse them later
-					if(zone_index.size() > 1){
-						bool flag_exist = false;
-						for(size_t i = 1 ; i < zone_index.size() ; ++i){
-							
-							//Sort them by index value
-							size_t min = zone_index[0];
-							size_t max = zone_index[i];
-							if(min > zone_index[i]){
-								min = zone_index[i];
-								max = zone_index[0];
-							}
-							
-							//Make sure the pair does not already exist
-							for(size_t j = 0 ; j < _index_of_zones_to_fuse_after.size() ; ++j){
-								if( (min == _index_of_zones_to_fuse_after[j].first &&\
-									max == _index_of_zones_to_fuse_after[j].second) ){
-									flag_exist = true;
-								}
-							}
-							if(flag_exist == false){
-								_index_of_zones_to_fuse_after.push_back(std::pair<size_t, size_t>(min, max) );
-							}
+				
+				//If more than one zone push the value of other zones to _index_of_zones_to_fuse_after to fuse them later
+				if(zone_index.size() > 1){
+					bool flag_exist = false;
+					for(size_t i = 1 ; i < zone_index.size() ; ++i){
+						
+						//Sort them by index value
+						size_t min = zone_index[0];
+						size_t max = zone_index[i];
+						if(min > zone_index[i]){
+							min = zone_index[i];
+							max = zone_index[0];
 						}
 						
-					}
-					
-					//Adding edges if needs be done
-					if(zone_edges.size() > 1){
-						bool flag_exist = false;
-						for(size_t i = 0 ; i < zone_edges.size() ; ++i){
-							
-							//Sort them by index value
-							size_t min = p_zone_star[col];
-							size_t max = zone_edges[i];
-							if(min > zone_edges[i]){
-								min = zone_edges[i];
-								max = p_zone_star[col];
-							}
-							if(min == max){
-								throw std::runtime_error("linking zone to itself !");
-							}
-							
-							//Make sure the pair does not already exist
-							for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
-								if( (min == _index_of_edges[j].first &&\
-									max == _index_of_edges[j].second) ){
-									flag_exist = true;
-								}
-							}
-							if(flag_exist == false){
-								_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
+						//Make sure the pair does not already exist
+						for(size_t j = 0 ; j < _index_of_zones_to_fuse_after.size() ; ++j){
+							if( (min == _index_of_zones_to_fuse_after[j].first &&\
+								max == _index_of_zones_to_fuse_after[j].second) ){
+								flag_exist = true;
 							}
 						}
-						
+						if(flag_exist == false){
+							_index_of_zones_to_fuse_after.push_back(std::pair<size_t, size_t>(min, max) );
+						}
 					}
 					
+				}
+				
+				//Adding edges if needs be done
+				if(zone_edges.size() > 1){
+					bool flag_exist = false;
+					for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+						
+						//Sort them by index value
+						size_t min = p_zone_star[col];
+						size_t max = zone_edges[i];
+						if(min > zone_edges[i]){
+							min = zone_edges[i];
+							max = p_zone_star[col];
+						}
+						if(min == max){
+							throw std::runtime_error("linking zone to itself !");
+						}
+						
+						//Make sure the pair does not already exist
+						for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
+							if( (min == _index_of_edges[j].first &&\
+								max == _index_of_edges[j].second) ){
+								flag_exist = true;
+							}
+						}
+						if(flag_exist == false){
+							_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
+						}
+					}
 					
 				}
 				
 				
-// 			}
-// 			else{
-// 				std::cout << "Pushing Wall" << std::endl;
-// 				p_zone_star[col] = 0;
-// 				_zones[0].push_back(cv::Point2i(row, col));
-// 			}
+			}
 		}
 		
 	}
@@ -160,13 +156,19 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 		for(int col_tmp = col - 1 ; col_tmp <= col + 1 ; ++col_tmp){
 			//Inside mat
 			if(row_tmp >= 0 && col_tmp >=0 && row_tmp < input.rows && col_tmp < input.cols){
+				
+// 				std::cout << "Inside of mat " << row_tmp <<"  "<< col_tmp << std::endl;
+				
 				//Not the center point
 				
 				if(row != row_tmp || col != col_tmp){
-					uint32_t* p = input.ptr<uint32_t>(row_tmp);
-					uint32_t* p_star = zones_star.ptr<uint32_t>(row_tmp);
+					int* p = input.ptr<int>(row_tmp);
+					int* p_star = zones_star.ptr<int>(row_tmp);
+					
+// 					std::cout << "Not center and vaues are " << value <<" " << p[col_tmp] << " " << p_star[col_tmp] << std::endl;
+
 					//Same value and visited before
-					if(value == p[col_tmp] && p_star[col_tmp] > 0){
+					if(value == p[col_tmp] && p_star[col_tmp] >= 0){
 						
 						if(_zones[p_star[col_tmp]].getValue() != value){
 							printZone(p_star[col_tmp]);
@@ -349,7 +351,7 @@ void AASS::RSI::Watershed::createGraph(){
 	
 	//Adding all edge
 	for(size_t i = 0 ; i < _index_of_edges.size() ; ++i){
-		std::cout << " edge : "<< _index_of_edges[i].first << " " << _index_of_edges[i].second << std::endl;
+// 		std::cout << " edge : "<< _index_of_edges[i].first << " " << _index_of_edges[i].second << std::endl;
 		int base;
 		int destination;
 		//Search the value in the mapping and update it
@@ -377,7 +379,7 @@ void AASS::RSI::Watershed::createGraph(){
 // 			mapping[to_fuse] = base;
 		}
 		EdgeZone e;
-		std::cout << "actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
+// 		std::cout << "actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
 		if ( _mapping_of_node_alive[base] > 0) {
 		// found
 // 			std::cout << "not FOUND base " << _index_of_zones_to_fuse_after[i].first << std::endl;
@@ -389,7 +391,7 @@ void AASS::RSI::Watershed::createGraph(){
 			destination =  _mapping_of_node_alive[destination];
 		}
 		
-		std::cout << "actual actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
+// 		std::cout << "actual actual edge : "<< base << " " << destination << " " << _mapping[24] << std::endl;
 		_graph.addEdge(e, vertices_zones[ base ], vertices_zones[ destination ]);
 	}
 	
