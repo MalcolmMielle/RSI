@@ -1,6 +1,9 @@
 #include "Kmean.hpp"
 
 void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
+	
+	clear();
+	
 	cv::imshow("input", in);
 	cv::Mat input;
 	std::cout << "TYPE " << type2str(in.type()) << std::endl;

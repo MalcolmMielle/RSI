@@ -32,6 +32,12 @@ namespace AASS{
 			
 			void kmeansColor(cv::Mat& in, cv::Mat& dest);
 			
+			void clear(){
+				_bestLabels.release();
+				_centers.release();
+				_colors.clear();
+			}
+			
 		};
 	}
 }
