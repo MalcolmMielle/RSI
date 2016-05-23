@@ -1,6 +1,6 @@
 #include "GraphZone.hpp"
 
-void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
+void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 {
 	cv::Mat drawmat_old;
 	drawmat.copyTo(drawmat_old);
@@ -56,6 +56,51 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 
 }
 
+void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
+{
+	cv::Mat drawmat_old;
+	drawmat.copyTo(drawmat_old);
+	
+	cv::Scalar color;
+	cv::RNG rng(12345);
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		if(drawmat.channels() == 1){
+			color = 255;
+		}
+		else if(drawmat.channels() == 3){
+			color[0] = 255;
+			color[1] = 255;
+			color[2] = 255;
+		}
+		
+		VertexZone v = *vp.first;
+		
+// 		if((*this)[v].getZone().size() > 100){
+// 				if(getNumEdges(v) > 1){
+			
+			draw(drawmat, v, color);
+			
+			EdgeIteratorZone out_i, out_end;
+			EdgeZone e;
+			
+			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+				out_i != out_end; ++out_i) {
+				e = *out_i;
+				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
+				if( (*this)[targ].getZone().size() > 100 ){
+					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), color);
+				}
+			}
+// 
+// 		}
+		
+	}
+
+}
+
 void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
 {
 // 		std::cout << std::endl;
@@ -66,7 +111,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 // 				cv::circle(m, point, 10, color, 3);
 // 			}
 // 			cv::drawContours( m, std::vector<std::vector<cv::Point> >(1,(*this)[v].contour), -1, color, 2, 8);
-	cv::circle(m, (*this)[v].getCentroid(), 10, 255, -1);
+	cv::circle(m, (*this)[v].getCentroid(), 2, 0, -1);
 	
 // 			cv::Mat draw_tmp = cv::Mat::zeros(m.rows, m.cols, CV_8U);
 // 			for(size_t j = 0 ; j < (*this)[v].getZone().size() ; ++j){
@@ -83,7 +128,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 }
 
 
-void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConnectic){
+void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConnectic, cv::Mat& test){
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 	//vertices access all the vertix
 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
@@ -101,10 +146,11 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 				
 				EdgeZone e_second = *out_i;
 				VertexZone targ = boost::target(e_second, (*this));
-				std::cout << "Printing both vertex" << std::endl;
-				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 				std::cout << "Printing both vertex" << std::endl;
+// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 				
 				EdgeIteratorZone out_i_second;
+				std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 			
 				for (out_i_second = std::next(out_i) ; 
 					out_i_second != out_end; ++out_i_second) {
@@ -114,7 +160,7 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 				
 					EdgeZone edz;
 					
-					std::cout << "Printing both vertex" << std::endl;
+					std::cout << "Printing both vertex linked" << std::endl;
 					std::cout << "Node 1 " << (*this)[targ] << std::endl;
 					std::cout << "Node 2 " << (*this)[targ2] << std::endl;
 				
@@ -122,12 +168,17 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 				}
 			}
 			
-			
-			
-			
-			std::cout << "Trying to remove" << std::endl;
+			std::cout << "Removing" << std::endl;
+			std::cout << (*this)[v] <<std::endl;
 			removeVertex(v);
-			std::cout << "Removed" << std::endl;
+			
+// 			cv::Mat copy;
+// 			test.copyTo(copy);
+// 			
+// 			this->draw(copy);
+// 			cv::imshow("Partial graph", copy);
+// 			cv::waitKey(0);
+			
 		}
 	}
 }
@@ -138,3 +189,20 @@ void AASS::RSI::GraphZone::removeRipples()
 {
 
 }*/
+
+
+
+bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
+{
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+		VertexZone v = *vp.first;
+		++vp.first;
+		std::cout << "Edge num " << this->getNumEdges(v) << std::endl;
+		if(this->getNumEdges(v) == 0){
+			return true;
+		}
+	}
+	return false;
+}

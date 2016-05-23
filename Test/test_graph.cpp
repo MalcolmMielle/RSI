@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	std::cout << "Removing Vertex" << std::endl;
 	
-	graph.removeVertexUnderSize(4, true);
+// 	graph.removeVertexUnderSize(4, true);
 	BOOST_CHECK_EQUAL(1, graph.getNumEdges());
 	BOOST_CHECK_EQUAL(2, graph.getNumVertices());
 

@@ -96,3 +96,11 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 	
 // 	std::cout << dest << std::endl;
 }
+
+
+
+// void AASS::RSI::Kmeans::meanShift(cv::Mat& in, cv::Mat& dest)
+// {
+// 
+// 	cv::meanShift(in, );
+// }

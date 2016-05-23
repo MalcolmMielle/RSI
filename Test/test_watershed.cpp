@@ -74,6 +74,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	std::cout << "out_tmp" << out_tmp << std::endl;
 	cv::waitKey(0);
 	int K = 4;
+	int size_to_remove = 50;
 	while(K != 0){
 // 		AASS::RSI::Kmeans kmeans;
 // 		kmeans.setK(K);
@@ -104,13 +105,13 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << "WATERSHED DONE" << std::endl;
 		
 // 		Still good
-// 		std::cout << out_tmp_slam << std::endl;
-// 		
+		std::cout << out_tmp_slam << std::endl;
+// 		exit(0);
 // 		watershed.print();
 // 		
 // 		std::cout << "Final zone number " << watershed.size() <<std::endl;
 		cv::Mat graphmat;
-		slam.copyTo(graphmat);
+		out_tmp_slam.copyTo(graphmat);
 		
 		AASS::RSI::GraphZone graph_slam;
 		std::cout << "Getting the graph" << std::endl;
@@ -125,18 +126,25 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << "WALLS ARE " << color_wall_slam << std::endl;
 		kmeans_slam.printColors();
 		
-		std::cout << "REmove Vertex" << std::endl;
+// 		std::cout << "REmove Vertex" << std::endl;
 		
 		graph_slam.removeVertexValue(color_wall_slam);
+		graph_slam.removeVertexUnderSize(size_to_remove, true, out_tmp_slam);
 		
 		graph_slam.draw(graphmat);
 		cv::imshow("GRAPH", graphmat);
+		
+		std::cout << "Graph : " << std::endl;
+		
+		std::cout << "Number of vertices : " << graph_slam.getNumVertices() << " number of edges " << graph_slam.getNumEdges() << std::endl;
 		
 // 		cv::imshow("out_tmp", out_tmp);
 		cv::waitKey(0);
 // 		watershed.drawAllZones(out_tmp, 0);
 		std::cout << "Value of K : " ;
 		std::cin >> K;
+		std::cout << "Value of size to remove : " ;
+		std::cin >> size_to_remove;
 	}
 	
 	

@@ -61,6 +61,7 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 			
 			isolatedOrNot(p[col], in, zones_star, row, col, zone_index, zone_edges);
 			
+			
 			//New zone since the pixel is connected to no  already seen + same value pixel
 			if(zone_index.size() == 0){
 // 				std::cout << "New Zone" << std::endl;
@@ -106,39 +107,45 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 					}
 					
 				}
+			}
+			
+			
+// 			std::cout << "Zone edge " << zone_edges.size() << std::endl;
+			//Adding edges if needs be done
+			if(zone_edges.size() > 0){
 				
-				//Adding edges if needs be done
-				if(zone_edges.size() > 1){
-					bool flag_exist = false;
-					for(size_t i = 0 ; i < zone_edges.size() ; ++i){
-						
-						//Sort them by index value
-						size_t min = p_zone_star[col];
-						size_t max = zone_edges[i];
-						if(min > zone_edges[i]){
-							min = zone_edges[i];
-							max = p_zone_star[col];
-						}
-						if(min == max){
-							throw std::runtime_error("linking zone to itself !");
-						}
-						
-						//Make sure the pair does not already exist
-						for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
-							if( (min == _index_of_edges[j].first &&\
-								max == _index_of_edges[j].second) ){
-								flag_exist = true;
-							}
-						}
-						if(flag_exist == false){
-							_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
-						}
+// 				std::cout << "Adding edges" << std::endl;
+				bool flag_exist = false;
+				for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+					
+					//Sort them by index value
+					size_t min = p_zone_star[col];
+					size_t max = zone_edges[i];
+					if(min > zone_edges[i]){
+						min = zone_edges[i];
+						max = p_zone_star[col];
+					}
+					if(min == max){
+						throw std::runtime_error("linking zone to itself !");
 					}
 					
+					//Make sure the pair does not already exist
+					for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
+						if( (min == _index_of_edges[j].first &&\
+							max == _index_of_edges[j].second) ){
+// 							std::cout << "EDGE ALREADY EXIST ??" << std::endl;
+							flag_exist = true;
+						}
+					}
+					if(flag_exist == false){
+						_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
+					}
 				}
 				
-				
 			}
+			
+			
+			
 		}
 		
 	}
@@ -187,8 +194,11 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 							zone_index.push_back(p_star[col_tmp]);
 						}
 					}
+					
 					//Check for other value bordering
-					if(value != p[col_tmp] && p_star[col_tmp] > 0){
+					else if(value != p[col_tmp] && p_star[col_tmp] >= 0){
+						
+// 						std::cout <<"Found edge" << std::endl;
 						
 // 						std::cout << "Was ? " << value << " != " << _zones[p_star[col_tmp]].getValue() << " " << p[col_tmp] << std::endl << "zone : " << p_star[col_tmp] << std::endl;
 						
@@ -205,13 +215,25 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 							}
 						}
 						if(flag_seen == false){
+// 							std::cout << "PUSHING BACK :D" << std::endl;
 							zone_edges.push_back(p_star[col_tmp]);
 						}
+					}
+					
+					else if(p_star[col_tmp] >= 0){
+						std::runtime_error("Something should have happenéd and it didn't. We found a value but it was not linked at the same or an edge");
 					}
 				}
 			}
 		}
 	}
+	
+// 	int a;
+// 	std::cout << "ALL THE EDGES  : " << _index_of_edges.size() << "and later " << zone_edges.size() << std::endl;
+// 	for(auto iter_edge = _index_of_edges.begin(); iter_edge != _index_of_edges.end() ; ++iter_edge){
+// 		std::cout << "Edge : " << iter_edge->first << " -> " << iter_edge->second << std::endl;
+// 	}
+// 	std::cin >> a;
 }
 
 void AASS::RSI::Watershed::fuse()
@@ -334,6 +356,13 @@ void AASS::RSI::Watershed::createGraph(){
 	
 	std::cout << "Number of edges " << _index_of_edges.size() << std::endl;
 	
+	for(auto iter_edge = _index_of_edges.begin(); iter_edge != _index_of_edges.end() ; ++iter_edge){
+		std::cout << "Edge : " << iter_edge->first << " -> " << iter_edge->second << std::endl;
+	}
+	
+	
+// 	exit(0);
+	
 	std::vector <VertexZone> vertices_zones;
 	
 	//Adding all vertices
@@ -396,6 +425,15 @@ void AASS::RSI::Watershed::createGraph(){
 	}
 	
 	std::cout << "Graph vertices : " << _graph.getNumVertices() << " egdes : " << _graph.getNumEdges() << std::endl;
+	
+	
+// 	if(_graph.asVerticesWithNoEdges() == true){
+// 		throw std::runtime_error("Some nodes are no linked");
+// 	}
+	
+	if(_graph.getNumVertices() != _zones.size()){
+		throw std::runtime_error("Graph and zone not of same dimensions");
+	}
 	
 	
 }

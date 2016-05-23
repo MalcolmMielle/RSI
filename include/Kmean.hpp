@@ -32,6 +32,11 @@ namespace AASS{
 			
 			void kmeansColor(cv::Mat& in, cv::Mat& dest);
 			
+			void getSilhouette();
+			
+			//TODO : look up if meanShift could be used
+// 			void meanShift(cv::Mat& in, cv::Mat& dest);
+			
 			void clear(){
 				_bestLabels.release();
 				_centers.release();

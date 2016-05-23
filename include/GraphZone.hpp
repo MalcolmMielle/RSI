@@ -27,6 +27,7 @@ namespace AASS{
 			GraphZone(){};
 			
 			void draw(cv::Mat& drawmat) const;
+			void drawPartial(cv::Mat& drawmat) const;
 			void draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
 			
 			///@brief Remove all vertex with Value value. Do not preserve edges
@@ -57,7 +58,10 @@ namespace AASS{
 			 * @param size size under which the vertex gets removed
 			 * @param preserveEdgeConnectic if true the connection between edge is "preserved" i.e if we have Node1 - Node2 - Node3 and we remove Node2 the end result will be Node1 - Node3.
 			 */			
-			void removeVertexUnderSize(int size, bool preserveEdgeConnectic);
+			void removeVertexUnderSize(int size, bool preserveEdgeConnectic, cv::Mat& test);
+			
+			
+			bool asVerticesWithNoEdges();
 			
 		private:
 			
