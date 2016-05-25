@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	BOOST_CHECK_EQUAL(fuzzy.circleIsEmpty(roi, circle), true);
 	
 	AASS::RSI::FuzzyOpening fuzzy_2;
-	fuzzy_2.setSize(50);
+// 	fuzzy_2.setSize(50);
 	fuzzy_2.fast(false);
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;

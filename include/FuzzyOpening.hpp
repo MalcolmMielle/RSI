@@ -21,7 +21,7 @@ namespace AASS{
 			* @brief Max distance from a point to a wall to be consider an open space.
 			* All point that can fit in a circle with at least radius _size will be considered the same
 			*/
-			int _size;
+// 			int _size;
 			/**
 			* @brief Fast or accurate
 			*/
@@ -38,8 +38,8 @@ namespace AASS{
 		// 	size_t _element_id;
 			
 		public:
-			FuzzyOpening(): _size(3), _fast(false){};
-			void setSize(int i){_size = i;}
+			FuzzyOpening(): _fast(false){};
+// 			void setSize(int i){_size = i;}
 			
 		// 	void generateElements();
 		// 	void generateCircle(size_t size, cv::Mat& out);

@@ -65,7 +65,7 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 			//New zone since the pixel is connected to no  already seen + same value pixel
 			if(zone_index.size() == 0){
 // 				std::cout << "New Zone" << std::endl;
-				Zone new_zone;
+				Zone new_zone(input.size());
 				new_zone.setValue(p[col]);
 				new_zone.push_back(cv::Point2i(row, col));
 				_zones.push_back(new_zone);

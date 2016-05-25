@@ -60,6 +60,7 @@ void AASS::RSI::FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& out
 
 void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 {
+	
 	//Calcul distance image
 	cv::Mat distance_image, label;
 	if(src.channels() == 3){
@@ -98,8 +99,8 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 			
 			int dist_to_obstacle = (float)p[col];
 			dist_to_obstacle;
-			if(dist_to_obstacle > _size){
-				dist_to_obstacle = _size;
+			if(dist_to_obstacle > size){
+				dist_to_obstacle = size;
 			}
 			else{
 // 				std::cout << "size is good " << dist_to_obstacle <<  std::endl;

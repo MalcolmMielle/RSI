@@ -19,11 +19,11 @@ BOOST_AUTO_TEST_CASE(trying)
 {
 	
 	AASS::RSI::FuzzyOpening fuzzy_2;
-	fuzzy_2.setSize(50);
+// 	fuzzy_2.setSize(50);
 	fuzzy_2.fast(false);
 	
 	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.setSize(50);
+// 	fuzzy_slam.setSize(50);
 	fuzzy_slam.fast(false);
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;

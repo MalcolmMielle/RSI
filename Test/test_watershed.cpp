@@ -19,24 +19,22 @@ BOOST_AUTO_TEST_CASE(trying)
 {
 	
 	AASS::RSI::FuzzyOpening fuzzy_2;
-	fuzzy_2.setSize(50);
 	fuzzy_2.fast(false);
 	
 	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.setSize(50);
 	fuzzy_slam.fast(false);
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 	
 	char* str = argv[1];
-	cv::Mat map = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
-	cv::Mat slam = cv::imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat slam = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat map = cv::imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out, out_slam;
 	cv::imshow("Base input ", map);
 	cv::imshow("SLAM", slam);
-	fuzzy_2.fuzzyOpening(map, out, 35);
-	fuzzy_slam.fuzzyOpening(slam, out_slam, 35);
+	fuzzy_2.fuzzyOpening(map, out, 500);
+	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 // 	std::cout << out << std::endl;
 	
 // 	cv::normalize(out, out, 0, 1, cv::NORM_MINMAX, CV_32F);
@@ -80,6 +78,9 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		kmeans.setK(K);
 // 		kmeans.kmeansColor(out, out_tmp);
 		
+		//TODO : valuye here 
+		cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
+		
 		AASS::RSI::Kmeans kmeans_slam;
 		kmeans_slam.setK(K);
 		kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
@@ -100,12 +101,22 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		std::cout << out_tmp_slam << std::endl;
 // 		exit(0);
 		
+		cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 11, 11 ), cv::Point( -1, -1 ) );
+	/// Apply the specified morphology operation
+// 		cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
+// 		cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
+// 		cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
+		
+// 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
+// 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
+// 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
+		
 		watershed.watershed(out_tmp_slam);
 		
 		std::cout << "WATERSHED DONE" << std::endl;
 		
 // 		Still good
-		std::cout << out_tmp_slam << std::endl;
+// 		std::cout << out_tmp_slam << std::endl;
 // 		exit(0);
 // 		watershed.print();
 // 		
