@@ -16,6 +16,7 @@ namespace AASS{
 			
 			//Convex hull to know if it's a block
 			
+			
 		public:
 			ZoneDescriptor(){};
 			

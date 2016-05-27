@@ -9,6 +9,16 @@ if ( NOT Boost_FOUND )
   message(STATUS "This project requires the Boost library, and will not be compiled.")
   return()  
 endif()
+find_package(dlib REQUIRED)
+if ( NOT dlib_FOUND )
+  message(STATUS "This project requires the Boost library, and will not be compiled.")
+  return()  
+endif()
+
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
 
 add_definitions(-std=c++11)
 
