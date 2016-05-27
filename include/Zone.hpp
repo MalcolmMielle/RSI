@@ -10,7 +10,8 @@ namespace AASS{
 	namespace RSI{
 		class Zone{
 		protected:
-			std::pair < size_t, std::deque <cv::Point2i > > _zone;
+			size_t _value;
+			std::deque <cv::Point2i> _zone;
 			///@brief sum of all value of x and y of all point in zone. For fast update and get of centroid
 			cv::Point2i _sum_of_x_and_y;
 			///@brief Zone drawn on the Mat
@@ -25,37 +26,44 @@ namespace AASS{
 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
 			
-			void push_back(const cv::Point2i& p){_zone.second.push_back(p); addPoint(p);}
-			void push_front(const cv::Point2i& p){_zone.second.push_front(p); addPoint(p);}
+			void push_back(const cv::Point2i& p){_zone.push_back(p); addPoint(p);}
+			void push_front(const cv::Point2i& p){_zone.push_front(p); addPoint(p);}
 			
-			void pop_back(){_zone.second.pop_back(); removePoint(_zone.second.size()-1);}
-			void pop_front(){_zone.second.pop_front(); removePoint(0);}
+			void pop_back(){removePoint(_zone.size()-1); _zone.pop_back();}
+			void pop_front(){removePoint(0); _zone.pop_front();}
 			
-			bool isEmpty(){return (0 == _zone.second.size());}
+			bool isEmpty(){return (0 == _zone.size());}
 			void setImageSize(const cv::Mat& in){_zone_mat = cv::Mat::zeros(in.size(), CV_8U);};
 			
-			size_t size() const {return _zone.second.size();}
-			void clear(){_zone.second.clear(); _zone.first = 0; _sum_of_x_and_y.x = 0 ; _sum_of_x_and_y.y = 0;}
-			cv::Point2i& operator[](int i){return _zone.second[i];};
-			const cv::Point2i& operator[](const int i) const {return _zone.second[i];};
+			size_t size() const {return _zone.size();}
 			
-			void setValue(size_t i){_zone.first = i;}
-			size_t getValue(){return _zone.first;}
-			size_t getValue() const {return _zone.first;}
-			const std::deque <cv::Point2i >& getZone() const {return _zone.second;}
-		// 	std::deque <cv::Point2i >& getZone(){return _zone.second;}
+			void clear(){
+				_zone.clear(); 
+				_value = 0; _sum_of_x_and_y.x = 0 ; _sum_of_x_and_y.y = 0; 
+				_zone_mat = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+			}
+			
+			cv::Point2i& operator[](int i){return _zone[i];};
+			const cv::Point2i& operator[](const int i) const {return _zone[i];};
+			
+			void setValue(size_t i){_value = i;}
+			size_t getValue(){return _value;}
+			size_t getValue() const {return _value;}
+			const std::deque <cv::Point2i >& getZone() const {return _zone;}
+		// 	std::deque <cv::Point2i >& getZone(){return _zone;}
+			const cv::Mat& getZoneMat() const {return _zone_mat;}
 			
 			cv::Point2i getCentroid(){
-				if( _zone.second.size() == 0 ){
+				if( _zone.size() == 0 ){
 					throw std::runtime_error("zone is empty");
 				}
-				return cv::Point2i(_sum_of_x_and_y.y / _zone.second.size(), _sum_of_x_and_y.x / _zone.second.size());	
+				return cv::Point2i(_sum_of_x_and_y.y / _zone.size(), _sum_of_x_and_y.x / _zone.size());	
 			}
 			const cv::Point2i getCentroid() const {
-				if( _zone.second.size() == 0 ){
+				if( _zone.size() == 0 ){
 					throw std::runtime_error("zone is empty");
 				}
-				return cv::Point2i(_sum_of_x_and_y.y / _zone.second.size(), _sum_of_x_and_y.x / _zone.second.size());		
+				return cv::Point2i(_sum_of_x_and_y.y / _zone.size(), _sum_of_x_and_y.x / _zone.size());		
 			}
 			
 // 			void draw()const {
@@ -67,11 +75,13 @@ namespace AASS{
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x + p.x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y + p.y;
 				//TODO drawing function of new point
+				_zone_mat.at<uchar>(p.x, p.y) = 255;
 			}
 			void removePoint(int i){
-				_sum_of_x_and_y.x = _sum_of_x_and_y.x - _zone.second[i].x;
-				_sum_of_x_and_y.y = _sum_of_x_and_y.y - _zone.second[i].y;
+				_sum_of_x_and_y.x = _sum_of_x_and_y.x - _zone[i].x;
+				_sum_of_x_and_y.y = _sum_of_x_and_y.y - _zone[i].y;
 				//TODO un-drawing function of new point
+				_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 0;
 			}
 			
 		};

@@ -48,6 +48,7 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 				}
 			}
 			
+			cv::imshow("Zone", (*this)[v].getZoneMat());
 			cv::imshow("Partial" , copy);
 			cv::waitKey(0);
 		}
