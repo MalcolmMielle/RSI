@@ -4,6 +4,7 @@
 #include <iterator>
 
 #include "Zone.hpp"
+#include "EdgeZone.hpp"
 #include "Utils.hpp"
 #include "bettergraph/SimpleGraph.hpp"
 
@@ -13,16 +14,16 @@ namespace AASS{
 
 		//TODO convert Mat to Eigen !
 
-		class GraphZone : public bettergraph::SimpleGraph<Zone, int>{
+		class GraphZone : public bettergraph::SimpleGraph<Zone, EdgeElement>{
 			
 		protected:
 			
 		public:
-			typedef typename bettergraph::SimpleGraph<Zone, int>::GraphType GraphZoneType;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::Vertex VertexZone;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::Edge EdgeZone;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::VertexIterator VertexIteratorZone;
-			typedef typename bettergraph::SimpleGraph<Zone, int>::EdgeIterator EdgeIteratorZone;
+			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::GraphType GraphZoneType;
+			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex VertexZone;
+			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::Edge EdgeZone;
+			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::VertexIterator VertexIteratorZone;
+			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::EdgeIterator EdgeIteratorZone;
 
 			GraphZone(){};
 			
