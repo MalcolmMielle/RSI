@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
 	
 	cv::imshow("REDUCED", out_tmp_slam);
-	cv::waitKey(0);
+// 	cv::waitKey(0);
 	
 	
 // 	cv::GaussianBlur(out, out_tmp, cv::Size(3, 3), 10);
@@ -107,18 +107,37 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		watershed.print();
 // 		
 // 		std::cout << "Final zone number " << watershed.size() <<std::endl;
-	cv::Mat graphmat;
+	cv::Mat graphmat, graphmat_init;
 	out_tmp_slam.copyTo(graphmat);
-	
+	out_tmp_slam.copyTo(graphmat_init);
 	AASS::RSI::GraphZone graph_slam;
 	std::cout << "Getting the graph" << std::endl;
 	graph_slam = watershed.getGraph();
 	
 // 		std::cout << "REmove Vertex" << std::endl;
-	
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness1");
 	graph_slam.removeVertexValue(10);
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness2");
 	graph_slam.removeVertexValue(0);
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness2");
 	graph_slam.removeVertexUnderSize(size_to_remove, true, out_tmp_slam);
+	graph_slam.removeLonelyVertices();
+	
+	graph_slam.draw(graphmat_init);
+	cv::imshow("GRAPH_init", graphmat_init);
+// 	graph_slam.watershed();
+	
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness");
+	
+	std::ofstream outt("bob2.txt");
+	graph_slam.write(outt);
+
+	graph_slam.watershed(50);
+	
 	
 	graph_slam.draw(graphmat);
 	cv::imshow("GRAPH", graphmat);

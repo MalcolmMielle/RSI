@@ -11,7 +11,6 @@
 namespace AASS{
 	namespace RSI{
 		
-
 		//TODO convert Mat to Eigen !
 
 		class GraphZone : public bettergraph::SimpleGraph<Zone, EdgeElement>{
@@ -36,7 +35,7 @@ namespace AASS{
 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 				//vertices access all the vertix
 				for (vp = boost::vertices((*this)); vp.first != vp.second;) {
-					VertexZone v = *vp.first;
+					VertexZone v = *vp.first; 
 					++vp.first;
 					std::cout << "Value " << (*this)[v].getValue() << std::endl;
 					if((*this)[v].getValue() == value){
@@ -45,6 +44,7 @@ namespace AASS{
 						std::cout << "Removed" << std::endl;
 					}
 				}
+				removeLonelyVertices();
 			}
 			
 			/**
@@ -61,10 +61,47 @@ namespace AASS{
 			 */			
 			void removeVertexUnderSize(int size, bool preserveEdgeConnectic, cv::Mat& test);
 			
-			
 			bool asVerticesWithNoEdges();
 			
+			void watershed();
+			void watershed(int threshold);
+			
+			
+			bool lonelyVertices(){
+				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
+				//vertices access all the vertix
+				std::cout << "NEW start" << std::endl;
+		// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
+				for (vp = boost::vertices(*this); vp.first != vp.second;) {
+		// 			std::cout << "Looking up vertex " << std::endl;
+					auto v = *vp.first;
+					++vp.first;
+					if(getNumEdges(v) == 0){
+						return true;
+					} 
+				}
+				return false;
+			
+			}
+			
+			void removeLonelyVertices(){
+				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
+				//vertices access all the vertix
+				std::cout << "NEW start" << std::endl;
+		// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
+				for (vp = boost::vertices(*this); vp.first != vp.second;) {
+		// 			std::cout << "Looking up vertex " << std::endl;
+					auto v = *vp.first;
+					++vp.first;
+					if(getNumEdges(v) == 0){
+						removeVertex(v);
+					}
+				}
+			}
+			
 		private:
+			void getAllNodeRemoved(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold, bool& change);
+			
 			
 		};
 

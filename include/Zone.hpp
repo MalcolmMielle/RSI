@@ -89,12 +89,27 @@ namespace AASS{
 		
 		inline std::ostream& operator<<(std::ostream& in, const Zone &p){
 			
-			in << "value " << p.getValue() << " size " << p.size();
-			
-			
-			
+			in << "v " << p.getValue() << " s " << p.size();
+
 			return in;
 			
+		}
+		
+		inline std::istream& operator>>(std::istream& in, Zone &p){
+			char tmp;
+			in >> tmp;
+			std::cout << "v " << tmp << std::endl;
+			int vall;
+			
+			in >> vall;
+// 			std::cout << "v " << vall << std::endl;
+			in >> tmp;
+			int vall_s;
+			in >> vall_s;
+			
+			p.setValue(vall);
+					
+			return in;
 		}
 	}
 }

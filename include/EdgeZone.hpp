@@ -14,7 +14,7 @@ namespace AASS{
 			double _diff ;
 			
 		public:
-			EdgeElement(){};
+			EdgeElement() : _diff(0){};
 			
 			double getDiff(){return _diff;}
 			double getDiff() const {return _diff;}
@@ -37,6 +37,26 @@ namespace AASS{
 			//Same value
 			return 0;
 			
+		}
+		
+		
+		inline std::ostream& operator<<(std::ostream& in, const EdgeElement &p){
+			
+			in << "d " << p.getDiff();
+			return in;
+			
+		}
+		
+		inline std::istream& operator>>(std::istream& in, EdgeElement &p){
+			char tmp; 
+			in >> tmp;
+			std::cout << tmp << " ";
+			//TODO change to double
+			int input;
+			in >> input;
+			std::cout << input << std::endl;
+			p.setDiff(input);
+			return in;
 		}
 		
 		
