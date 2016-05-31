@@ -66,6 +66,28 @@ namespace AASS{
 				return cv::Point2i(_sum_of_x_and_y.y / _zone.size(), _sum_of_x_and_y.x / _zone.size());		
 			}
 			
+			
+			void fuse(const Zone& input){
+				for(size_t i = 0 ; i < input.size() ; ++i){
+					this->push_back(input.getZone()[i]);
+				}
+			}
+			
+			
+			void draw(cv::Mat& img, const cv::Scalar& color) const{
+				img.convertTo(img, CV_8U);
+				for(int row = 0 ; row < img.rows  ; row++){
+// 					uchar* p = img.ptr<uchar>(row); //point to each row
+// 					uchar* pz = _zone_mat.ptr<uchar>(row); //point to each row
+					for(int col = 0 ; col < img.cols; col++){
+						if(_zone_mat.at<uchar>(row, col) == 255){
+							uchar colllo = color[0];
+							img.at<uchar>(row, col) = colllo;
+						}
+					}
+				}
+			}
+			
 // 			void draw()const {
 // 				
 // 			}

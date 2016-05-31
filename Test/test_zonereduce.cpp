@@ -49,7 +49,15 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat out_tmp;
 	cv::Mat out_tmp_slam;
 	
-	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+// 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+	
+	cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
+		
+	AASS::RSI::Kmeans kmeans_slam;
+	kmeans_slam.setK(15);
+	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
+	
+	
 	
 	cv::imshow("REDUCED", out_tmp_slam);
 // 	cv::waitKey(0);
@@ -108,7 +116,8 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		
 // 		std::cout << "Final zone number " << watershed.size() <<std::endl;
 	cv::Mat graphmat, graphmat_init;
-	out_tmp_slam.copyTo(graphmat);
+	graphmat = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+// 	out_tmp_slam.copyTo(graphmat);
 	out_tmp_slam.copyTo(graphmat_init);
 	AASS::RSI::GraphZone graph_slam;
 	std::cout << "Getting the graph" << std::endl;
@@ -123,34 +132,38 @@ BOOST_AUTO_TEST_CASE(trying)
 	graph_slam.removeVertexValue(0);
 	if(graph_slam.lonelyVertices())
 		throw std::runtime_error("Fuck you lonelyness2");
-	graph_slam.removeVertexUnderSize(size_to_remove, true, out_tmp_slam);
-	graph_slam.removeLonelyVertices();
+	
 	
 	graph_slam.draw(graphmat_init);
 	cv::imshow("GRAPH_init", graphmat_init);
 // 	graph_slam.watershed();
 	
-	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness");
+	
 	
 	std::ofstream outt("bob2.txt");
 	graph_slam.write(outt);
 
 	graph_slam.watershed(50);
 	
+	graph_slam.removeVertexUnderSize(size_to_remove, true, out_tmp_slam);
+	graph_slam.removeLonelyVertices();
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness");
 	
 	graph_slam.draw(graphmat);
-	cv::imshow("GRAPH", graphmat);
+	cv::imshow("GRAPH FINAL", graphmat);
+	cv::waitKey(0);
 	
 	std::cout << "Graph : " << std::endl;
 	
 	std::cout << "Number of vertices : " << graph_slam.getNumVertices() << " number of edges " << graph_slam.getNumEdges() << std::endl;
 	
 // 		cv::imshow("out_tmp", out_tmp);
-	cv::waitKey(0);
+	while(1)
+		cv::waitKey(0);
 // 		watershed.drawAllZones(out_tmp, 0);
 	std::cout << "Value of size to remove : " ;
-	std::cin >> size_to_remove;
+// 	std::cin >> size_to_remove;
 	
 	
 }

@@ -60,7 +60,7 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 {
 	cv::Mat drawmat_old;
-	drawmat.copyTo(drawmat_old);
+	drawmat.convertTo(drawmat_old, CV_8U);
 	
 	cv::Scalar color;
 	cv::RNG rng(12345);
@@ -69,12 +69,12 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
 		
 		if(drawmat.channels() == 1){
-			color = 255;
+			color = rng.uniform(0, 230);
 		}
 		else if(drawmat.channels() == 3){
-			color[0] = 255;
-			color[1] = 255;
-			color[2] = 255;
+			color[0] = rng.uniform(0, 230);
+			color[1] = rng.uniform(0, 230);
+			color[2] = rng.uniform(0, 230);
 		}
 		
 		VertexZone v = *vp.first;
@@ -112,7 +112,8 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 // 				cv::circle(m, point, 10, color, 3);
 // 			}
 // 			cv::drawContours( m, std::vector<std::vector<cv::Point> >(1,(*this)[v].contour), -1, color, 2, 8);
-	cv::circle(m, (*this)[v].getCentroid(), 2, color, -1);
+	(*this)[v].draw(m, color);
+	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
 	
 // 			cv::Mat draw_tmp = cv::Mat::zeros(m.rows, m.cols, CV_8U);
 // 			for(size_t j = 0 ; j < (*this)[v].getZone().size() ; ++j){
@@ -430,15 +431,17 @@ void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone&
 			
 			//IMPORTANT THAT'S IT RIGHT BEFORE THE REMOVE
 			++out_i;
+			
+			(*this)[top_vertex].fuse((*this)[targ]);
 			removeVertex(targ);
-			cv::Mat tmptmp = cv::imread("../Test/labsketch_trimmed.png", CV_LOAD_IMAGE_GRAYSCALE);
-			cv::Mat graphmat = cv::Mat::zeros(tmptmp.size(), CV_8U);
-			cv::Mat graphmat2 = cv::Mat::zeros(tmptmp.size(), CV_8U);
-			draw(graphmat);
-			draw(graphmat2, first_vertex, cv::Scalar(255));
-			cv::imshow("GRAPH", graphmat);
-			cv::imshow("CENTER", graphmat2);
-			cv::waitKey(0);
+// 			cv::Mat tmptmp = cv::imread("../Test/labsketch_trimmed.png", CV_LOAD_IMAGE_GRAYSCALE);
+// 			cv::Mat graphmat = cv::Mat::zeros(tmptmp.size(), CV_8U);
+// 			cv::Mat graphmat2 = cv::Mat::zeros(tmptmp.size(), CV_8U);
+// 			draw(graphmat);
+// 			draw(graphmat2, first_vertex, cv::Scalar(255));
+// 			cv::imshow("GRAPH", graphmat);
+// 			cv::imshow("CENTER", graphmat2);
+// 			cv::waitKey(0);
 			
 // 			std::cout << std::endl;
 // 			print();
