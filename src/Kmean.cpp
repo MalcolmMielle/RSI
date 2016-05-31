@@ -1,6 +1,6 @@
 #include "Kmean.hpp"
 
-void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
+void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest, const cv::Mat& sketch){
 	
 	clear();
 	
@@ -50,27 +50,6 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 	
 	std::cout << "TYPE " << type2str(_centers.type()) << " size " << _centers.rows << " " << _centers.cols << std::endl;
 // 				
-	uint32_t* pointer_label = _bestLabels.ptr<uint32_t>(0); //point to each row
-	
-	for(int row = 0 ; row < input.rows ; row++){
-		uchar* pointer = dest.ptr<uchar>(row); //point to each row
-		
-		for(int col = 0 ; col < input.cols ; col++){
-// 						std::cout << "AT " << pointer_label[(row * input.cols) + col] << std::endl;
-			float* pointer_center = _centers.ptr<float>(pointer_label[(row * input.cols) + col]);
-			
-// 						std::cout << "Center : " << pointer_center[0] << " " << pointer_center[1] << " " << pointer_center[2] * 255 << " " << std::endl;
-// 						std::cout << "Value in base " << (int) in.at<uchar>(pointer_center[0] * in.rows, pointer_center[1] * in.cols) << std::endl;
-		
-// 						pointer[col] = (uchar)(colors[ pointer_label[(row * input.cols) + col] ]);
-// 						not working
-// 						pointer[col] = (uchar)(pointer_center[2] * 255);
-// 			std::cout << "adding " << (int) ( ((float)pointer_center[2] * 255) ) << std::endl;
-			pointer[col] = (int) ( ((float)pointer_center[2] * 255) );
-		}				
-	} 
-// 	exit(0);
-	//Add all colors to colors
 	for(int row = 0 ; row < _centers.rows ; row++){
 		float* pointer_center = _centers.ptr<float>(row); //point to each row
 		
@@ -80,6 +59,49 @@ void AASS::RSI::Kmeans::kmeansColor(cv::Mat& in, cv::Mat& dest){
 		
 	}
 	std::sort(_colors.begin(), _colors.end());
+	
+	uint32_t* pointer_label = _bestLabels.ptr<uint32_t>(0); //point to each row
+	
+	for(int row = 0 ; row < input.rows ; row++){
+		uchar* pointer = dest.ptr<uchar>(row); //point to each row
+		uchar* pointer_src = in.ptr<uchar>(row); //point to each row
+		for(int col = 0 ; col < input.cols ; col++){
+			float* pointer_center = _centers.ptr<float>(pointer_label[(row * input.cols) + col]);
+// 						std::cout << "AT " << pointer_label[(row * input.cols) + col] << std::endl;
+			
+			if(sketch.empty() == false){
+				//Only to do for sketch !
+				if(sketch.at<uchar>(row, col) != 0 ){
+					
+				}
+				else{
+					if( (int) ((float)pointer_center[2] * 255) > _colors[0]){
+	// 					std::cout << (int) ((float)pointer_center[2] * 255) << " " << _colors[0] << std::endl;
+						pointer[col] = (int) ( ((float)pointer_center[2] * 255) );
+					}
+					else{
+	// 					std::cout << "FUck you all" << std::endl;
+	// 					exit(0);
+						pointer[col] = 20;
+					}
+				}
+			}
+			else{
+				pointer[col] = (int) ( ((float)pointer_center[2] * 255) );
+			}
+// 						std::cout << "Center : " << pointer_center[0] << " " << pointer_center[1] << " " << pointer_center[2] * 255 << " " << std::endl;
+// 						std::cout << "Value in base " << (int) in.at<uchar>(pointer_center[0] * in.rows, pointer_center[1] * in.cols) << std::endl;
+		
+// 						pointer[col] = (uchar)(colors[ pointer_label[(row * input.cols) + col] ]);
+// 						not working
+// 						pointer[col] = (uchar)(pointer_center[2] * 255);
+// 			std::cout << "adding " << (int) ( ((float)pointer_center[2] * 255) ) << std::endl;
+			
+		}				
+	} 
+// 	exit(0);
+	//Add all colors to colors
+// 	exit(0);
 	
 // 				for(int row = 0 ; row < centers.rows ; row++){
 // 					uchar* pointer = dest.ptr<uchar>(row); //point to each row

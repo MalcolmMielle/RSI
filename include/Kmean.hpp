@@ -30,7 +30,7 @@ namespace AASS{
 			std::vector< int > getColors(){return _colors;}
 			const std::vector< int >& getColors() const {return _colors;}
 			
-			void kmeansColor(cv::Mat& in, cv::Mat& dest);
+			void kmeansColor(cv::Mat& in, cv::Mat& dest, const cv::Mat& sketch = cv::Mat());
 			
 			void getSilhouette();
 			

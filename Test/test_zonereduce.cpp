@@ -52,10 +52,12 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
 	
 	cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
+	
 		
 	AASS::RSI::Kmeans kmeans_slam;
-	kmeans_slam.setK(15);
-	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
+	kmeans_slam.setK(5);
+	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam);
+// 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 	
 	
 	
@@ -85,7 +87,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	cv::resize(out_tmp, out_tmp, cv::Size(out_tmp.cols*2, out_tmp.rows*2 ), 0, 0, cv::INTER_NEAREST);
 	
 // 	std::cout << "out_tmp" << out_tmp << std::endl;
-	int size_to_remove = 50;
+	int size_to_remove = 150;
 
 
 		
