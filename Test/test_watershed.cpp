@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		std::cout << "REmove Vertex" << std::endl;
 		
 		graph_slam.removeVertexValue(color_wall_slam);
-		graph_slam.removeVertexUnderSize(size_to_remove, true, out_tmp_slam);
+		graph_slam.removeVertexUnderSize(size_to_remove, true);
 		
 		graph_slam.draw(graphmat);
 		cv::imshow("GRAPH", graphmat);

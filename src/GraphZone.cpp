@@ -59,6 +59,7 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 
 void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 {
+	
 	cv::Mat drawmat_old;
 	drawmat.convertTo(drawmat_old, CV_8U);
 	
@@ -130,7 +131,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 }
 
 
-void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConnectic, cv::Mat& test){
+void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConnectic){
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 	//vertices access all the vertix
 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
@@ -139,46 +140,13 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 		std::cout << "Size " << (*this)[v].size() << std::endl;
 		if((*this)[v].size() < size){
 			
-			
-			EdgeIteratorZone out_i, out_end;
-			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-				out_i != out_end; out_i = ++out_i) {
-				
-				
-				EdgeZone e_second = *out_i;
-				VertexZone targ = boost::target(e_second, (*this));
-// 				std::cout << "Printing both vertex" << std::endl;
-// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
-				
-				EdgeIteratorZone out_i_second;
-				std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
-			
-				for (out_i_second = std::next(out_i) ; 
-					out_i_second != out_end; ++out_i_second) {
-					e_second = *out_i_second;
-				
-					VertexZone targ2 = boost::target(e_second, (*this));
-				
-					EdgeZone edz;
-					
-					std::cout << "Printing both vertex linked" << std::endl;
-					std::cout << "Node 1 " << (*this)[targ] << std::endl;
-					std::cout << "Node 2 " << (*this)[targ2] << std::endl;
-				
-					addEdge(edz, targ, targ2);
-				}
+			if(preserveEdgeConnectic == true){
+				removeVertexWhilePreservingEdges(v);
 			}
-			
-			std::cout << "Removing" << std::endl;
-			std::cout << (*this)[v] <<std::endl;
-			removeVertex(v);
-			
-// 			cv::Mat copy;
-// 			test.copyTo(copy);
-// 			
-// 			this->draw(copy);
-// 			cv::imshow("Partial graph", copy);
-// 			cv::waitKey(0);
+			else{
+				removeVertex(v);
+			}
+
 			
 		}
 	}
@@ -325,6 +293,7 @@ void AASS::RSI::GraphZone::watershed()
 
 
 //TODO : would crash on self loop ?
+///Recurisve function to find all node to be fused to the original node by the watershed !
 void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold, bool& change){
 	
 // 	std::cout << "Recursive function" <<std::endl;
@@ -360,9 +329,11 @@ void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone&
 		}
 	
 // 		std::cout << "On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
+
+std::cout << "AOUCH" << ((int)(*this)[first_vertex].getValue()) - threshold << std::endl;
 	
 		//REMOVE TARG
-		if( (*this)[targ].getValue() >= (*this)[first_vertex].getValue() - threshold && 
+		if( ( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
 			(*this)[targ].getValue() < (*this)[first_vertex].getValue() && 
 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
 			is_old == true
@@ -589,4 +560,44 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 	}
 	
 
+}
+
+
+
+void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v)
+{
+	EdgeIteratorZone out_i, out_end;
+	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+		out_i != out_end; out_i = ++out_i) {
+		
+		
+		EdgeZone e_second = *out_i;
+		VertexZone targ = boost::target(e_second, (*this));
+// 				std::cout << "Printing both vertex" << std::endl;
+// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+		
+		EdgeIteratorZone out_i_second;
+// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+	
+		for (out_i_second = std::next(out_i) ; 
+			out_i_second != out_end; ++out_i_second) {
+			e_second = *out_i_second;
+		
+			VertexZone targ2 = boost::target(e_second, (*this));
+		
+			EdgeZone edz;
+			
+// 			std::cout << "Printing both vertex linked" << std::endl;
+// 			std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 			std::cout << "Node 2 " << (*this)[targ2] << std::endl;
+		
+			addEdge(edz, targ, targ2);
+		}
+	}
+	
+// 	std::cout << "Removing" << std::endl;
+	std::cout << (*this)[v] <<std::endl;
+	removeVertex(v);
+	
+	
 }

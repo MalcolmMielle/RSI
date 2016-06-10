@@ -17,6 +17,9 @@ namespace AASS{
 			///@brief Zone drawn on the Mat
 			cv::Mat _zone_mat;
 			
+			std::tuple<cv::Point, cv::Point, cv::Point> _pca;
+			double _pca_orientation;
+			
 		public:
 			Zone(){}; //Used for the read function of betterGraph
 			Zone(const cv::Size& size){
@@ -52,6 +55,10 @@ namespace AASS{
 			const std::deque <cv::Point2i >& getZone() const {return _zone;}
 		// 	std::deque <cv::Point2i >& getZone(){return _zone;}
 			const cv::Mat& getZoneMat() const {return _zone_mat;}
+			std::tuple<cv::Point, cv::Point, cv::Point> getPCA(){return _pca;}
+			const std::tuple<cv::Point, cv::Point, cv::Point>& getPCA() const {return _pca;}
+			double getPCAOrientation(){return _pca_orientation;}
+			double getPCAOrientation() const {return _pca_orientation;}
 			
 			cv::Point2i getCentroid(){
 				if( _zone.size() == 0 ){
@@ -86,11 +93,61 @@ namespace AASS{
 						}
 					}
 				}
+				
+				//Draw PCA
+// 				cv::circle(img, std::get<0>(_pca), 3, CV_RGB(255, 0, 255), 10);
+				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 3);
+				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 3);	
+				
+				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
+				
 			}
 			
 // 			void draw()const {
 // 				
 // 			}
+
+			void PCA(){
+// 				find countour
+				cv::Mat copy_tmp;
+				_zone_mat.copyTo(copy_tmp);
+				cv::Mat copy =  cv::Scalar::all(255) - _zone_mat;
+				
+				
+				std::vector< std::vector< cv::Point> > contours;
+				std::vector<cv::Vec4i> hierarchy;
+				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+				
+				assert(contours.size() == 1 && "More than one shape in Zone");
+				
+				// Calculate the area of each contour
+				auto area = cv::contourArea(contours[0]);
+				// Ignore contours that are too small or too large
+// 				if (area < 1e2 || 1e5 < area) {
+			
+					// Draw each contour only for visualisation purposes
+	// 				cv::drawContours(img, contours, i, CV_RGB(255, 0, 0), 2, 8, hierarchy, 0);
+					// Find the orientation of each shape
+					getOrientation(contours[0]);
+// 				}
+// 				else{
+					
+// 					std::cout << "TOO small :( " << std::endl;
+					
+// 				}
+				
+				std::cout << "PCAAAAA" << std::endl;
+				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
+				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<2>(_pca) << std::endl;
+				std::cout << "Next PCA " << std::endl << std::endl;
+// 				cv::imshow("Bobafter", _zone_mat);
+// 				cv::imshow("Bob", copy_tmp);
+// 				cv::waitKey(0);
+
+			}
+			
+
+			
 			
 		private: 
 			void addPoint(const cv::Point2i& p){
@@ -104,6 +161,39 @@ namespace AASS{
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y - _zone[i].y;
 				//TODO un-drawing function of new point
 				_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 0;
+			}
+			
+			void getOrientation(std::vector<cv::Point> &pts){
+				//Construct a buffer used by the pca analysis
+				auto data_pts = cv::Mat(pts.size(), 2, CV_64FC1);
+				for (int i = 0; i < data_pts.rows; ++i)
+				{
+					data_pts.at<double>(i, 0) = pts[i].x;
+					data_pts.at<double>(i, 1) = pts[i].y;
+				}
+			
+				//Perform PCA analysis
+				cv::PCA pca_analysis(data_pts, cv::Mat(), CV_PCA_DATA_AS_ROW);
+			
+				//Store the position of the object
+				auto pos = cv::Point(pca_analysis.mean.at<double>(0, 0),
+								pca_analysis.mean.at<double>(0, 1));
+			
+				//Store the eigenvalues and eigenvectors
+				std::vector<cv::Point2d> eigen_vecs(2);
+				std::vector<double> eigen_val(2);
+				for (int i = 0; i < 2; ++i)
+				{
+					eigen_vecs[i] = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0),
+											pca_analysis.eigenvectors.at<double>(i, 1));
+			
+					eigen_val[i] = pca_analysis.eigenvalues.at<double>(0, i);
+				}				
+				_pca = std::tuple<cv::Point2i, cv::Point2i, cv::Point2i>(pos, pos + 0.02 * cv::Point(eigen_vecs[0].x * eigen_val[0], eigen_vecs[0].y * eigen_val[0]), pos + 0.02 * cv::Point(eigen_vecs[1].x * eigen_val[1], eigen_vecs[1].y * eigen_val[1]));
+			
+				_pca_orientation = atan2(eigen_vecs[0].y, eigen_vecs[0].x);
+				
+				
 			}
 			
 		};

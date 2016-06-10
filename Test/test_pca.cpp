@@ -59,63 +59,16 @@ BOOST_AUTO_TEST_CASE(trying)
 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam);
 // 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 	
-	
-	
 	cv::imshow("REDUCED", out_tmp_slam);
-// 	cv::waitKey(0);
-	
-	
-// 	cv::GaussianBlur(out, out_tmp, cv::Size(3, 3), 10);
-// 	cv::medianBlur(out, out_tmp, 11);
-// 	cv::bilateralFilter(out, out_tmp, 5, 10, 0);
 
-// 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 11, 11 ), cv::Point( -1, -1 ) );
-	/// Apply the specified morphology operation
-// 	cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
 	
-// 	std::cout << "FILTER " << std::endl << out << std::endl;
-	
-// 	cv::pyrDown(out, out_tmp, cv::Size(out.cols/2, out.rows/2 ) );
-// 	cv::pyrUp(out_tmp, out_tmp, cv::Size(out_tmp.cols*2, out_tmp.rows*2 ) );
-	
-// 	cv::resize(out, out_tmp, cv::Size(out.cols/2, out.rows/2 ), 0, 0, cv::INTER_NEAREST);
-	
-	
-// 	cv::GaussianBlur(out, out_tmp, cv::Size(0, 0), 3);
-// 	cv::addWeighted(out, 1.5, out_tmp, -0.5, 0, out_tmp);
-	
-// 	cv::resize(out_tmp, out_tmp, cv::Size(out_tmp.cols*2, out_tmp.rows*2 ), 0, 0, cv::INTER_NEAREST);
-	
-// 	std::cout << "out_tmp" << out_tmp << std::endl;
-
-
-		
 	AASS::RSI::ZoneExtractor wzoneextract;
 	std::cout << "WHATERSHED SLAM" << std::endl;
 	
-// 		std::cout << out_tmp_slam << std::endl;
-// 		exit(0);
-	
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 11, 11 ), cv::Point( -1, -1 ) );
-/// Apply the specified morphology operation
-// 		cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
-// 		cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
-// 		cv::morphologyEx( out, out_tmp, cv::MORPH_CLOSE, element);
-	
-// 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
-// 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
-// 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
-	
 	wzoneextract.extract(out_tmp_slam);
 	
 	std::cout << "WATERSHED DONE" << std::endl;
-	
-// 		Still good
-// 		std::cout << out_tmp_slam << std::endl;
-// 		exit(0);
-// 		watershed.print();
-// 		
-// 		std::cout << "Final zone number " << watershed.size() <<std::endl;
 	cv::Mat graphmat, graphmat_init;
 	graphmat = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 // 	out_tmp_slam.copyTo(graphmat);
@@ -144,7 +97,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::ofstream outt("bob2.txt");
 	graph_slam.write(outt);
 
-	graph_slam.watershed(50000);
+	graph_slam.watershed(5000);
 	
 	int size_to_remove = 50;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
@@ -152,8 +105,23 @@ BOOST_AUTO_TEST_CASE(trying)
 	if(graph_slam.lonelyVertices())
 		throw std::runtime_error("Fuck you lonelyness");
 	
+	
+	
+	/*** PCA of all zones in Graph**/
+	
+	graph_slam.updatePCA();
+	
+	/*******************************/
+	
 	graph_slam.draw(graphmat);
-	cv::imshow("GRAPH FINAL", graphmat);
+	cv::imshow("GRAPH FINAL before remove", graphmat);
+	cv::waitKey(0);
+	
+	graph_slam.removeRiples();
+	
+	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+	graph_slam.draw(graphmat2);
+	cv::imshow("GRAPH FINAL after remove", graphmat2);
 	cv::waitKey(0);
 	
 	std::cout << "Graph : " << std::endl;
