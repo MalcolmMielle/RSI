@@ -10,7 +10,7 @@
 
 #include <ctime>
 
-#include "WaterShed.hpp"
+#include "ZoneExtractor.hpp"
 #include "FuzzyOpening.hpp"
 #include "Kmean.hpp"
 #include "ZoneReducer.hpp"
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(trying)
 
 
 		
-	AASS::RSI::Watershed watershed;
+	AASS::RSI::ZoneExtractor wzoneextract;
 	std::cout << "WHATERSHED SLAM" << std::endl;
 	
 // 		std::cout << out_tmp_slam << std::endl;
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
 // 		cv::medianBlur(out_tmp_slam, out_tmp_slam, 11);
 	
-	watershed.watershed(out_tmp_slam);
+	wzoneextract.extract(out_tmp_slam);
 	
 	std::cout << "WATERSHED DONE" << std::endl;
 	
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	out_tmp_slam.copyTo(graphmat_init);
 	AASS::RSI::GraphZone graph_slam;
 	std::cout << "Getting the graph" << std::endl;
-	graph_slam = watershed.getGraph();
+	graph_slam = wzoneextract.getGraph();
 	
 // 		std::cout << "REmove Vertex" << std::endl;
 	if(graph_slam.lonelyVertices())

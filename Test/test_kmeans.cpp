@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "Kmean.hpp"
-#include "WaterShed.hpp"
+#include "ZoneExtractor.hpp"
 
 using namespace cv;
 using namespace std;
@@ -68,13 +68,13 @@ int main() {
 		cv::imshow("custom kmean" , dest);
 		cv::waitKey(0);
 		
-		AASS::RSI::Watershed watershed;
+		AASS::RSI::ZoneExtractor wzoneextract;
 		std::cout << "WHATERSHED" << std::endl;
-		watershed.watershed(dest);
+		wzoneextract.extract(dest);
 		
 // 		watershed.print();
 		
-		std::cout << "Final zone number " << watershed.size() <<std::endl;
+		std::cout << "Final zone number " << wzoneextract.size() <<std::endl;
 		
 		cv::imshow("out_tmp", dest);
 		cv::imshow("src", src);

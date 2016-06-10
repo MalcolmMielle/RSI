@@ -1,6 +1,6 @@
-#include "WaterShed.hpp"
+#include "ZoneExtractor.hpp"
 
-void AASS::RSI::Watershed::watershed(cv::Mat& in)
+void AASS::RSI::ZoneExtractor::extract(cv::Mat& in)
 {
 	//Make zones
 	
@@ -22,7 +22,7 @@ void AASS::RSI::Watershed::watershed(cv::Mat& in)
 * OR
 * I can for every value only keep a certain value -> FloodFill all spaces while marking the pixel that disappeared as a zone
 */
-void AASS::RSI::Watershed::makeZones(cv::Mat& input)
+void AASS::RSI::ZoneExtractor::makeZones(cv::Mat& input)
 {
 	
 // 	cv::imshow("input water ", input);
@@ -152,7 +152,7 @@ void AASS::RSI::Watershed::makeZones(cv::Mat& input)
 	
 }
 
-void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector<size_t>& zone_index, std::vector< size_t >& zone_edges)
+void AASS::RSI::ZoneExtractor::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector<size_t>& zone_index, std::vector< size_t >& zone_edges)
 {
 
 	if(zones_star.size() != input.size()){
@@ -236,7 +236,7 @@ void AASS::RSI::Watershed::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zon
 // 	std::cin >> a;
 }
 
-void AASS::RSI::Watershed::fuse()
+void AASS::RSI::ZoneExtractor::fuse()
 {
 	for(size_t i = 0 ; i < _zones.size() ; ++i){
 		if(_zones[i].isEmpty()){
@@ -346,7 +346,7 @@ void AASS::RSI::Watershed::fuse()
 	
 }
 
-void AASS::RSI::Watershed::createGraph(){
+void AASS::RSI::ZoneExtractor::createGraph(){
 	
 	std::cout << "Create graph " << std::endl;
 	std::map<size_t, int>::iterator iter;

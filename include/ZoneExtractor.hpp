@@ -14,7 +14,7 @@ namespace AASS{
 
 		//TODO convert Mat to Eigen !
 
-		class Watershed{
+		class ZoneExtractor{
 			
 		protected :
 			
@@ -33,7 +33,7 @@ namespace AASS{
 			GraphZone _graph;
 			
 		public:
-			Watershed(){
+			ZoneExtractor(){
 				//Cheat for obstacle being 0
 // 				Zone z; _zones.push_back(z);
 			}
@@ -45,7 +45,7 @@ namespace AASS{
 			* @brief Main algorithm : extract all zone of same value from Matrix and store them in _zones
 			* @param in Matrix from where the zone are to be extracted
 			*/
-			void watershed(cv::Mat& in);
+			void extract(cv::Mat& in);
 
 			/**
 			* @brief Print all zone and values
@@ -127,7 +127,7 @@ namespace AASS{
 			/**
 			* @brief Create a first version of the zone in Matrix
 			* Swype through the in put matrix once and extract a certain number of zones stored in _zones. 
-			* Actual zones might be separated in multiple parts and one needs to use the function  Watershed::fuse after. Zones to be fused are stored by id in _index_of_zones_to_fuse_after
+			* Actual zones might be separated in multiple parts and one needs to use the function  ZoneExtractor::fuse after. Zones to be fused are stored by id in _index_of_zones_to_fuse_after
 			* @param input Input matrix with the values
 			*/ 
 			void makeZones(cv::Mat& input);
