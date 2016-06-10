@@ -146,7 +146,59 @@ namespace AASS{
 
 			}
 			
-
+			//Return the number of contact points in percent compared to size of contour
+			int contactPoint(const Zone& zone){
+				cv::Mat copyTest;
+				zone.getZoneMat().copyTo(copyTest);
+				
+// 				cv::imshow("i",zone.getZoneMat());
+// 				cv::imshow("b",_zone_mat);
+				cv::Mat copy_tmp;
+				_zone_mat.copyTo(copy_tmp);
+				cv::Mat copy =  cv::Scalar::all(255) - _zone_mat;
+				
+				std::vector< std::vector< cv::Point> > contours;
+				std::vector<cv::Vec4i> hierarchy;
+				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+				
+				assert(contours.size() == 1 && "More than one shape in Zone");
+				
+				// Calculate the area of each contour
+				auto contour = contours[0];
+				cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+				for(auto it = contour.begin() ; it != contour.end() ; ++it ){
+					matcon.at<uchar>(it->y, it->x) = 255;
+				}
+				
+				cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
+	/// Apply the specified morphology operation
+				cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
+				cv::Mat diff = matcon - copyTest;
+				cv::Mat diff2 = copyTest - matcon;
+				cv::Mat fin;
+				matcon.copyTo(fin);
+				fin = fin - diff;
+				fin = fin - diff2;
+				
+				int whitepix = 0 ;
+				for(int row = 0; row < fin.rows; ++row) {
+					uchar* p = fin.ptr(row);
+					for(int col = 0; col < fin.cols; ++col) {
+						if(p[col] != 0){
+							++whitepix;
+						}
+					}
+				}
+// 				std::cout << "PRINT FIN" << std::endl;
+// 				cv::imshow("FIIIn", fin);
+// 				cv::imshow("3", matcon);
+// 				cv::imshow("1", diff);
+// 				cv::imshow("2", diff2);
+// 				cv::waitKey(0);
+				auto percent = whitepix * 100 / contour.size();
+				return percent;
+				
+			}
 			
 			
 		private: 
