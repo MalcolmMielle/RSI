@@ -329,12 +329,12 @@ void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone&
 		}
 	
 // 		std::cout << "On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
-
-std::cout << "AOUCH" << ((int)(*this)[first_vertex].getValue()) - threshold << std::endl;
 	
 		//REMOVE TARG
 		if( ( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
-			(*this)[targ].getValue() < (*this)[first_vertex].getValue() && 
+// 			Decided to remove that line since testing the difference between the very first one and next one is not very significant. Indeed if it progressively go down for them going up again, the K-mean wil create a new zone if it gets small enough and then watershed will not be able to go up again after ! So the corridor will be indeed separated in two even without this condition which is super abitrary
+			
+// 			(*this)[targ].getValue() < (*this)[first_vertex].getValue() && 
 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
 			is_old == true
 		){

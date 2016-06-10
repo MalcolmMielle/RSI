@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::ofstream outt("bob2.txt");
 	graph_slam.write(outt);
 
-	graph_slam.watershed(5000);
+	graph_slam.watershed(50);
 	
 	int size_to_remove = 50;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);

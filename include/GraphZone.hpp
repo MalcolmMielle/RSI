@@ -191,7 +191,7 @@ namespace AASS{
 							
 							std::cout << "Distance " << distance << " distance 2 " << distance2 << " angles " << orientation_pca << " " << orientation_link << std::endl;
 							//If the distance betwen pca is close to 45 it's a ripple !
-							if( ( distance > 70 && distance < 100 ) || ( distance2 > 70 && distance2 < 100 ) ){
+							if( ( distance > 60 && distance < 110 ) || ( distance2 > 60 && distance2 < 110 ) ){
 								//It's a ripple
 							}
 							else{
@@ -209,6 +209,10 @@ namespace AASS{
 						}
 						
 					}
+					//For debugging
+// 					else{
+// 						removeVertexWhilePreservingEdges(v);
+// 					}
 					
 				}
 				
