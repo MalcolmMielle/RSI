@@ -11,10 +11,10 @@ namespace AASS{
 		
 		
 		/**
-		 * 
+		 * Compare function return bool with true if the element are considered similar and false otherwise. No measure of how similar they scored for now !
 		 */
 		template < typename ModifyTypeElement, typename UnchangedTypeElement>
-		inline double levenshteinDistance(const std::deque<ModifyTypeElement>& string_to_modify, const std::deque<UnchangedTypeElement>& unchanged, std::function<double(ModifyTypeElement, UnchangedTypeElement)> compareFunction, std::string& out){
+		inline double levenshteinDistance(const std::deque<ModifyTypeElement>& string_to_modify, const std::deque<UnchangedTypeElement>& unchanged, std::function<bool(ModifyTypeElement, UnchangedTypeElement)> compareFunction, std::string& out){
 			
 			out.clear();
 			
@@ -31,7 +31,8 @@ namespace AASS{
 				col[0] = i+1;
 				for (unsigned int j = 0; j < len2; j++){
 					
-					double score = compareFunction(string_to_modify[i], unchanged[j]);
+					//Score is 0 if they are the same and 1 otherwise
+					bool score = !compareFunction(string_to_modify[i], unchanged[j]);
 					
 					col[j+1] = std::min<double>( 
 								std::min<double> ( (double) prevCol[1 + j] + 1, col[j] + 1), 

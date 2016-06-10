@@ -13,7 +13,7 @@
 #include "editDistance.hpp"
 #include "Neighborhood.hpp"
 
-double compare(const char& c, const char& c2){if(c == c2) {return 0;} return 1;}
+double compare(const char& c, const char& c2){if(c == c2) {return 1;} return 0;}
 
 BOOST_AUTO_TEST_CASE(trying)
 {
@@ -56,8 +56,54 @@ BOOST_AUTO_TEST_CASE(trying)
 	n1.push_back(nei3);
 	AASS::RSI::Neighborhood n2;
 	
-	double resres = n1.compare(n1);
+	std::string out;
+	double resres = n1.compare(n1, out);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(resres, 0);
+	BOOST_CHECK_EQUAL(out, "nnn");
 	
+	resres = n1.compare(n2, out);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(out, "ddd");
+	BOOST_CHECK_EQUAL(resres, 3);
+	
+	resres = n2.compare(n1, out);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(out, "iii");
+	BOOST_CHECK_EQUAL(resres, 3);
+	
+	n2.push_back(nei2);
+	n2.push_back(nei3);
+	
+	resres = n1.compare(n2, out);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(out, "dnn");
+	BOOST_CHECK_EQUAL(resres, 1);
+	
+	resres = n2.compare(n1, out);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(out, "inn");
+	BOOST_CHECK_EQUAL(resres, 1);
+	
+	edgeelement.setDiff(50);
+	AASS::RSI::Neighbor nei4(vertex, edge, zone, edgeelement);
+	edgeelement.setDiff(-10);
+	AASS::RSI::Neighbor nei5(vertex, edge, zone, edgeelement);
+	edgeelement.setDiff(100);
+	AASS::RSI::Neighbor nei6(vertex, edge, zone, edgeelement);
+	
+	AASS::RSI::Neighborhood n3;
+	n3.push_back(nei4);
+	n3.push_back(nei5);
+	n3.push_back(nei6);
+	
+	resres = n3.compare(n1, out);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(out, "nnn");
+	BOOST_CHECK_EQUAL(resres, 0);
+	std::cout << "Out " << out << std::endl;
+	BOOST_CHECK_EQUAL(out, "nnn");
+	resres = n1.compare(n3, out);
 	BOOST_CHECK_EQUAL(resres, 0);
 	
 	

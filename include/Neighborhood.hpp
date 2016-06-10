@@ -34,7 +34,19 @@ namespace AASS{
 			}
 			
 			//Compare the diff in both edges and return a cost of 1 if the diff needs to be change and 0 if not
-			double compare(const Neighbor& n1) const {
+			bool compare(const Neighbor& n1) const {
+				double scoregrad = compareGradient(n1);
+				double scoreShape = compareShape(n1);
+				
+				if(scoregrad == 0){
+					return true;
+				}
+				return false;
+			}
+			
+		private:
+			
+			double compareGradient(const Neighbor& n1) const{
 				if ( ( n1.getEdgeElement().getDiff() > 0 ) == ( _element.second.getDiff() > 0) ){
 					return 0;
 				}
@@ -43,11 +55,15 @@ namespace AASS{
 				}
 			}
 			
+			double compareShape(const Neighbor& n1) const{
+				
+			}
+			
 			
 		};
 		
 		///@brief compare two neighbor objects
-		double compareNeighbor(const Neighbor& n1, const Neighbor& n2){
+		bool compareNeighbor(const Neighbor& n1, const Neighbor& n2){
 			return n1.compare(n2);
 		}
 		
@@ -83,9 +99,26 @@ namespace AASS{
 			const std::deque< Neighbor >& getNeighborhood() const {return _neighborhood;}
 			std::deque< Neighbor >& getNeighborhood() {return _neighborhood;}
 			
-			double compare(const Neighborhood& neig) const{
-				std::string out;
-				double score = levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out);
+			double compare(const Neighborhood& neig, std::string& out) const{
+				double score = levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out);;
+				//Need to rotate the Neighbor
+				auto neigh_comp = neig.getNeighborhood();
+				for(size_t i = 1 ; i < neigh_comp.size() ; ++i){
+// 					std::cout << "ROTATE" << std::endl;
+					std::rotate(neigh_comp.begin(), neigh_comp.begin() + i, neigh_comp.end());
+					std::string out_tmp;
+					double score_tmp = levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out_tmp);
+					if(score_tmp < score){
+						score = score_tmp;
+						out = out_tmp;
+					}
+				}
+				
+			}
+			
+			void clear(){
+				_center_zone = Zone();
+				_neighborhood.clear();
 			}
 			
 			//Not good because we should use the edit distance here as a better comparison mean
