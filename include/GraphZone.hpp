@@ -65,7 +65,8 @@ namespace AASS{
 			
 			bool asVerticesWithNoEdges();
 			
-			void watershed();
+			
+// 			void watershed();
 			void watershed(int threshold);
 			
 			
@@ -343,8 +344,15 @@ namespace AASS{
 // 			}
 			
 		private:
-			void getAllNodeRemoved(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold);
-			
+			/**
+			 * @brief recursively fuse node to be fuse to the top_vertex
+			 * @param top_vertex : Vertex currently studied
+			 * @param first_vertex : Vertex on the top of the food chain. The initial vertex of the watershed
+			 * @param top_vertex_visited : The vertices already visited by the watershed algorithm
+			 * @param threshold : Threshold at which the difference between the value of top_vertex and a neighborhood vertex is considered enough for the neighborhood vertex not to be fused and to be considered a new zone.
+			 */
+			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold);
+			void getAllNodeRemovedRipples(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold);
 			void removeVertexWhilePreservingEdges(VertexZone v);
 			
 		};

@@ -177,124 +177,124 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 }
 
 
-void AASS::RSI::GraphZone::watershed()
-{
-	//Find all "top node"
-// 	throw std::runtime_error("WTF");
+// void AASS::RSI::GraphZone::watershed()
+// {
+// 	//Find all "top node"
+// // 	throw std::runtime_error("WTF");
+// 	
+// 	std::deque<VertexZone> top_vertex;
+// 	
+// 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 	//vertices access all the vertix
+// 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+// 		VertexZone v = *vp.first;
+// 		++vp.first;
+// 		EdgeIteratorZone out_i, out_end;
+// 		
+// 		bool top = true;
+// 		for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+// 			out_i != out_end; out_i = ++out_i) {
+// 			
+// 			EdgeZone e = *out_i;
+// 			VertexZone targ = boost::target(e, (*this));
+// 			if((*this)[targ].getValue() > (*this)[v].getValue()){
+// 				top = false;
+// 			}
+// 		}
+// 		if(top == true){
+// 			top_vertex.push_back(v);
+// 		}
+// 	}
 	
-	std::deque<VertexZone> top_vertex;
+// 	//Find all "bottom node"
+// 	
+// 	std::deque<VertexZone> bottom_vertex;
+// 	
+// 	//vertices access all the vertix
+// 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+// 		VertexZone v = *vp.first;
+// 		++vp.first;
+// 		EdgeIteratorZone out_i, out_end;
+// 		
+// 		bool top = true;
+// 		for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+// 			out_i != out_end; out_i = ++out_i) {
+// 			
+// 			EdgeZone e = *out_i;
+// 			VertexZone targ = boost::target(e, (*this));
+// 			if((*this)[targ].getValue() < (*this)[v].getValue()){
+// 				top = false;
+// 			}
+// 		}
+// 		if(top == true){
+// 			bottom_vertex.push_back(v);
+// 		}
+// 	}
 	
-	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
-	//vertices access all the vertix
-	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
-		VertexZone v = *vp.first;
-		++vp.first;
-		EdgeIteratorZone out_i, out_end;
-		
-		bool top = true;
-		for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-			out_i != out_end; out_i = ++out_i) {
-			
-			EdgeZone e = *out_i;
-			VertexZone targ = boost::target(e, (*this));
-			if((*this)[targ].getValue() > (*this)[v].getValue()){
-				top = false;
-			}
-		}
-		if(top == true){
-			top_vertex.push_back(v);
-		}
-	}
-	
-	//Find all "bottom node"
-	
-	std::deque<VertexZone> bottom_vertex;
-	
-	//vertices access all the vertix
-	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
-		VertexZone v = *vp.first;
-		++vp.first;
-		EdgeIteratorZone out_i, out_end;
-		
-		bool top = true;
-		for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-			out_i != out_end; out_i = ++out_i) {
-			
-			EdgeZone e = *out_i;
-			VertexZone targ = boost::target(e, (*this));
-			if((*this)[targ].getValue() < (*this)[v].getValue()){
-				top = false;
-			}
-		}
-		if(top == true){
-			bottom_vertex.push_back(v);
-		}
-	}
-	
-	//Watershed the hell out of it!
-	
-	//vertices access all the vertix
-	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
-		VertexZone v = *vp.first;
-		++vp.first;
-		bool is_visited = false;
-		bool is_visited_new = false;
-		for(size_t j = 0 ; j < bottom_vertex.size() ; ++j){
-			if(v == bottom_vertex[j]){
-				is_visited = true;
-			}
-		}
-		for(size_t j = 0 ; j < top_vertex.size() ; ++j){
-			if(v == top_vertex[j]){
-				is_visited_new = true;
-			}
-		}
-		
-		if(is_visited == false && is_visited_new == false){
-			EdgeIteratorZone out_i, out_end;
-			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-				out_i != out_end; out_i = ++out_i) {
-				
-				
-				EdgeZone e_second = *out_i;
-				VertexZone targ = boost::target(e_second, (*this));
-// 				std::cout << "Printing both vertex" << std::endl;
-// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
-				
-				EdgeIteratorZone out_i_second, out_end_second;
-				std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
-			
-				for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) )  ; 
-					out_i_second != out_end_second; ++out_i_second) {
-					e_second = *out_i_second;
-				
-					VertexZone targ2 = boost::target(e_second, (*this));
-				
-					EdgeZone edz;
-					
-					std::cout << "Printing both vertex linked" << std::endl;
-					std::cout << "Node 1 " << (*this)[targ] << std::endl;
-					std::cout << "Node 2 " << (*this)[targ2] << std::endl;
-				
-					addEdge(edz, targ, targ2);
-				}
-			}
-			
-			std::cout << "Removing" << std::endl;
-			std::cout << (*this)[v] <<std::endl;
-			removeVertex(v);
-			
-			
-		}
-		
-	}
-
-}
+// 	//Watershed the hell out of it!
+// 	
+// 	//vertices access all the vertix
+// 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+// 		VertexZone v = *vp.first;
+// 		++vp.first;
+// 		bool is_visited = false;
+// 		bool is_visited_new = false;
+// 		for(size_t j = 0 ; j < bottom_vertex.size() ; ++j){
+// 			if(v == bottom_vertex[j]){
+// 				is_visited = true;
+// 			}
+// 		}
+// 		for(size_t j = 0 ; j < top_vertex.size() ; ++j){
+// 			if(v == top_vertex[j]){
+// 				is_visited_new = true;
+// 			}
+// 		}
+// 		
+// 		if(is_visited == false && is_visited_new == false){
+// 			EdgeIteratorZone out_i, out_end;
+// 			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+// 				out_i != out_end; out_i = ++out_i) {
+// 				
+// 				
+// 				EdgeZone e_second = *out_i;
+// 				VertexZone targ = boost::target(e_second, (*this));
+// // 				std::cout << "Printing both vertex" << std::endl;
+// // 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 				
+// 				EdgeIteratorZone out_i_second, out_end_second;
+// 				std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+// 			
+// 				for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) )  ; 
+// 					out_i_second != out_end_second; ++out_i_second) {
+// 					e_second = *out_i_second;
+// 				
+// 					VertexZone targ2 = boost::target(e_second, (*this));
+// 				
+// 					EdgeZone edz;
+// 					
+// 					std::cout << "Printing both vertex linked" << std::endl;
+// 					std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 					std::cout << "Node 2 " << (*this)[targ2] << std::endl;
+// 				
+// 					addEdge(edz, targ, targ2);
+// 				}
+// 			}
+// 			
+// 			std::cout << "Removing" << std::endl;
+// 			std::cout << (*this)[v] <<std::endl;
+// 			removeVertex(v);
+// 			
+// 			
+// 		}
+// 		
+// 	}
+// 
+// }
 
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold){
+void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold){
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
@@ -354,7 +354,7 @@ void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone&
 			
 			//Recursion :(
 // 			std::cout << "sending recur " << (*this)[first_vertex].getValue() << std::endl;
-			getAllNodeRemoved(targ, first_vertex, top_vertex_visited, threshold);
+			getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, threshold);
 			
 // 			change = true;
 			EdgeIteratorZone out_i_second, out_end_second;
@@ -477,7 +477,7 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 		std::cout << "watersheding " << (*this)[top_vertex] << std::endl;
 		//Watershed the hell out of it!
 	
-		getAllNodeRemoved(top_vertex, top_vertex, top_vertex_visited, threshold);
+		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, threshold);
 			
 		top_vertex_visited.push_back(top_vertex);
 		//Stopping condition
@@ -583,9 +583,59 @@ void AASS::RSI::GraphZone::removeRiplesv2()
 			}
 		}
 		
+		//Remove all ripples
+		
+		
+		
+		
 		
 		
 	}
 
+}
+
+
+//TODO : would crash on self loop ?
+///Recurisve function to find all node to be fused to the original node by the watershed !
+void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold){
+	
+// 	std::cout << "Recursive function" <<std::endl;
+	EdgeIteratorZone out_i, out_end;
+	int num_edge = getNumEdges(top_vertex);
+// 	std::cout << "Nume edges " << num_edge << std::endl;
+	if(num_edge == 0){
+		std::cout << (*this)[top_vertex] << " num of vert " <<getNumVertices() << std::endl;
+		print();
+		throw std::runtime_error("Node is not linked anymore");
+	}
+	
+	for (boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this)); 
+		out_i != out_end;) {
+		
+		EdgeZone e_second = *out_i;
+		VertexZone targ = boost::target(e_second, (*this));
+			
+		bool is_visited = false;
+		for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
+			if(targ == top_vertex_visited[j]){
+				is_visited = true;
+			}
+		}
+		if(is_visited == true){
+			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
+			throw std::runtime_error("WE ARE REMOVING A TOP");
+		}
+		
+// 		if(isRipple() == true){
+// 			//Removing the ripple
+// 			(*this)[targ].fuse((*this)[top_vertex]);
+// 			removeVertex(targ);
+// 			boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this));
+// 		}
+// 		else{
+// 			++out_i;
+// 		}
+	}
+	
 }
 
