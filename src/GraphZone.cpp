@@ -474,12 +474,10 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 			}
 		}
 		
-		std::cout << "watersheding " << (*this)[top_vertex] << std::endl;
-		//Watershed the hell out of it!
+		top_vertex_visited.push_back(top_vertex);
 	
 		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, threshold);
-			
-		top_vertex_visited.push_back(top_vertex);
+		
 		//Stopping condition
 		if(top_vertex_visited.size() == getNumVertices()){
 			done = true; 
@@ -585,9 +583,23 @@ void AASS::RSI::GraphZone::removeRiplesv2()
 		
 		//Remove all ripples
 		
+		getAllNodeRemovedRipples(top_vertex, top_vertex_visited);
 		
 		
 		
+		//End condition
+		top_vertex_visited.push_back(top_vertex);
+		//Stopping condition
+		if(top_vertex_visited.size() == getNumVertices()){
+			done = true; 
+		}
+		else if (top_vertex_visited.size() > getNumVertices()){
+// 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
+			throw std::runtime_error("over shoot in the water shed");
+		}
+		else{
+// 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
+		}
 		
 		
 	}
@@ -597,45 +609,95 @@ void AASS::RSI::GraphZone::removeRiplesv2()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold){
+void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, const std::deque<VertexZone>& top_vertex_visited){
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
-	int num_edge = getNumEdges(top_vertex);
+	int num_edge = getNumEdges(base_vertex);
 // 	std::cout << "Nume edges " << num_edge << std::endl;
 	if(num_edge == 0){
-		std::cout << (*this)[top_vertex] << " num of vert " <<getNumVertices() << std::endl;
+		std::cout << (*this)[base_vertex] << " num of vert " <<getNumVertices() << std::endl;
 		print();
 		throw std::runtime_error("Node is not linked anymore");
 	}
 	
-	for (boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this)); 
+	for (boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this)); 
 		out_i != out_end;) {
 		
 		EdgeZone e_second = *out_i;
 		VertexZone targ = boost::target(e_second, (*this));
 			
-		bool is_visited = false;
-		for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
-			if(targ == top_vertex_visited[j]){
-				is_visited = true;
-			}
-		}
-		if(is_visited == true){
-			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
-			throw std::runtime_error("WE ARE REMOVING A TOP");
-		}
 		
-// 		if(isRipple() == true){
-// 			//Removing the ripple
-// 			(*this)[targ].fuse((*this)[top_vertex]);
-// 			removeVertex(targ);
-// 			boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this));
-// 		}
-// 		else{
-// 			++out_i;
-// 		}
+		if(isRipple(base_vertex, targ) == true){
+			
+			bool is_visited = false;
+			for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
+				if(targ == top_vertex_visited[j]){
+					is_visited = true;
+				}
+			}
+			if(is_visited == true){
+				std::cout << (*this)[targ].getValue() << " " << (*this)[base_vertex].getValue() << std::endl;
+				throw std::runtime_error("WE ARE REMOVING A TOP");
+			}
+			
+			
+			//Removing the ripple
+			(*this)[base_vertex].fuse((*this)[targ]);
+			removeVertexWhilePreservingEdges(targ);
+			boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this));
+		}
+		else{
+			++out_i;
+		}
 	}
 	
+}
+
+
+bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZone& might_be_ripple) const
+{
+	
+	auto pca_ripple = (*this)[might_be_ripple].getPCA();
+	
+	//Find bigger direction
+	std::pair<cv::Point2i, cv::Point2i> line1;
+	std::pair<cv::Point2i, cv::Point2i> line2;
+	
+	double length1_x = (std::get<1>(pca_ripple).x - std::get<0>(pca_ripple).x);
+	length1_x = length1_x * length1_x;
+	double length1_y = (std::get<1>(pca_ripple).y - std::get<0>(pca_ripple).y);
+	length1_y = length1_y * length1_y;
+	double length1 = length1_x + length1_y;
+	
+	double length2_x = (std::get<2>(pca_ripple).x - std::get<0>(pca_ripple).x);
+	length2_x = length2_x * length2_x;
+	double length2_y = (std::get<2>(pca_ripple).y - std::get<0>(pca_ripple).y);
+	length2_y = length2_y * length2_y;
+	double length2 = length2_x + length2_y;
+	
+	double max = length1, min = length2;
+	if(max < min){
+		max = length2;
+		min = length1;
+	}
+	
+	std::cout << " max and 5 min " << max << " " << min * 5 << std::endl;
+	
+	//ATTENTION magic number
+	if(max > (min * 5)){
+		
+		Zone z_ripple = (*this)[might_be_ripple];
+		Zone z_base = (*this)[base_vertex];
+		
+// 			It's a ripple !
+		//ATTENTION Second magic number
+		if(z_ripple.contactPoint(z_base) > 30){
+			return true;
+		}
+	}
+	
+	return false;
+
 }
 

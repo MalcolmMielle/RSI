@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::imshow("GRAPH FINAL before remove", graphmat);
 	cv::waitKey(0);
 	
-	graph_slam.removeRiples();
+	graph_slam.removeRiplesv2();
 	
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 	graph_slam.draw(graphmat2);
