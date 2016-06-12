@@ -294,7 +294,7 @@ void AASS::RSI::GraphZone::watershed()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold, bool& change){
+void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold){
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
@@ -354,9 +354,9 @@ void AASS::RSI::GraphZone::getAllNodeRemoved(VertexZone& top_vertex, VertexZone&
 			
 			//Recursion :(
 // 			std::cout << "sending recur " << (*this)[first_vertex].getValue() << std::endl;
-			getAllNodeRemoved(targ, first_vertex, top_vertex_visited, threshold, change);
+			getAllNodeRemoved(targ, first_vertex, top_vertex_visited, threshold);
 			
-			change = true;
+// 			change = true;
 			EdgeIteratorZone out_i_second, out_end_second;
 			
 			int vertnum = getNumVertices();
@@ -477,72 +477,8 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 		std::cout << "watersheding " << (*this)[top_vertex] << std::endl;
 		//Watershed the hell out of it!
 	
-	
-		bool change = true;
-// 		while(change == true){
-// 			change = false;
+		getAllNodeRemoved(top_vertex, top_vertex, top_vertex_visited, threshold);
 			
-			getAllNodeRemoved(top_vertex, top_vertex, top_vertex_visited, threshold, change);
-			
-// 			std::cout << "DONE WITH ONE SEED " << std::endl;
-			
-// 			std::cout << std::endl;
-// 			print();
-// 			std::cout << std::endl;
-// 			EdgeIteratorZone out_i, out_end;
-// 			int num_edge = getNumEdges(top_vertex), count = 0;
-// 			for (boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this)); 
-// 				out_i != out_end;) {
-// 				
-// // 				std::cout << "Edge number " << count << " total " << num_edge << std::endl;
-// 				++count;
-// 				EdgeZone e_second = *out_i;
-// 				++out_i;
-// 			
-// 				VertexZone targ = boost::target(e_second, (*this));
-// 			
-// // 				std::cout << "On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
-// 			
-// 				//REMOVE TARG
-// 				if( (*this)[targ].getValue() >= (*this)[top_vertex].getValue() - threshold && 
-// 					(*this)[targ].getValue() < (*this)[top_vertex].getValue() ){
-// 					
-// 					bool is_visited = false;
-// 					for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
-// 						if(targ == top_vertex_visited[j]){
-// 							is_visited = true;
-// 						}
-// 					}
-// 					if(is_visited == true){
-// 						std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
-// 						throw std::runtime_error("WE ARE REMOVING A TOP");
-// 					}
-// 					
-// 					change = true;
-// 					EdgeIteratorZone out_i_second, out_end_second;
-// 				
-// 					for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) ) ; 
-// 						out_i_second != out_end_second; ++out_i_second) {
-// 						e_second = *out_i_second;
-// 					
-// 						VertexZone targ2 = boost::target(e_second, (*this));
-// 						if(targ2 != top_vertex){
-// 							EdgeZone edz;					
-// 							addEdge(edz, top_vertex, targ2);
-// 						}
-// 					}
-// // 					std::cout << "REMOVE THE BASE VERTEX EDGE GOING TO NEXT EDGE" << std::endl;
-// // 					throw std::runtime_error("Not an error, it actually works" );
-// 					//TODO : replace this by a fuse Zone function
-// 					removeVertex(targ);
-// 				}
-// 				else{
-// // 					std::cout << "Not removing a THING" << std::endl;
-// 				}
-// 				
-// 			}
-// 			std::cout << "Got out " << std::endl;
-// 		}
 		top_vertex_visited.push_back(top_vertex);
 		//Stopping condition
 		if(top_vertex_visited.size() == getNumVertices()){
@@ -601,3 +537,55 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	
 	
 }
+
+
+void AASS::RSI::GraphZone::removeRiplesv2()
+{
+	std::cout << "Starting watershed" << std::endl;
+// 	exit(0);
+	
+	std::deque<VertexZone> top_vertex_visited;
+	bool done = false;
+	while(done == false){
+		
+		VertexZone top_vertex;
+		bool init = false;
+		
+		///Find biggest vertex not visited
+		
+		std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+		//vertices access all the vertix
+// 		std::cout << "NEW start" << std::endl;
+// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
+		for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+// 			std::cout << "Looking up vertex " << std::endl;
+			VertexZone v = *vp.first;
+			++vp.first;
+// 			std::cout << "assind vertex " <<(*this)[v]<< std::endl;
+			bool is_visited = false;
+			for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
+				if(v == top_vertex_visited[j]){
+					is_visited = true;
+				}
+			}
+// 			std::cout << "checked visit " << is_visited << std::endl;
+			if(is_visited == false){
+// 				std::cout << "Is it init : "<< init << std::endl;
+				if(init == false){
+// 					std::cout << "assigned init" << std::endl;
+					top_vertex = v;
+					init = true;
+				}
+				else if( (*this)[top_vertex].size() < (*this)[v].size() ){
+// 					std::cout << "assigned other" << std::endl;
+					top_vertex = v;
+				}
+			}
+		}
+		
+		
+		
+	}
+
+}
+

@@ -113,6 +113,8 @@ namespace AASS{
 			}
 			
 			
+			void removeRiplesv2();
+			
 			
 						/**
 			 * @brief remove ripples by looking at the pca and the angle between the main component and How much the zone is glued to it. If one of the angle is NOT a ripple then the zone is saved.
@@ -341,7 +343,7 @@ namespace AASS{
 // 			}
 			
 		private:
-			void getAllNodeRemoved(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold, bool& change);
+			void getAllNodeRemoved(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold);
 			
 			void removeVertexWhilePreservingEdges(VertexZone v);
 			
