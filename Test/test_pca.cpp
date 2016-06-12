@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(trying)
 
 	graph_slam.watershed(50);
 	
-	int size_to_remove = 50;
+	int size_to_remove = 100;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
 	graph_slam.removeLonelyVertices();
 	if(graph_slam.lonelyVertices())

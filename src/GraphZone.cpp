@@ -686,6 +686,7 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 	
 	//ATTENTION magic number
 	if(max > (min * 5)){
+// 	if(true == true){
 		
 		Zone z_ripple = (*this)[might_be_ripple];
 		Zone z_base = (*this)[base_vertex];
