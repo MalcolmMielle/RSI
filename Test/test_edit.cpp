@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	std::string string;
 	
-	double res = AASS::RSI::levenshteinDistance<char, char>(str1, str2, compare, string);
+	double res = AASS::editdistance::levenshteinDistance<char, char>(str1, str2, compare, string);
 
 	std::cout << "res : " <<res << " thanks to " << string << std::endl;
 	

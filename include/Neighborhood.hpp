@@ -1,6 +1,8 @@
 #ifndef RSI_NEIGHBORHOOD_28052016
 #define RSI_NEIGHBORHOOD_28052016
 
+#include "editDistance/Levenshtein.hpp"
+
 #include "GraphZone.hpp"
 #include "editDistance.hpp"
 
@@ -45,7 +47,7 @@ namespace AASS{
 				if(scoregrad != 0 || scoreShape > 0.5){
 					return false;
 				}
-				return false;
+				return true;
 			}
 			
 		private:
@@ -106,14 +108,14 @@ namespace AASS{
 			std::deque< Neighbor >& getNeighborhood() {return _neighborhood;}
 			
 			double compare(const Neighborhood& neig, std::string& out) const{
-				double score = levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out);;
+				double score = AASS::editdistance::levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out);;
 				//Need to rotate the Neighbor
 				auto neigh_comp = neig.getNeighborhood();
 				for(size_t i = 1 ; i < neigh_comp.size() ; ++i){
 // 					std::cout << "ROTATE" << std::endl;
 					std::rotate(neigh_comp.begin(), neigh_comp.begin() + i, neigh_comp.end());
 					std::string out_tmp;
-					double score_tmp = levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out_tmp);
+					double score_tmp = AASS::editdistance::levenshteinDistance<Neighbor, Neighbor>(_neighborhood, neig.getNeighborhood(), compareNeighbor, out_tmp);
 					if(score_tmp < score){
 						score = score_tmp;
 						out = out_tmp;

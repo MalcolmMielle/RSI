@@ -282,22 +282,25 @@ namespace AASS{
 			}
 			
 			
-			double compare(const Zone& zone_in){
+			double compare(const Zone& zone_in) const {
 				
 				auto pca_max_min = getMaxMinPCA();
 				auto pca_max_min_input = zone_in.getMaxMinPCA();
 				
-				std::cout << "max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
+// 				std::cout << "max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
 				
-				double normalizer_own = 1 / pca_max_min.first;
-				pca_max_min.second = pca_max_min.second * normalizer_own;
-				pca_max_min.first = pca_max_min.first * normalizer_own;
+				if(pca_max_min.first > 0){
+					double normalizer_own = 1 / pca_max_min.first;
+					pca_max_min.second = pca_max_min.second * normalizer_own;
+					pca_max_min.first = pca_max_min.first * normalizer_own;
+				}
+				if(pca_max_min_input.first > 0){
+					double normalizer_input = 1 / pca_max_min_input.first;
+					pca_max_min_input.second = pca_max_min_input.second * normalizer_input;
+					pca_max_min_input.first = pca_max_min_input.first * normalizer_input;
+				}
 				
-				double normalizer_input = 1 / pca_max_min_input.first;
-				pca_max_min_input.second = pca_max_min_input.second * normalizer_input;
-				pca_max_min_input.first = pca_max_min_input.first * normalizer_input;
-				
-				std::cout << " normilzed max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
+// 				std::cout << " normilzed max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
 				
 				double diff = pca_max_min.first - pca_max_min.second;
 				double diff_input = pca_max_min_input.first - pca_max_min_input.second;
