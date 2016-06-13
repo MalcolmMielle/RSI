@@ -10,7 +10,7 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 	//vertices access all the vertix
 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
-		
+		std::cout << "VERTEX" << std::endl;
 		if(drawmat.channels() == 1){
 			color = rng.uniform(50, 255);
 		}
@@ -22,7 +22,7 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 		
 		VertexZone v = *vp.first;
 		
-		if((*this)[v].getZone().size() > 100){
+		if((*this)[v].getZone().size() > 0){
 // 				if(getNumEdges(v) > 1){
 			
 			cv::Mat copy = cv::Mat::zeros(drawmat_old.rows, drawmat_old.cols, CV_8U);
@@ -48,7 +48,7 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 				}
 			}
 			
-			cv::imshow("Zone", (*this)[v].getZoneMat());
+			cv::imshow("Z", (*this)[v].getZoneMat());
 			cv::imshow("Partial" , copy);
 			cv::waitKey(0);
 		}
@@ -93,7 +93,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 				e = *out_i;
 				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
 				if( (*this)[targ].getZone().size() > 100 ){
-					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+// 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 				}
 			}
 // 
@@ -114,7 +114,9 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 // 			}
 // 			cv::drawContours( m, std::vector<std::vector<cv::Point> >(1,(*this)[v].contour), -1, color, 2, 8);
 	(*this)[v].draw(m, color);
-	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
+	std::cout << "VALUIE " << std::endl;
+	(*this)[v].printPCA();
+// 	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
 	
 // 			cv::Mat draw_tmp = cv::Mat::zeros(m.rows, m.cols, CV_8U);
 // 			for(size_t j = 0 ; j < (*this)[v].getZone().size() ; ++j){

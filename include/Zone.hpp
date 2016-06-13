@@ -96,16 +96,12 @@ namespace AASS{
 				
 				//Draw PCA
 // 				cv::circle(img, std::get<0>(_pca), 3, CV_RGB(255, 0, 255), 10);
-				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 3);
-				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 3);	
+				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
+				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
 				
 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
 				
 			}
-			
-// 			void draw()const {
-// 				
-// 			}
 
 			void PCA(){
 // 				find countour
@@ -129,19 +125,8 @@ namespace AASS{
 					assert(contours[0].size() > contours[1].size());
 				
 				auto area = cv::contourArea(contours[0]);
-				// Ignore contours that are too small or too large
-// 				if (area < 1e2 || 1e5 < area) {
-			
-					// Draw each contour only for visualisation purposes
-	// 				cv::drawContours(img, contours, i, CV_RGB(255, 0, 0), 2, 8, hierarchy, 0);
-					// Find the orientation of each shape
-					getOrientation(contours[0]);
-// 				}
-// 				else{
-					
-// 					std::cout << "TOO small :( " << std::endl;
-					
-// 				}
+				getOrientation(contours[0]);
+
 				
 				std::cout << "PCAAAAA" << std::endl;
 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
@@ -151,6 +136,13 @@ namespace AASS{
 // 				cv::imshow("Bob", copy_tmp);
 // 				cv::waitKey(0);
 
+			}
+			
+			void printPCA() const{
+				std::cout << "PCAAAAA" << std::endl;
+				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
+				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<2>(_pca) << std::endl;
+				std::cout << "Next PCA " << std::endl << std::endl;
 			}
 			
 			//Return the number of contact points in percent compared to size of contour
@@ -171,9 +163,7 @@ namespace AASS{
 				std::vector< std::vector< cv::Point> > contours;
 				std::vector<cv::Vec4i> hierarchy;
 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-				
-// 				assert(contours.size() == 1 && "More than one shape in Zone");
-				
+								
 				//Do for all contour and add percentage
 				// Calculate the area of each contour
 
@@ -264,6 +254,61 @@ namespace AASS{
 // 				std::cout << "Percent " << percent << std::endl;
 // 				assert(percent < 50 && "Percentage can't be more than 50% because that means the shape is flat");
 				return percent;
+				
+			}
+			
+			std::pair<double, double> getMaxMinPCA() const {
+				double length1_x_own = (std::get<1>(_pca).x - std::get<0>(_pca).x);
+				length1_x_own = length1_x_own * length1_x_own;
+				double length1_y_own = (std::get<1>(_pca).y - std::get<0>(_pca).y);
+				length1_y_own = length1_y_own * length1_y_own;
+				double length1_oen = length1_x_own + length1_y_own;
+				
+				double length2_x_oen = (std::get<2>(_pca).x - std::get<0>(_pca).x);
+				length2_x_oen = length2_x_oen * length2_x_oen;
+				double length2_y_oen = (std::get<2>(_pca).y - std::get<0>(_pca).y);
+				length2_y_oen = length2_y_oen * length2_y_oen;
+				double length2_oen = length2_x_oen + length2_y_oen;
+				
+				double max_own = length1_oen, min_own = length2_oen;
+				if(max_own < min_own){
+					max_own = length2_oen;
+					min_own = length1_oen;
+				}
+			 	max_own = std::sqrt(max_own);
+				min_own = std::sqrt(min_own);
+				
+				return std::pair<double, double>(max_own, min_own);
+			}
+			
+			
+			double compare(const Zone& zone_in){
+				
+				auto pca_max_min = getMaxMinPCA();
+				auto pca_max_min_input = zone_in.getMaxMinPCA();
+				
+				std::cout << "max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
+				
+				double normalizer_own = 1 / pca_max_min.first;
+				pca_max_min.second = pca_max_min.second * normalizer_own;
+				pca_max_min.first = pca_max_min.first * normalizer_own;
+				
+				double normalizer_input = 1 / pca_max_min_input.first;
+				pca_max_min_input.second = pca_max_min_input.second * normalizer_input;
+				pca_max_min_input.first = pca_max_min_input.first * normalizer_input;
+				
+				std::cout << " normilzed max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
+				
+				double diff = pca_max_min.first - pca_max_min.second;
+				double diff_input = pca_max_min_input.first - pca_max_min_input.second;
+				
+				double similarity = diff - diff_input;
+				similarity = std::abs(similarity);
+				
+				assert(similarity >= 0 && "similarity measure of Zone should not be negative");
+				assert(similarity <= 1 && "similarity measure of Zone should not be mopre than one");
+				
+				return similarity;
 				
 			}
 			

@@ -33,13 +33,17 @@ namespace AASS{
 				_accessor = std::pair <GraphZone::VertexZone, GraphZone::EdgeZone>(vertex, edge);
 			}
 			
-			//Compare the diff in both edges and return a cost of 1 if the diff needs to be change and 0 if not
+			/**
+			 * @brief Compare the diff in both edges and return a cost of 1 if the diff needs to be change and 0 if not
+			 * For now make sure that the gradient of the dge are the same and that the shape score is not too far 
+			 */
 			bool compare(const Neighbor& n1) const {
 				double scoregrad = compareGradient(n1);
 				double scoreShape = compareShape(n1);
 				
-				if(scoregrad == 0){
-					return true;
+				//If the gradient is not similar or the PCA or too far away from each other, not the same
+				if(scoregrad != 0 || scoreShape > 0.5){
+					return false;
 				}
 				return false;
 			}
@@ -56,6 +60,8 @@ namespace AASS{
 			}
 			
 			double compareShape(const Neighbor& n1) const{
+				
+				return _element.first.compare(n1.getVertexElement());
 				
 			}
 			

@@ -30,3 +30,6 @@ target_link_libraries(test_pca ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lb
 
 add_executable(test_collisionblob test_collisionblob.cpp)
 target_link_libraries(test_collisionblob ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework)
+
+add_executable(test_comparezone test_comparezone.cpp)
+target_link_libraries(test_comparezone ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework)
