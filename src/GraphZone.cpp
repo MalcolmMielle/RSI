@@ -721,7 +721,7 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 		//ATTENTION Second magic number
 		if(z_ripple.contactPoint(z_base) > 40){
 			
-			
+// 			std::cout << "PERCET : " << z_ripple.contactPoint(z_base) << std::endl;
 // 			cv::Mat graphmat2 = cv::Mat::zeros(400,400, CV_8U);
 // 			z_ripple.draw(graphmat2, cv::Scalar(255));
 // 			cv::imshow("ripple", graphmat2);

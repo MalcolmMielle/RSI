@@ -155,6 +155,10 @@ namespace AASS{
 			
 			//Return the number of contact points in percent compared to size of contour
 			int contactPoint(const Zone& zone){
+				int whitepix = 0 ;
+				int final_size = 0;
+				int test_size = 0 ;
+
 				cv::Mat copyTest;
 				zone.getZoneMat().copyTo(copyTest);
 				
@@ -172,45 +176,93 @@ namespace AASS{
 				
 				//Do for all contour and add percentage
 				// Calculate the area of each contour
-				int whitepix = 0 ;
-				int final_size = 0;
+
 				
+				auto lambda = [](int x, int y, const cv::Mat& mat) -> bool{
+					
+					int xx;
+					for( xx = x - 1 ; xx < x + 2 ; ++xx ){
+						int yy;
+						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
+// 							std::cout << " x y " << xx << " " << yy << std::endl;
+							if(mat.at<uchar>(yy, xx) == 255){
+								return true;
+							}
+						}
+					}
+					return false;
+
+				};
+				
+// 				std::cout << "NUMBER OF CONTOUR " << contours.size() << " with " << contours[0].size() << std::endl;
 				for(size_t i = 0 ; i < contours.size() ; i++){
 					auto contour = contours[i];
 					
-					final_size = final_size + contour.size();
+// 					final_size = final_size + contour.size();
+					
+					std::vector<std::pair<int, int > > seen;
 					
 					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
 					for(auto it = contour.begin() ; it != contour.end() ; ++it ){
 						matcon.at<uchar>(it->y, it->x) = 255;
-					}
-					
-					cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
-		/// Apply the specified morphology operation
-					cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
-					cv::Mat diff = matcon - copyTest;
-					cv::Mat diff2 = copyTest - matcon;
-					cv::Mat fin;
-					matcon.copyTo(fin);
-					fin = fin - diff;
-					fin = fin - diff2;
-					
-					for(int row = 0; row < fin.rows; ++row) {
-						uchar* p = fin.ptr(row);
-						for(int col = 0; col < fin.cols; ++col) {
-							if(p[col] != 0){
-								++whitepix;
+// 						std::cout << "LAMBDAS" << std::endl;
+						bool asbeenseeen = false;
+						for(size_t i = 0 ; i < seen.size() ; ++i){
+							if(seen[i].first == it->x && seen[i].second == it->y){
+								asbeenseeen = true;
 							}
 						}
+						seen.push_back(std::pair<int, int>(it->x, it->y));
+						if(!asbeenseeen){
+							if(lambda(it->x, it->y, copyTest)){
+								whitepix++;
+							}
+							final_size++;
+						}
+
 					}
+// 					cv::imshow("3", matcon);
+// 					cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
+// 		/// Apply the specified morphology operation
+// 					cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
+// 					cv::Mat diff = matcon - copyTest;
+// 					cv::Mat diff2 = copyTest - matcon;
+// 					cv::Mat fin;
+// 					matcon.copyTo(fin);
+// 					fin = fin - diff;
+// 					fin = fin - diff2;
+// 					
+// 					for(int row = 0; row < fin.rows; ++row) {
+// 						uchar* p = matcon.ptr(row);
+// 						for(int col = 0; col < fin.cols; ++col) {
+// 							if(p[col] != 0){
+// 								test_size++;
+// 							}
+// 						}
+// 					}
+// 					
+// 					
+// 					for(int row = 0; row < fin.rows; ++row) {
+// 						uchar* p = fin.ptr(row);
+// 						for(int col = 0; col < fin.cols; ++col) {
+// 							if(p[col] != 0){
+// 								++whitepix;
+// 							}
+// 						}
+// 					}
 				}
+// 				std::cout << "WHITEPIX " << whitepix << std::endl;
+// 				std::cout << "TESTING " << test_size << std::endl;
+// 				std::cout << "FinalSize " << final_size << std::endl;
 // 				std::cout << "PRINT FIN" << std::endl;
 // 				cv::imshow("FIIIn", fin);
-// 				cv::imshow("3", matcon);
+				
 // 				cv::imshow("1", diff);
 // 				cv::imshow("2", diff2);
 // 				cv::waitKey(0);
 				auto percent = whitepix * 100 / final_size;
+// 				std::cout << "Percent " << percent << std::endl;
+// 				assert(percent < 50 && "Percentage can't be more than 50% because that means the shape is flat");
 				return percent;
 				
 			}
