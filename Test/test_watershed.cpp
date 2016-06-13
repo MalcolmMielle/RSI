@@ -34,6 +34,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat out, out_slam;
 	
 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
+	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
 	
 	cv::imshow("Base input ", map);
 	cv::imshow("SLAM", slam);
@@ -95,7 +96,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		//ATTENTION : KMEAN
 		if(kmean_f == true){
 			kmeans_slam.setK(K);
-			kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 255);
+			kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
 		}
 		//ATTENTION : MeanShift
 		else{
@@ -105,7 +106,7 @@ BOOST_AUTO_TEST_CASE(trying)
 			mshift.meanshift(out_slam, mean);
 			cv::imshow("Mean Shift", mean);
 			kmeans_slam.setK(K);
-			kmeans_slam.kmeansColor(mean, out_tmp_slam, slam, 255);
+			kmeans_slam.kmeansColor(mean, out_tmp_slam, slam, 0);
 			
 			cv::Mat kmeanout;
 			//For comparison prurpose

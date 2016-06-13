@@ -500,6 +500,9 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 
 void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v)
 {
+	//Find biggest neighbor vertex for fusion of zone
+	VertexZone biggest;
+	bool init = true;
 	EdgeIteratorZone out_i, out_end;
 	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
 		out_i != out_end; out_i = ++out_i) {
@@ -511,14 +514,24 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
-// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+		if(init == true){
+			std::cout << "INIT" << std::endl;
+			biggest = targ;
+			init = false;
+		}
+		else{
+			std::cout << "COMPARING SIZES " << std::endl;
+			if( (*this)[biggest].size() <(*this)[targ].size() ){
+				biggest = targ;
+			}
+		}
 	
 		for (out_i_second = std::next(out_i) ; 
 			out_i_second != out_end; ++out_i_second) {
 			e_second = *out_i_second;
 		
 			VertexZone targ2 = boost::target(e_second, (*this));
-		
 			EdgeZone edz;
 			
 // 			std::cout << "Printing both vertex linked" << std::endl;
@@ -529,10 +542,15 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		}
 	}
 	
-// 	std::cout << "Removing" << std::endl;
+	
+	std::cout << "Removing and fusing" << std::endl;
+	std::cout << "Printing both vertex fsed" << std::endl;
+	std::cout << "Node 1 " << (*this)[biggest] << std::endl;
+	std::cout << "Node 2 " << (*this)[v] << std::endl;
+	
+	(*this)[biggest].fuse((*this)[v]);
 	std::cout << (*this)[v] <<std::endl;
 	removeVertex(v);
-	
 	
 }
 
@@ -693,7 +711,14 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 		
 // 			It's a ripple !
 		//ATTENTION Second magic number
-		if(z_ripple.contactPoint(z_base) > 30){
+		if(z_ripple.contactPoint(z_base) > 40){
+			
+			
+			cv::Mat graphmat2 = cv::Mat::zeros(400,400, CV_8U);
+			z_ripple.draw(graphmat2, cv::Scalar(255));
+			cv::imshow("ripple", graphmat2);
+			cv::waitKey(0);
+			
 			return true;
 		}
 	}

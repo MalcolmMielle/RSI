@@ -161,31 +161,39 @@ namespace AASS{
 				std::vector<cv::Vec4i> hierarchy;
 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 				
-				assert(contours.size() == 1 && "More than one shape in Zone");
+// 				assert(contours.size() == 1 && "More than one shape in Zone");
 				
+				//Do for all contour and add percentage
 				// Calculate the area of each contour
-				auto contour = contours[0];
-				cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
-				for(auto it = contour.begin() ; it != contour.end() ; ++it ){
-					matcon.at<uchar>(it->y, it->x) = 255;
-				}
-				
-				cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
-	/// Apply the specified morphology operation
-				cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
-				cv::Mat diff = matcon - copyTest;
-				cv::Mat diff2 = copyTest - matcon;
-				cv::Mat fin;
-				matcon.copyTo(fin);
-				fin = fin - diff;
-				fin = fin - diff2;
-				
 				int whitepix = 0 ;
-				for(int row = 0; row < fin.rows; ++row) {
-					uchar* p = fin.ptr(row);
-					for(int col = 0; col < fin.cols; ++col) {
-						if(p[col] != 0){
-							++whitepix;
+				int final_size = 0;
+				
+				for(size_t i = 0 ; i < contours.size() ; i++){
+					auto contour = contours[i];
+					
+					final_size = final_size + contour.size();
+					
+					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+					for(auto it = contour.begin() ; it != contour.end() ; ++it ){
+						matcon.at<uchar>(it->y, it->x) = 255;
+					}
+					
+					cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
+		/// Apply the specified morphology operation
+					cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
+					cv::Mat diff = matcon - copyTest;
+					cv::Mat diff2 = copyTest - matcon;
+					cv::Mat fin;
+					matcon.copyTo(fin);
+					fin = fin - diff;
+					fin = fin - diff2;
+					
+					for(int row = 0; row < fin.rows; ++row) {
+						uchar* p = fin.ptr(row);
+						for(int col = 0; col < fin.cols; ++col) {
+							if(p[col] != 0){
+								++whitepix;
+							}
 						}
 					}
 				}
@@ -195,7 +203,7 @@ namespace AASS{
 // 				cv::imshow("1", diff);
 // 				cv::imshow("2", diff2);
 // 				cv::waitKey(0);
-				auto percent = whitepix * 100 / contour.size();
+				auto percent = whitepix * 100 / final_size;
 				return percent;
 				
 			}

@@ -30,6 +30,10 @@ BOOST_AUTO_TEST_CASE(trying)
 	char* str = argv[1];
 	cv::Mat slam = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat map = cv::imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+	
+	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
+	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
+	
 	cv::Mat out, out_slam;
 	cv::imshow("Base input ", map);
 	cv::imshow("SLAM", slam);
@@ -56,7 +60,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 	AASS::RSI::Kmeans kmeans_slam;
 	kmeans_slam.setK(5);
-	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam);
+	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
 // 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 	
 	cv::imshow("REDUCED", out_tmp_slam);
@@ -64,8 +68,6 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	AASS::RSI::ZoneExtractor wzoneextract;
 	std::cout << "WHATERSHED SLAM" << std::endl;
-	
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 11, 11 ), cv::Point( -1, -1 ) );
 	wzoneextract.extract(out_tmp_slam);
 	
 	std::cout << "WATERSHED DONE" << std::endl;
@@ -90,7 +92,6 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	
 	graph_slam.draw(graphmat_init);
 	cv::imshow("GRAPH_init", graphmat_init);
-// 	graph_slam.watershed();
 	cv::waitKey(0);
 	
 	

@@ -31,7 +31,7 @@ namespace AASS{
 			void drawPartial(cv::Mat& drawmat) const;
 			void draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
 			
-			///@brief Remove all vertex with Value value. Do not preserve edges
+			///@brief Remove all vertex with Value value. Do not preserve edges or zones
 			void removeVertexValue(int value){
 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 				//vertices access all the vertix
@@ -58,7 +58,7 @@ namespace AASS{
 			
 			/** @brief Remove all vertex which zone is less than size in size.
 			 * @param size size under which the vertex gets removed
-			 * @param preserveEdgeConnectic if true the connection between edge is "preserved" i.e if we have Node1 - Node2 - Node3 and we remove Node2 the end result will be Node1 - Node3.
+			 * @param preserveEdgeConnectic if true the connection between edge is "preserved" i.e if we have Node1 - Node2 - Node3 and we remove Node2 the end result will be Node1 - Node3. Plus the zone of the removed vertex will be fused into the biggest neighbor
 			 * TODO : change name to Vertices
 			 */			
 			void removeVertexUnderSize(int size, bool preserveEdgeConnectic);
