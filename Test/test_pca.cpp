@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 	AASS::RSI::Kmeans kmeans_slam;
 	kmeans_slam.setK(5);
-	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
+	kmeans_slam.kmeansColor(out_slam, out_tmp_slam/*, slam, 0*/);
 // 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 	
 	cv::imshow("REDUCED", out_tmp_slam);

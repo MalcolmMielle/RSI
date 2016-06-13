@@ -93,7 +93,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 				e = *out_i;
 				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
 				if( (*this)[targ].getZone().size() > 100 ){
-					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), color);
+					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 				}
 			}
 // 
@@ -504,9 +504,10 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	VertexZone biggest;
 	bool init = true;
 	EdgeIteratorZone out_i, out_end;
+	
+	//First find neighbor with biggest zone
 	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
 		out_i != out_end; out_i = ++out_i) {
-		
 		
 		EdgeZone e_second = *out_i;
 		VertexZone targ = boost::target(e_second, (*this));
@@ -527,18 +528,25 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 			}
 		}
 	
-		for (out_i_second = std::next(out_i) ; 
-			out_i_second != out_end; ++out_i_second) {
-			e_second = *out_i_second;
+	}
+	
+	//Since we fuse the old zone in biggest we only need to link them to biggest
+	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+		out_i != out_end; out_i = ++out_i) {
 		
-			VertexZone targ2 = boost::target(e_second, (*this));
+		
+		EdgeZone e_second = *out_i;
+		VertexZone targ = boost::target(e_second, (*this));
+// 				std::cout << "Printing both vertex" << std::endl;
+// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+		
+		EdgeIteratorZone out_i_second;
+		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+		
+	
+		if(biggest != targ){
 			EdgeZone edz;
-			
-// 			std::cout << "Printing both vertex linked" << std::endl;
-// 			std::cout << "Node 1 " << (*this)[targ] << std::endl;
-// 			std::cout << "Node 2 " << (*this)[targ2] << std::endl;
-		
-			addEdge(edz, targ, targ2);
+			addEdge(edz, targ, biggest);
 		}
 	}
 	
@@ -714,10 +722,10 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 		if(z_ripple.contactPoint(z_base) > 40){
 			
 			
-			cv::Mat graphmat2 = cv::Mat::zeros(400,400, CV_8U);
-			z_ripple.draw(graphmat2, cv::Scalar(255));
-			cv::imshow("ripple", graphmat2);
-			cv::waitKey(0);
+// 			cv::Mat graphmat2 = cv::Mat::zeros(400,400, CV_8U);
+// 			z_ripple.draw(graphmat2, cv::Scalar(255));
+// 			cv::imshow("ripple", graphmat2);
+// 			cv::waitKey(0);
 			
 			return true;
 		}

@@ -118,9 +118,16 @@ namespace AASS{
 				std::vector<cv::Vec4i> hierarchy;
 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 				
-				assert(contours.size() == 1 && "More than one shape in Zone");
+// 				assert(contours.size() == 1 && "More than one shape in Zone");
 				
 				// Calculate the area of each contour
+				
+				//Use a lambda function to sort the contours
+				std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
+				
+				if(contours.size() > 1)
+					assert(contours[0].size() > contours[1].size());
+				
 				auto area = cv::contourArea(contours[0]);
 				// Ignore contours that are too small or too large
 // 				if (area < 1e2 || 1e5 < area) {
