@@ -77,21 +77,21 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::cout << "Getting the graph" << std::endl;
 	graph_slam = wzoneextract.getGraph();
 	
-// 		std::cout << "REmove Vertex" << std::endl;
-	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness1");
-	graph_slam.removeVertexValue(10);
-	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness2");
+// // 		std::cout << "REmove Vertex" << std::endl;
+// 	if(graph_slam.lonelyVertices())
+// 		throw std::runtime_error("Fuck you lonelyness1");
+// 	graph_slam.removeVertexValue(10);
+// 	if(graph_slam.lonelyVertices())
+// 		throw std::runtime_error("Fuck you lonelyness2");
 	graph_slam.removeVertexValue(0);
-	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness2");
-	
-	
+// 	if(graph_slam.lonelyVertices())
+// 		throw std::runtime_error("Fuck you lonelyness2");
+// 	
+// 	
 	graph_slam.draw(graphmat_init);
 	cv::imshow("GRAPH_init", graphmat_init);
 // 	graph_slam.watershed();
-	
+	cv::waitKey(0);
 	
 	
 	std::ofstream outt("bob2.txt");

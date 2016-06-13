@@ -30,7 +30,13 @@ namespace AASS{
 			std::vector< int > getColors(){return _colors;}
 			const std::vector< int >& getColors() const {return _colors;}
 			
-			void kmeansColor(cv::Mat& in, cv::Mat& dest, const cv::Mat& sketch = cv::Mat());
+			/**
+			 * @brief Kmean algorithm
+			 * @param in : Mat input
+			 * @param dest : Mat destination
+			 * @param sketch : if not empty, Mat used to rectify the color zone wrongfully added to the background
+			 */
+			void kmeansColor(cv::Mat& in, cv::Mat& dest, const cv::Mat& sketch = cv::Mat(), int backrgound_color_model = 255);
 			
 			void getSilhouette();
 			

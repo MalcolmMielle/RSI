@@ -73,7 +73,8 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 	
 // 	distance_image.convertTo(CV_);
 	
-	cv::threshold(distance_image, distance_image, 50, 255, CV_THRESH_BINARY_INV);
+	//I should do it here because it can lead to problem later when certain point in original map are forgotten
+// 	cv::threshold(distance_image, distance_image, 50, 255, CV_THRESH_BINARY_INV);
 	cv::distanceTransform(distance_image, distance_image, label, CV_DIST_L2, CV_DIST_MASK_PRECISE, CV_DIST_LABEL_CCOMP);
 // 	std::cout << " TYPE " << type2str(distance_image.type()) << std::endl;	
 	CV_Assert(distance_image.depth() == CV_32F);
@@ -111,34 +112,6 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 			cv::Mat roi_output = output(cv::Rect(col - (dist_to_obstacle), row - (dist_to_obstacle), dist_to_obstacle * 2, dist_to_obstacle * 2));
 			if((int)dist_to_obstacle > 0){
 				addPointValueInCircle(roi, roi_output, dist_to_obstacle);
-// 				std::cout << std::endl;
-// 				std::cout << roi_output_final << std::endl;
-// 				int a ;
-// 				std::cin >> a;
-// 				count++;
-// 				if(count % 15000 == 0){
-					
-// 					std::cout << "Hello " << count << std::endl;
-// 					cv::Mat copy;
-// 					roi_output_final.copyTo(copy);
-// 					cv::normalize(copy, copy, 0, 1, cv::NORM_MINMAX, CV_32F);
-// 					cv::imshow("out", copy);
-// // 					
-// // 					cv::Mat roi_tmp_draw = cv::Mat::zeros(roi_output_final.rows, roi_output_final.cols, CV_32F);
-// // 					if(dist_to_obstacle%2 != 0){
-// // 						cv::circle(roi_tmp_draw, cv::Point2i(col - pad , row - pad ) , dist_to_obstacle, cv::Scalar(1), -1);
-// // 					}
-// // 					else{
-// // 						cv::circle(roi_tmp_draw, cv::Point2i(col-1 - pad , row -1 - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
-// // 						cv::circle(roi_tmp_draw, cv::Point2i(col - pad , row - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
-// // 						cv::circle(roi_tmp_draw, cv::Point2i(col -1 - pad , row - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
-// // 						cv::circle(roi_tmp_draw, cv::Point2i(col - pad , row - -1 - pad ), (dist_to_obstacle)-1, cv::Scalar(1), -1);
-// // 					}
-// // 					
-// // 					cv::imshow("circle moving", roi_tmp_draw);
-// // 					
-// 					cv::waitKey(1);
-// 				}
 			}
 			else{
 				p_output[col] = 0;

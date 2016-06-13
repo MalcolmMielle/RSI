@@ -13,6 +13,7 @@
 #include "ZoneExtractor.hpp"
 #include "FuzzyOpening.hpp"
 #include "Kmean.hpp"
+#include "MeanShift.hpp"
 
 
 BOOST_AUTO_TEST_CASE(trying)
@@ -31,6 +32,9 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat slam = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat map = cv::imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out, out_slam;
+	
+	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
+	
 	cv::imshow("Base input ", map);
 	cv::imshow("SLAM", slam);
 	fuzzy_2.fuzzyOpening(map, out, 500);
@@ -79,12 +83,36 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		kmeans.kmeansColor(out, out_tmp);
 		
 		//TODO : valuye here 
-		cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
+		//ATTENTION : do this only for slam
+// 		cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
 		
+		cv::imshow("nefore", out_slam);
+		cv::waitKey(0);
+		
+		bool kmean_f = true;
 		AASS::RSI::Kmeans kmeans_slam;
-		kmeans_slam.setK(K);
-		kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
-		
+		AASS::RSI::MeanShift mshift;
+		//ATTENTION : KMEAN
+		if(kmean_f == true){
+			kmeans_slam.setK(K);
+			kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 255);
+		}
+		//ATTENTION : MeanShift
+		else{
+// 			cv::Mat tmp;
+			cv::Mat mean;
+// 			cv::cvtColor(out_slam, tmp, CV_GRAY2RGB);
+			mshift.meanshift(out_slam, mean);
+			cv::imshow("Mean Shift", mean);
+			kmeans_slam.setK(K);
+			kmeans_slam.kmeansColor(mean, out_tmp_slam, slam, 255);
+			
+			cv::Mat kmeanout;
+			//For comparison prurpose
+			kmeans_slam.kmeansColor(out_slam, kmeanout, slam, 255);
+			cv::imshow("Kmean old", kmeanout);
+			cv::waitKey(0);
+		}
 // 		out_tmp_slam = out_slam;
 // 		std::cout << out_tmp_slam << std::endl;
 // 		exit(0);
@@ -92,8 +120,8 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		std::cout << out_tmp_slam << std::endl;
 		
 // 		cv::imshow("kmenas", out_tmp);
-		cv::imshow("kmenas SLAM", out_tmp_slam);
-
+		cv::imshow("kmenas or mShift SLAM", out_tmp_slam);
+		cv::waitKey(0);
 		
 		AASS::RSI::ZoneExtractor wzoneextract;
 		std::cout << "WHATERSHED SLAM" << std::endl;
@@ -120,7 +148,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		exit(0);
 // 		watershed.print();
 // 		
-// 		std::cout << "Final zone number " << watershed.size() <<std::endl;
+		std::cout << "Final zone number " << wzoneextract.size() <<std::endl;
 		cv::Mat graphmat;
 		out_tmp_slam.copyTo(graphmat);
 		
@@ -130,20 +158,25 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		std::cout << "HGetting the color" << std::endl;
 		int color_wall_slam = 0 ;
-		if(kmeans_slam.getColors().size() >0 ){
-			color_wall_slam = kmeans_slam.getColors()[0];
+		if(kmean_f == true){
+			if(kmeans_slam.getColors().size() >0 ){
+				color_wall_slam = kmeans_slam.getColors()[0];
+			}
+			
+			std::cout << "WALLS ARE " << color_wall_slam << std::endl;
+			kmeans_slam.printColors();
 		}
-		
-		std::cout << "WALLS ARE " << color_wall_slam << std::endl;
-		kmeans_slam.printColors();
 		
 // 		std::cout << "REmove Vertex" << std::endl;
 		
-		graph_slam.removeVertexValue(color_wall_slam);
-		graph_slam.removeVertexUnderSize(size_to_remove, true);
+// 		graph_slam.draw(graphmat);
+// 		cv::imshow("GRAPH before", graphmat);
 		
-		graph_slam.draw(graphmat);
-		cv::imshow("GRAPH", graphmat);
+		graph_slam.removeVertexValue(color_wall_slam);
+// 		graph_slam.removeVertexUnderSize(size_to_remove, true);
+		
+		graph_slam.drawPartial(graphmat);
+		cv::imshow("GRAPH after", graphmat);
 		
 		std::cout << "Graph : " << std::endl;
 		
@@ -152,10 +185,10 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		cv::imshow("out_tmp", out_tmp);
 		cv::waitKey(0);
 // 		watershed.drawAllZones(out_tmp, 0);
-		std::cout << "Value of K : " ;
-		std::cin >> K;
-		std::cout << "Value of size to remove : " ;
-		std::cin >> size_to_remove;
+// 		std::cout << "Value of K : " ;
+// 		std::cin >> K;
+// 		std::cout << "Value of size to remove : " ;
+// 		std::cin >> size_to_remove;
 	}
 	
 	
