@@ -169,59 +169,62 @@ void AASS::RSI::ZoneExtractor::isolatedOrNot(int value, cv::Mat& input, cv::Mat&
 				//Not the center point
 				
 				if(row != row_tmp || col != col_tmp){
-					int* p = input.ptr<int>(row_tmp);
-					int* p_star = zones_star.ptr<int>(row_tmp);
-					
-// 					std::cout << "Not center and vaues are " << value <<" " << p[col_tmp] << " " << p_star[col_tmp] << std::endl;
+					//Not the diagonal
+					if(row_tmp == row || col_tmp == col){
+						int* p = input.ptr<int>(row_tmp);
+						int* p_star = zones_star.ptr<int>(row_tmp);
+						
+	// 					std::cout << "Not center and vaues are " << value <<" " << p[col_tmp] << " " << p_star[col_tmp] << std::endl;
 
-					//Same value and visited before
-					if(value == p[col_tmp] && p_star[col_tmp] >= 0){
-						
-						if(_zones[p_star[col_tmp]].getValue() != value){
-							printZone(p_star[col_tmp]);
-							std::cout << "Size of matrix : " << zones_star.size() << std::endl;
-							std::cout << "At : row col " << row_tmp << " " << col_tmp << " we should not have " << _zones[p_star[col_tmp]].getValue() << " != " << value << std::endl;
-							throw std::runtime_error("Value and zone mismatch");
-						}
-						//SAME ZONE
-						bool flag_seen = false;
-						for(size_t i = 0 ; i < zone_index.size() ; ++i){
-							if(zone_index[i] == p_star[col_tmp]){
-								flag_seen = true;
+						//Same value and visited before
+						if(value == p[col_tmp] && p_star[col_tmp] >= 0){
+							
+							if(_zones[p_star[col_tmp]].getValue() != value){
+								printZone(p_star[col_tmp]);
+								std::cout << "Size of matrix : " << zones_star.size() << std::endl;
+								std::cout << "At : row col " << row_tmp << " " << col_tmp << " we should not have " << _zones[p_star[col_tmp]].getValue() << " != " << value << std::endl;
+								throw std::runtime_error("Value and zone mismatch");
+							}
+							//SAME ZONE
+							bool flag_seen = false;
+							for(size_t i = 0 ; i < zone_index.size() ; ++i){
+								if(zone_index[i] == p_star[col_tmp]){
+									flag_seen = true;
+								}
+							}
+							if(flag_seen == false){
+								zone_index.push_back(p_star[col_tmp]);
 							}
 						}
-						if(flag_seen == false){
-							zone_index.push_back(p_star[col_tmp]);
-						}
-					}
-					
-					//Check for other value bordering
-					else if(value != p[col_tmp] && p_star[col_tmp] >= 0){
 						
-// 						std::cout <<"Found edge" << std::endl;
-						
-// 						std::cout << "Was ? " << value << " != " << _zones[p_star[col_tmp]].getValue() << " " << p[col_tmp] << std::endl << "zone : " << p_star[col_tmp] << std::endl;
-						
-						if(_zones[p_star[col_tmp]].getValue() == value){
-// 							printZone(p_star[col_tmp]);
-							std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
-							throw std::runtime_error("Value and zone are the same in edges");
-						}
-						//SAME ZONE
-						bool flag_seen = false;
-						for(size_t i = 0 ; i < zone_edges.size() ; ++i){
-							if(zone_edges[i] == p_star[col_tmp]){
-								flag_seen = true;
+						//Check for other value bordering
+						else if(value != p[col_tmp] && p_star[col_tmp] >= 0){
+							
+	// 						std::cout <<"Found edge" << std::endl;
+							
+	// 						std::cout << "Was ? " << value << " != " << _zones[p_star[col_tmp]].getValue() << " " << p[col_tmp] << std::endl << "zone : " << p_star[col_tmp] << std::endl;
+							
+							if(_zones[p_star[col_tmp]].getValue() == value){
+	// 							printZone(p_star[col_tmp]);
+								std::cout << "At : row col " << row_tmp << " " << col_tmp << std::endl;
+								throw std::runtime_error("Value and zone are the same in edges");
+							}
+							//SAME ZONE
+							bool flag_seen = false;
+							for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+								if(zone_edges[i] == p_star[col_tmp]){
+									flag_seen = true;
+								}
+							}
+							if(flag_seen == false){
+	// 							std::cout << "PUSHING BACK :D" << std::endl;
+								zone_edges.push_back(p_star[col_tmp]);
 							}
 						}
-						if(flag_seen == false){
-// 							std::cout << "PUSHING BACK :D" << std::endl;
-							zone_edges.push_back(p_star[col_tmp]);
-						}
-					}
 					
-					else if(p_star[col_tmp] >= 0){
-						std::runtime_error("Something should have happenéd and it didn't. We found a value but it was not linked at the same or an edge");
+						else if(p_star[col_tmp] >= 0){
+							std::runtime_error("Something should have happenéd and it didn't. We found a value but it was not linked at the same or an edge");
+						}
 					}
 				}
 			}
