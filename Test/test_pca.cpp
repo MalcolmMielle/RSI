@@ -8,7 +8,9 @@
 #include <fstream>
 #include <ctime> 
 
-#include <ctime>
+#include <boost/filesystem.hpp>
+#include <boost/iterator/filter_iterator.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "ZoneExtractor.hpp"
 #include "FuzzyOpening.hpp"
@@ -129,8 +131,26 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	std::cout << "Number of vertices : " << graph_slam.getNumVertices() << " number of edges " << graph_slam.getNumEdges() << std::endl;
 	
+	std::string stri= "../doc/Output/";
+	
+	boost::filesystem::path p(str);
+	while(!boost::filesystem::exists(p)){
+		std::cout << "need a valid path toward the slam images" << std::endl;
+		std::cin >> str;
+		p = str;
+	}
+	if(boost::filesystem::is_regular_file(p)){
+		std::cout << p.filename()<<std::endl;
+		stri = stri + "out_" + p.filename().string();
+	}
+	
+// 	stri = stri + str; 
+	
+	std::cout << "Printing to " << stri << std::endl;
+	cv::imwrite(stri, graphmat2);
+	
 // 		cv::imshow("out_tmp", out_tmp);
-	while(1)
+// 	while(1)
 		cv::waitKey(0);
 // 		watershed.drawAllZones(out_tmp, 0);
 	std::cout << "Value of size to remove : " ;

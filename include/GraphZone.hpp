@@ -354,6 +354,7 @@ namespace AASS{
 			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold);
 			void getAllNodeRemovedRipples(AASS::RSI::GraphZone::VertexZone& base_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited);
 			void removeVertexWhilePreservingEdges(VertexZone v);
+			void removeVertexWhilePreservingEdges(VertexZone v, VertexZone v_to_fuse_in);
 			
 			///@brief Return true of the zone is ripple
 			bool isRipple(const AASS::RSI::GraphZone::VertexZone& base_vertex, const AASS::RSI::GraphZone::VertexZone& might_be_ripple) const;

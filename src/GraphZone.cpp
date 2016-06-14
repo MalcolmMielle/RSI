@@ -114,7 +114,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 // 			}
 // 			cv::drawContours( m, std::vector<std::vector<cv::Point> >(1,(*this)[v].contour), -1, color, 2, 8);
 	(*this)[v].draw(m, color);
-	std::cout << "VALUIE " << std::endl;
+// 	std::cout << "VALUIE " << std::endl;
 	(*this)[v].printPCA();
 // 	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
 	
@@ -143,7 +143,12 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 		if((*this)[v].size() < size){
 			
 			if(preserveEdgeConnectic == true){
-				removeVertexWhilePreservingEdges(v);
+				if(getNumEdges(v) > 0){
+					removeVertexWhilePreservingEdges(v);
+				}
+				else{
+					removeVertex(v);
+				}
 			}
 			else{
 				removeVertex(v);
@@ -316,6 +321,9 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 		out_i++;
 	}
 	
+	
+	std::cout << "NEW NODE VISITED " << top_vertex << " from " << first_vertex << std::endl;
+	
 	for (boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this)); 
 		out_i != out_end;) {
 		
@@ -330,7 +338,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 				is_old = true;
 		}
 	
-// 		std::cout << "On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
+		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
 	
 		//REMOVE TARG
 		if( ( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
@@ -366,47 +374,52 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 		
 			std::vector<VertexZone> test;
 			
-			for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) ) ; 
-				out_i_second != out_end_second; ++out_i_second) {
-				e_second = *out_i_second;
-			
-				VertexZone targ2 = boost::target(e_second, (*this));
-				if(targ2 != first_vertex){
-// 					std::cout << "Adding edge with total edges : " << getNumEdges(targ) << std::endl;
-					EdgeZone edz;				
-					addEdge(edz, first_vertex, targ2);
-					if(vertnum != getNumVertices()){
-						throw std::runtime_error("Number fo Vertice Change at an abnormal place");
-					}
-					if(vertedge != getNumEdges(targ)){
-						throw std::runtime_error("Number fo Edges Change at an abnormal place");
-					}
-					
-				}
-				else{
-// 					std::cout << "Not an edge between same node :| " << std::endl;
-				}
-				
-				for(size_t ju = 0 ; ju < test.size() ; ++ju){
-					if(targ2 == test[ju]){
-						throw std::runtime_error("Same node linked twice with the same edge :( ?");
-					}
-				}
-				test.push_back(targ2);
-				
-				
-			}
-// 					std::cout << "REMOVE THE BASE VERTEX EDGE GOING TO NEXT EDGE" << std::endl;
-// 					throw std::runtime_error("Not an error, it actually works" );
-			//TODO : replace this by a fuse Zone function
-			
-// 			std::cout << "Removing " <<(*this)[targ] << " with edges " << getNumEdges(targ) << std::endl;
-			
-			//IMPORTANT THAT'S IT RIGHT BEFORE THE REMOVE
 			++out_i;
+			removeVertexWhilePreservingEdges(targ, first_vertex);
 			
-			(*this)[top_vertex].fuse((*this)[targ]);
-			removeVertex(targ);
+			
+			
+// 			for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) ) ; 
+// 				out_i_second != out_end_second; ++out_i_second) {
+// 				e_second = *out_i_second;
+// 			
+// 				VertexZone targ2 = boost::target(e_second, (*this));
+// 				if(targ2 != first_vertex){
+// // 					std::cout << "Adding edge with total edges : " << getNumEdges(targ) << std::endl;
+// 					EdgeZone edz;				
+// 					addEdge(edz, first_vertex, targ2);
+// 					if(vertnum != getNumVertices()){
+// 						throw std::runtime_error("Number fo Vertice Change at an abnormal place");
+// 					}
+// 					if(vertedge != getNumEdges(targ)){
+// 						throw std::runtime_error("Number fo Edges Change at an abnormal place");
+// 					}
+// 					
+// 				}
+// 				else{
+// // 					std::cout << "Not an edge between same node :| " << std::endl;
+// 				}
+// 				
+// 				for(size_t ju = 0 ; ju < test.size() ; ++ju){
+// 					if(targ2 == test[ju]){
+// 						throw std::runtime_error("Same node linked twice with the same edge :( ?");
+// 					}
+// 				}
+// 				test.push_back(targ2);
+// 				
+// 				
+// 			}
+// // 					std::cout << "REMOVE THE BASE VERTEX EDGE GOING TO NEXT EDGE" << std::endl;
+// // 					throw std::runtime_error("Not an error, it actually works" );
+// 			//TODO : replace this by a fuse Zone function
+// 			
+// // 			std::cout << "Removing " <<(*this)[targ] << " with edges " << getNumEdges(targ) << std::endl;
+// 			
+// 			//IMPORTANT THAT'S IT RIGHT BEFORE THE REMOVE
+// 			++out_i;
+// 			
+// 			(*this)[top_vertex].fuse((*this)[targ]);
+// 			removeVertex(targ);
 // 			cv::Mat tmptmp = cv::imread("../Test/labsketch_trimmed.png", CV_LOAD_IMAGE_GRAYSCALE);
 // 			cv::Mat graphmat = cv::Mat::zeros(tmptmp.size(), CV_8U);
 // 			cv::Mat graphmat2 = cv::Mat::zeros(tmptmp.size(), CV_8U);
@@ -491,17 +504,65 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 		else{
 // 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
 		}
-		
 				
 	}
 	
+// 	std::cout << "DONE" << std::endl;
+// 	exit(0);
+	
 
+}
+
+
+void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v, AASS::RSI::GraphZone::VertexZone v_to_fuse_in)
+{
+	EdgeIteratorZone out_i, out_end;
+	//Since we fuse the old zone in biggest we only need to link them to biggest
+	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+		out_i != out_end; out_i = ++out_i) {
+		
+		
+		EdgeZone e_second = *out_i;
+		VertexZone targ = boost::target(e_second, (*this));
+// 				std::cout << "Printing both vertex" << std::endl;
+// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+		
+		EdgeIteratorZone out_i_second;
+		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+		
+	
+		if(v_to_fuse_in != targ){
+			EdgeZone edz;
+			addEdge(edz, targ, v_to_fuse_in);
+		}
+	}
+	
+	std::cout << "Removing and fusing" << std::endl;
+	std::cout << "Printing both vertex fsed" << std::endl;
+	std::cout << "Node 1 " << (*this)[v_to_fuse_in] << std::endl;
+	std::cout << "Node 2 " << (*this)[v] << std::endl;
+	
+	(*this)[v_to_fuse_in].fuse((*this)[v]);
+	std::cout << (*this)[v] <<std::endl;
+	removeVertex(v);
+	
 }
 
 
 
 void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v)
 {
+	if(getNumEdges(v) == 0){
+		cv::Mat graphmat = cv::Mat::zeros(500, 500, CV_8U);
+		draw(graphmat);
+		cv::imshow("BUG", graphmat);
+		cv::Mat graphmat3 = cv::Mat::zeros(500, 500, CV_8U);
+		draw(graphmat3,v, cv::Scalar(255));
+		cv::imshow("BUGZONE", graphmat3);
+		cv::waitKey(0);
+		throw std::runtime_error("Fuck you lonelyness");
+	}
+	assert(getNumEdges(v) > 0 && "Node without edges Oo");
 	//Find biggest neighbor vertex for fusion of zone
 	VertexZone biggest;
 	bool init = true;
@@ -532,35 +593,8 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	
 	}
 	
-	//Since we fuse the old zone in biggest we only need to link them to biggest
-	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-		out_i != out_end; out_i = ++out_i) {
-		
-		
-		EdgeZone e_second = *out_i;
-		VertexZone targ = boost::target(e_second, (*this));
-// 				std::cout << "Printing both vertex" << std::endl;
-// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
-		
-		EdgeIteratorZone out_i_second;
-		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
-		
+	removeVertexWhilePreservingEdges(v, biggest);
 	
-		if(biggest != targ){
-			EdgeZone edz;
-			addEdge(edz, targ, biggest);
-		}
-	}
-	
-	
-	std::cout << "Removing and fusing" << std::endl;
-	std::cout << "Printing both vertex fsed" << std::endl;
-	std::cout << "Node 1 " << (*this)[biggest] << std::endl;
-	std::cout << "Node 2 " << (*this)[v] << std::endl;
-	
-	(*this)[biggest].fuse((*this)[v]);
-	std::cout << (*this)[v] <<std::endl;
-	removeVertex(v);
 	
 }
 
