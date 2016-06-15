@@ -20,6 +20,8 @@ namespace AASS{
 			std::tuple<cv::Point, cv::Point, cv::Point> _pca;
 			double _pca_orientation;
 			
+			std::vector< cv::Point> _contours;
+			
 		public:
 			Zone(){}; //Used for the read function of betterGraph
 			Zone(const cv::Size& size){
@@ -78,6 +80,13 @@ namespace AASS{
 				for(size_t i = 0 ; i < input.size() ; ++i){
 					this->push_back(input.getZone()[i]);
 				}
+// 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 				draw(graphmat2, cv::Scalar(100));
+// 				cv::imshow("fused", graphmat2);
+// 				cv::waitKey(0);	
+// 				std::cout << "Fused now pca " << std::endl;
+				//Do not updated PCA because sometime when doing recursive fusion, we must wait until all zones have been fused in the initial to perform fusion OR use throw mechanism but it's complex for no reason
+// 				PCA();
 			}
 			
 			
@@ -101,6 +110,11 @@ namespace AASS{
 				
 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
 				
+				for (int i = 0; i < _contours.size(); ++i)
+				{
+					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
+				}
+				
 			}
 
 			void PCA(){
@@ -112,7 +126,7 @@ namespace AASS{
 				
 				std::vector< std::vector< cv::Point> > contours;
 				std::vector<cv::Vec4i> hierarchy;
-				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 				
 // 				assert(contours.size() == 1 && "More than one shape in Zone");
 				
@@ -122,8 +136,22 @@ namespace AASS{
 				std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
 				
 				if(contours.size() > 1)
-					assert(contours[0].size() > contours[1].size());
-				
+				{
+					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
+					if(contours[0].size() < contours[1].size()){
+						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+						for (int i = 0; i < contours[0].size(); ++i)
+						{
+							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
+						}
+						cv::imshow("fina", graphmat2);
+						cv::waitKey(0);	
+						throw std::runtime_error("Calculating PCA with zone not in order");
+					}
+					
+					throw std::runtime_error("MORE THAN ONE CONTOUR !");
+				}
+				_contours = contours[0];
 				auto area = cv::contourArea(contours[0]);
 				getOrientation(contours[0]);
 

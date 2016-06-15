@@ -118,9 +118,9 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 // 				std::cout << "Wall" << std::endl;
 			}
 			
-			cv::imshow("out", roi_output);
-			cv::imshow("roi", roi);
-			cv::waitKey(0);
+// 			cv::imshow("out", roi_output);
+// 			cv::imshow("roi", roi);
+// 			cv::waitKey(0);
 			
 			
 			

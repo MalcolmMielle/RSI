@@ -93,7 +93,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 				e = *out_i;
 				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
 				if( (*this)[targ].getZone().size() > 100 ){
-// 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 				}
 			}
 // 
@@ -144,7 +144,47 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 			
 			if(preserveEdgeConnectic == true){
 				if(getNumEdges(v) > 0){
-					removeVertexWhilePreservingEdges(v);
+					
+					//TEST
+// 					EdgeIteratorZone out_i, out_end;
+// 					VertexZone biggest;
+// 					bool init = true;
+// 					//First find neighbor with biggest zone
+// 					for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+// 						out_i != out_end; out_i = ++out_i) {
+// 						
+// 						EdgeZone e_second = *out_i;
+// 						VertexZone targ = boost::target(e_second, (*this));
+// 				// 				std::cout << "Printing both vertex" << std::endl;
+// 				// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 						
+// 						EdgeIteratorZone out_i_second;
+// 				// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+// 						if(init == true){
+// 				// 			std::cout << "INIT" << std::endl;
+// 							biggest = targ;
+// 							init = false;
+// 						}
+// 						else{
+// 				// 			std::cout << "COMPARING SIZES " << std::endl;
+// 							if( (*this)[biggest].size() <(*this)[targ].size() ){
+// 								biggest = targ;
+// 							}
+// 						}
+// 					
+// 					}
+					
+					try{
+						removeVertexWhilePreservingEdges(v);
+					}
+					catch(std::exception& e){
+						std::cout << "Here : " << __LINE__ << " " << __FILE__ << " " << e.what() << std::endl;
+// 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 						(*this)[biggest].draw(graphmat2, cv::Scalar(100));
+// 						cv::imshow("fused", graphmat2);
+// 						cv::waitKey(0);	
+						exit(0);
+					}
 				}
 				else{
 					removeVertex(v);
@@ -375,7 +415,13 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 			std::vector<VertexZone> test;
 			
 			++out_i;
-			removeVertexWhilePreservingEdges(targ, first_vertex);
+			try{
+				removeVertexWhilePreservingEdges(targ, first_vertex);
+			}
+			catch(std::exception& e){
+				std::cout << "Zone had more than one shape. It's fine at this point in the proccess. Continue" << std::endl;
+				//Catch the error that PCA stopped because of 
+			}
 			
 			
 			
@@ -514,7 +560,7 @@ void AASS::RSI::GraphZone::watershed(int threshold)
 }
 
 
-void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v, AASS::RSI::GraphZone::VertexZone v_to_fuse_in)
+void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in)
 {
 	EdgeIteratorZone out_i, out_end;
 	//Since we fuse the old zone in biggest we only need to link them to biggest
@@ -546,11 +592,13 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 	std::cout << (*this)[v] <<std::endl;
 	removeVertex(v);
 	
+	(*this)[v_to_fuse_in].PCA();
+	
 }
 
 
 
-void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v)
+void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v)
 {
 // 	if(getNumEdges(v) == 0){
 // 		cv::Mat graphmat = cv::Mat::zeros(500, 500, CV_8U);
@@ -594,8 +642,6 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	}
 	
 	removeVertexWhilePreservingEdges(v, biggest);
-	
-	
 }
 
 
@@ -706,8 +752,25 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 			
 			//Removing the ripple
 			(*this)[base_vertex].fuse((*this)[targ]);
-			removeVertexWhilePreservingEdges(targ);
+			try{
+				removeVertexWhilePreservingEdges(targ);
+			}
+			catch(std::exception& e){
+				std::cout << "Here : " << e.what() << std::endl;
+				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+				(*this)[targ].draw(graphmat2, cv::Scalar(100));
+				cv::imshow("fused", graphmat2);
+				cv::waitKey(0);	
+				exit(0);
+			}
+			
 			boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this));
+			
+// 			cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 			draw(graphmat2);
+// 			cv::imshow("fina", graphmat2);
+// 			cv::waitKey(0);
+			
 		}
 		else{
 			++out_i;
@@ -747,25 +810,26 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 	std::cout << " max and 5 min " << max << " " << min * 5 << std::endl;
 	
 	//ATTENTION magic number
-	if(max > (min * 5)){
+// 	if(max > (min * 5)){
 // 	if(true == true){
 		
 		Zone z_ripple = (*this)[might_be_ripple];
 		Zone z_base = (*this)[base_vertex];
-		
-// 			It's a ripple !
-		//ATTENTION Second magic number
-		if(z_ripple.contactPoint(z_base) > 40){
-			
-// 			std::cout << "PERCET : " << z_ripple.contactPoint(z_base) << std::endl;
+// 		std::cout << "PERCET : " << z_ripple.contactPoint(z_base) << std::endl;
 // 			cv::Mat graphmat2 = cv::Mat::zeros(400,400, CV_8U);
 // 			z_ripple.draw(graphmat2, cv::Scalar(255));
 // 			cv::imshow("ripple", graphmat2);
 // 			cv::waitKey(0);
 			
+// 			It's a ripple !
+		//ATTENTION Second magic number
+		if(z_ripple.contactPoint(z_base) >= 40){
+			
+			
+			
 			return true;
 		}
-	}
+// 	}
 	
 	return false;
 

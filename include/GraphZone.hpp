@@ -109,7 +109,19 @@ namespace AASS{
 					std::cout <<"Updating PCA "<< std::endl;
 					auto v = *vp.first;
 					++vp.first;
-					(*this)[v].PCA();
+					
+// 					(*this)[v].PCA();
+					try{
+						(*this)[v].PCA();
+					}
+					catch(std::exception& e){
+						std::cout << "Here : " << e.what() << std::endl;
+						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+						(*this)[v].draw(graphmat2, cv::Scalar(100));
+						cv::imshow("fused", graphmat2);
+						cv::waitKey(0);	
+						exit(0);
+					}
 				}
 			}
 			
@@ -353,8 +365,8 @@ namespace AASS{
 			 */
 			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold);
 			void getAllNodeRemovedRipples(AASS::RSI::GraphZone::VertexZone& base_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited);
-			void removeVertexWhilePreservingEdges(VertexZone v);
-			void removeVertexWhilePreservingEdges(VertexZone v, VertexZone v_to_fuse_in);
+			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v);
+			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in);
 			
 			///@brief Return true of the zone is ripple
 			bool isRipple(const AASS::RSI::GraphZone::VertexZone& base_vertex, const AASS::RSI::GraphZone::VertexZone& might_be_ripple) const;
