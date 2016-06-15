@@ -93,7 +93,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 				e = *out_i;
 				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
 				if( (*this)[targ].getZone().size() > 100 ){
-					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+// 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 				}
 			}
 // 
@@ -341,7 +341,7 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, double threshold, int direction){
+void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, int direction){
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
@@ -361,6 +361,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 		out_i++;
 	}
 	
+	top_vertex_visited_tmp.push_back(top_vertex);
 	
 // 	std::cout << "NEW NODE VISITED " << top_vertex << " from " << first_vertex << std::endl;
 	
@@ -388,6 +389,16 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			}
 		}
 		
+		//Already visited node in this recursion mode. Needed if we don't do a watershed and no direction is kept.
+		bool is_visited_tmp = false;
+		for(size_t j = 0 ; j < top_vertex_visited_tmp.size() ; ++j){
+			if(targ == top_vertex_visited_tmp[j]){
+				std::cout << "SEEN " << j << std::endl;
+				is_visited_tmp = true;
+			}
+		}
+		
+		//Comparison using the biggest space as a reference
 		double max_value = (*this)[first_vertex].getValue();
 		double min_value = (*this)[targ].getValue();
 		if(max_value < min_value){
@@ -413,7 +424,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			//Condition of threshold up and down
 			min_value >= max_value - ( (double) max_value * threshold) &&
 			min_value <= max_value + ( (double) max_value * threshold) &&
-			is_old == true && is_visited == false
+			is_old == true && is_visited == false && is_visited_tmp == false
 		){
 			
 			int direction_tmp;
@@ -440,19 +451,23 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				good_direction = true;
 			}
 			
+			//TEST : REMOVE THIS LINE TO MAKE IT A WATERSHED AGAIN ATTENTION ATTENTION TODO TODO
+			good_direction = true;
+			/*******************************/
+			
 			if(good_direction == true){
 // 			std::cout << "REMOVE vertex for edge " << (*this)[targ].getValue() << std::endl;
 				std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
 				
-				if(direction_tmp == -2){
-					throw("Weird two node with same value next to each other");
-				}
+// 				if(direction_tmp == -2){
+// 					throw("Weird two node with same value next to each other");
+// 				}
 				
 // 				assert(direction_tmp <= 0);
 				
 				//Recursion :(
 				std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
-				getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, threshold, direction_tmp);
+				getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction_tmp);
 				
 	// 			change = true;
 				EdgeIteratorZone out_i_second, out_end_second;
@@ -471,64 +486,6 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 					//Catch the error that PCA stopped because of 
 				}
 				
-				//restart at the begining
-// 				boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this));
-			
-			
-// 			for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) ) ; 
-// 				out_i_second != out_end_second; ++out_i_second) {
-// 				e_second = *out_i_second;
-// 			
-// 				VertexZone targ2 = boost::target(e_second, (*this));
-// 				if(targ2 != first_vertex){
-// // 					std::cout << "Adding edge with total edges : " << getNumEdges(targ) << std::endl;
-// 					EdgeZone edz;				
-// 					addEdge(edz, first_vertex, targ2);
-// 					if(vertnum != getNumVertices()){
-// 						throw std::runtime_error("Number fo Vertice Change at an abnormal place");
-// 					}
-// 					if(vertedge != getNumEdges(targ)){
-// 						throw std::runtime_error("Number fo Edges Change at an abnormal place");
-// 					}
-// 					
-// 				}
-// 				else{
-// // 					std::cout << "Not an edge between same node :| " << std::endl;
-// 				}
-// 				
-// 				for(size_t ju = 0 ; ju < test.size() ; ++ju){
-// 					if(targ2 == test[ju]){
-// 						throw std::runtime_error("Same node linked twice with the same edge :( ?");
-// 					}
-// 				}
-// 				test.push_back(targ2);
-// 				
-// 				
-// 			}
-// // 					std::cout << "REMOVE THE BASE VERTEX EDGE GOING TO NEXT EDGE" << std::endl;
-// // 					throw std::runtime_error("Not an error, it actually works" );
-// 			//TODO : replace this by a fuse Zone function
-// 			
-// // 			std::cout << "Removing " <<(*this)[targ] << " with edges " << getNumEdges(targ) << std::endl;
-// 			
-// 			//IMPORTANT THAT'S IT RIGHT BEFORE THE REMOVE
-// 			++out_i;
-// 			
-// 			(*this)[top_vertex].fuse((*this)[targ]);
-// 			removeVertex(targ);
-// 			cv::Mat tmptmp = cv::imread("../Test/labsketch_trimmed.png", CV_LOAD_IMAGE_GRAYSCALE);
-// 			cv::Mat graphmat = cv::Mat::zeros(tmptmp.size(), CV_8U);
-// 			cv::Mat graphmat2 = cv::Mat::zeros(tmptmp.size(), CV_8U);
-// 			draw(graphmat);
-// 			draw(graphmat2, first_vertex, cv::Scalar(255));
-// 			cv::imshow("GRAPH", graphmat);
-// 			cv::imshow("CENTER", graphmat2);
-// 			cv::waitKey(0);
-			
-// 			std::cout << std::endl;
-// 			print();
-// 			std::cout << std::endl;
-// 			std::cout << "AFTER PRINT" << std::endl;
 			}
 			else{
 				++out_i;
@@ -602,7 +559,9 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 	
 		int direction = 0 ;
 		std::cout << "NEW VERTEX.............................:" << std::endl;
-		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, threshold, direction);
+		std::deque<VertexZone> top_vertex_visited_tmp;
+		top_vertex_visited_tmp.push_back(top_vertex);
+		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction);
 		
 		//Stopping condition
 		if(top_vertex_visited.size() == getNumVertices()){

@@ -275,16 +275,18 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		int size_to_remove = 100;
 		
-		graphmat = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
-		graph_slam.draw(graphmat);
-		cv::imshow("GRAPH FINAL before remove PCA", graphmat);
-		cv::waitKey(0);
 		
+		std::cout << "REMOVE VERTEX SIZE" << std::endl;
 		graph_slam.removeVertexUnderSize(size_to_remove, true);
+		std::cout << "REMOVE LONELY VERTEX" << std::endl;
 		graph_slam.removeLonelyVertices();
 		if(graph_slam.lonelyVertices())
 			throw std::runtime_error("Fuck you lonelyness");
 		
+		graphmat = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+		graph_slam.draw(graphmat);
+		cv::imshow("GRAPH FINAL before remove PCA", graphmat);
+		cv::waitKey(0);
 		
 		
 		/*** PCA of all zones in Graph**/
@@ -293,11 +295,18 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		/*******************************/
 		
+		graphmat = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+		graph_slam.draw(graphmat);
+		cv::imshow("GRAPH FINALafter update PCA", graphmat);
+		cv::waitKey(0);
+		
 		graph_slam.draw(graphmat);
 // 		cv::imshow("GRAPH FINAL before remove", graphmat);
 // 		cv::waitKey(0);
 		
 		graph_slam.removeRiplesv2();
+		
+// 		graph_slam.watershed(0.25);
 		
 		cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 		graph_slam.draw(graphmat2);
