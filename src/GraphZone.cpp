@@ -93,7 +93,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 				e = *out_i;
 				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
 				if( (*this)[targ].getZone().size() > 100 ){
-// 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 				}
 			}
 // 
@@ -387,6 +387,14 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				is_visited = true;
 			}
 		}
+		
+		double max_value = (*this)[first_vertex].getValue();
+		double min_value = (*this)[targ].getValue();
+		if(max_value < min_value){
+			max_value = (*this)[targ].getValue();
+			min_value = (*this)[first_vertex].getValue();
+		}
+		
 // 		if(is_visited == true){
 // 			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
 // 			throw std::runtime_error("WE ARE REMOVING A TOP");
@@ -403,8 +411,8 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			//Condition for going down the watershed
 // 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
 			//Condition of threshold up and down
-			(*this)[targ].getValue() >= (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) &&
-			(*this)[targ].getValue() <= (*this)[first_vertex].getValue() + ( (double) (*this)[first_vertex].getValue() * threshold) &&
+			min_value >= max_value - ( (double) max_value * threshold) &&
+			min_value <= max_value + ( (double) max_value * threshold) &&
 			is_old == true && is_visited == false
 		){
 			
@@ -429,16 +437,18 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				}
 			}
 			if(direction_tmp == -2){
-				good_direction = false;
+				good_direction = true;
 			}
 			
 			if(good_direction == true){
 // 			std::cout << "REMOVE vertex for edge " << (*this)[targ].getValue() << std::endl;
 				std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
 				
+				if(direction_tmp == -2){
+					throw("Weird two node with same value next to each other");
+				}
 				
-				
-				assert(direction_tmp <= 0);
+// 				assert(direction_tmp <= 0);
 				
 				//Recursion :(
 				std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
@@ -452,7 +462,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			
 				std::vector<VertexZone> test;
 				
-// 				++out_i;
+				++out_i;
 				try{
 					removeVertexWhilePreservingEdges(targ, first_vertex);
 				}
@@ -462,7 +472,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				}
 				
 				//restart at the begining
-				boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this));
+// 				boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this));
 			
 			
 // 			for (boost::tie(out_i_second, out_end_second) = boost::out_edges(targ, (*this) ) ; 
@@ -580,8 +590,8 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 					top_vertex = v;
 					init = true;
 				}
-				else if( (*this)[top_vertex].getValue() < (*this)[v].getValue() ){
-// 				else if( (*this)[top_vertex].size() < (*this)[v].size() ){
+// 				else if( (*this)[top_vertex].getValue() < (*this)[v].getValue() ){
+				else if( (*this)[top_vertex].size() < (*this)[v].size() ){
 // 					std::cout << "assigned other" << std::endl;
 					top_vertex = v;
 				}
