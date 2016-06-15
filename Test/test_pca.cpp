@@ -76,12 +76,12 @@ BOOST_AUTO_TEST_CASE(trying)
 			cv::Mat copp;
 			out_slam.copyTo(copp);
 			
-// 			AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+			AASS::RSI::reduceZone(out_slam, out_tmp_slam);
 				
-			cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
-			AASS::RSI::Kmeans kmeans_slam;
-			kmeans_slam.setK(5);
-			kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
+// 			cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
+// 			AASS::RSI::Kmeans kmeans_slam;
+// 			kmeans_slam.setK(5);
+// 			kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
 		// 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 			
 			cv::imshow("REDUCED", out_tmp_slam);
