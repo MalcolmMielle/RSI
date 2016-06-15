@@ -322,7 +322,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 	}
 	
 	
-	std::cout << "NEW NODE VISITED " << top_vertex << " from " << first_vertex << std::endl;
+// 	std::cout << "NEW NODE VISITED " << top_vertex << " from " << first_vertex << std::endl;
 	
 	for (boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this)); 
 		out_i != out_end;) {
@@ -338,7 +338,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 				is_old = true;
 		}
 	
-		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
+// 		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
 	
 		//REMOVE TARG
 		if( ( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
@@ -528,7 +528,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
-		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 		
 	
 		if(v_to_fuse_in != targ){
@@ -537,13 +537,13 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		}
 	}
 	
-	std::cout << "Removing and fusing" << std::endl;
-	std::cout << "Printing both vertex fsed" << std::endl;
-	std::cout << "Node 1 " << (*this)[v_to_fuse_in] << std::endl;
-	std::cout << "Node 2 " << (*this)[v] << std::endl;
+// 	std::cout << "Removing and fusing" << std::endl;
+// 	std::cout << "Printing both vertex fsed" << std::endl;
+// 	std::cout << "Node 1 " << (*this)[v_to_fuse_in] << std::endl;
+// 	std::cout << "Node 2 " << (*this)[v] << std::endl;
 	
 	(*this)[v_to_fuse_in].fuse((*this)[v]);
-	std::cout << (*this)[v] <<std::endl;
+// 	std::cout << (*this)[v] <<std::endl;
 	removeVertex(v);
 	
 }
@@ -552,16 +552,16 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 
 void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone v)
 {
-	if(getNumEdges(v) == 0){
-		cv::Mat graphmat = cv::Mat::zeros(500, 500, CV_8U);
-		draw(graphmat);
-		cv::imshow("BUG", graphmat);
-		cv::Mat graphmat3 = cv::Mat::zeros(500, 500, CV_8U);
-		draw(graphmat3,v, cv::Scalar(255));
-		cv::imshow("BUGZONE", graphmat3);
-		cv::waitKey(0);
-		throw std::runtime_error("Fuck you lonelyness");
-	}
+// 	if(getNumEdges(v) == 0){
+// 		cv::Mat graphmat = cv::Mat::zeros(500, 500, CV_8U);
+// 		draw(graphmat);
+// 		cv::imshow("BUG", graphmat);
+// 		cv::Mat graphmat3 = cv::Mat::zeros(500, 500, CV_8U);
+// 		draw(graphmat3,v, cv::Scalar(255));
+// 		cv::imshow("BUGZONE", graphmat3);
+// 		cv::waitKey(0);
+// 		throw std::runtime_error("Fuck you lonelyness");
+// 	}
 	assert(getNumEdges(v) > 0 && "Node without edges Oo");
 	//Find biggest neighbor vertex for fusion of zone
 	VertexZone biggest;
@@ -578,14 +578,14 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
-		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 		if(init == true){
-			std::cout << "INIT" << std::endl;
+// 			std::cout << "INIT" << std::endl;
 			biggest = targ;
 			init = false;
 		}
 		else{
-			std::cout << "COMPARING SIZES " << std::endl;
+// 			std::cout << "COMPARING SIZES " << std::endl;
 			if( (*this)[biggest].size() <(*this)[targ].size() ){
 				biggest = targ;
 			}

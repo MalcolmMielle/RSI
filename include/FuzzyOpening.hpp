@@ -51,8 +51,16 @@ namespace AASS{
 			
 			///@brief return true or false depending on if the circle discribed by circle is empty in input
 			bool circleIsEmpty(cv::Mat& input, cv::Mat& circle);
-			//Start with biggest circle and go down until empty
-			void fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size);
+			/**
+			 * @brief Perform on opening on the map using either a circle or a square. Using the square is not recommended.
+			 * Indeed using the square assume, no curve in the map and all walls parallele or perpendicular to to the horizon.
+			 * Other the size of the square might be wrong if the distance is on the diagonal. For curves, use the circle element.
+			 * Start with biggest circle and go down until empty
+			 * @param[in] src : source image
+			 * @param[out] output : output image
+			 * @param[in] size : optionnal argument to define the mximum size of the element. Default value is 50
+			 */
+			void fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size = 50);
 			void addPointValueInCircle(cv::Mat& input, cv::Mat& output, int value);
 			
 			

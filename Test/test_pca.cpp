@@ -21,10 +21,10 @@ BOOST_AUTO_TEST_CASE(trying)
 {
 	
 	AASS::RSI::FuzzyOpening fuzzy_2;
-	fuzzy_2.fast(false);
+	fuzzy_2.fast(true);
 	
 	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.fast(false);
+	fuzzy_slam.fast(true);
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat out, out_slam;
 	cv::imshow("Base input ", map);
 	cv::imshow("SLAM", slam);
-	fuzzy_2.fuzzyOpening(map, out, 500);
+// 	fuzzy_2.fuzzyOpening(map, out, 500);
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 // 	std::cout << out << std::endl;
 	
@@ -55,17 +55,22 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat out_tmp;
 	cv::Mat out_tmp_slam;
 	
-// 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+// 	cv::imshow("REDUCED", out_tmp_slam);
+	cv::Mat copp;
+	out_slam.copyTo(copp);
 	
-	cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
-	
+	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
 		
-	AASS::RSI::Kmeans kmeans_slam;
-	kmeans_slam.setK(5);
-	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
+// 	cv::threshold(out_slam, out_slam, 20, 0, cv::THRESH_TOZERO);
+// 	AASS::RSI::Kmeans kmeans_slam;
+// 	kmeans_slam.setK(5);
+// 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam, slam, 0);
 // 	kmeans_slam.kmeansColor(out_slam, out_tmp_slam);
 	
 	cv::imshow("REDUCED", out_tmp_slam);
+	cv::Mat cop;
+	out_tmp_slam.copyTo(cop);
+// 	cv::waitKey(0);
 
 	
 	AASS::RSI::ZoneExtractor wzoneextract;
@@ -94,7 +99,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	
 	graph_slam.draw(graphmat_init);
 	cv::imshow("GRAPH_init", graphmat_init);
-	cv::waitKey(0);
+// 	cv::waitKey(0);
 	
 	
 	std::ofstream outt("bob2.txt");
@@ -118,20 +123,22 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	graph_slam.draw(graphmat);
 	cv::imshow("GRAPH FINAL before remove", graphmat);
-	cv::waitKey(0);
+// 	cv::waitKey(0);
 	
 	graph_slam.removeRiplesv2();
 	
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 	graph_slam.draw(graphmat2);
 	cv::imshow("GRAPH FINAL after remove", graphmat2);
-	cv::waitKey(0);
+// 	cv::waitKey(0);
 	
 	std::cout << "Graph : " << std::endl;
 	
 	std::cout << "Number of vertices : " << graph_slam.getNumVertices() << " number of edges " << graph_slam.getNumEdges() << std::endl;
 	
 	std::string stri= "../doc/Output/";
+	std::string strired= stri;
+	std::string stridist= stri;
 	
 	boost::filesystem::path p(str);
 	while(!boost::filesystem::exists(p)){
@@ -142,16 +149,19 @@ BOOST_AUTO_TEST_CASE(trying)
 	if(boost::filesystem::is_regular_file(p)){
 		std::cout << p.filename()<<std::endl;
 		stri = stri + "out_" + p.filename().string();
+		strired = strired + "out_reduced_" + p.filename().string();
+		stridist = stridist + "out_diust_" + p.filename().string();
 	}
 	
 // 	stri = stri + str; 
 	
 	std::cout << "Printing to " << stri << std::endl;
 	cv::imwrite(stri, graphmat2);
-	
+	cv::imwrite(strired, cop);
+	cv::imwrite(stridist, copp);
 // 		cv::imshow("out_tmp", out_tmp);
 // 	while(1)
-		cv::waitKey(0);
+// 		cv::waitKey(0);
 // 		watershed.drawAllZones(out_tmp, 0);
 	std::cout << "Value of size to remove : " ;
 // 	std::cin >> size_to_remove;
