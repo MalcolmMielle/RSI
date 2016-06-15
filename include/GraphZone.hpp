@@ -67,7 +67,7 @@ namespace AASS{
 			
 			
 // 			void watershed();
-			void watershed(int threshold);
+			void watershed(double threshold);
 			
 			
 			bool lonelyVertices(){
@@ -361,9 +361,9 @@ namespace AASS{
 			 * @param top_vertex : Vertex currently studied
 			 * @param first_vertex : Vertex on the top of the food chain. The initial vertex of the watershed
 			 * @param top_vertex_visited : The vertices already visited by the watershed algorithm
-			 * @param threshold : Threshold at which the difference between the value of top_vertex and a neighborhood vertex is considered enough for the neighborhood vertex not to be fused and to be considered a new zone.
+			 * @param threshold : Threshold at which the difference between the value of top_vertex and a neighborhood vertex is considered enough for the neighborhood vertex not to be fused and to be considered a new zone. Actually no : fraction the new node must be partt of to not be fyused
 			 */
-			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int threshold);
+			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, double threshold);
 			void getAllNodeRemovedRipples(AASS::RSI::GraphZone::VertexZone& base_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited);
 			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v);
 			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in);

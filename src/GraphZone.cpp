@@ -341,7 +341,7 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, VertexZone& first_vertex, const std::deque<VertexZone>& top_vertex_visited, int threshold){
+void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, double threshold){
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
@@ -381,11 +381,14 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 // 		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
 	
 		//REMOVE TARG
-		if( ( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
+		if( 
+// 			( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
 // 			Decided to remove that line since testing the difference between the very first one and next one is not very significant. Indeed if it progressively go down for them going up again, the K-mean wil create a new zone if it gets small enough and then watershed will not be able to go up again after ! So the corridor will be indeed separated in two even without this condition which is super abitrary
 			
-// 			(*this)[targ].getValue() < (*this)[first_vertex].getValue() && 
+// 			(*this)[targ].getValue() < (*this)[first_vertex].getValue() &&
+			//Condition for going down the watershed
 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
+			(*this)[targ].getValue() >= (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) &&
 			is_old == true
 		){
 			
@@ -403,7 +406,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 			}
 			
 			//Recursion :(
-// 			std::cout << "sending recur " << (*this)[first_vertex].getValue() << std::endl;
+			std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[top_vertex].getValue() - ( (double) (*this)[top_vertex].getValue() * threshold) << std::endl;
 			getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, threshold);
 			
 // 			change = true;
@@ -490,7 +493,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(VertexZone& top_vertex, Ve
 
 
 
-void AASS::RSI::GraphZone::watershed(int threshold)
+void AASS::RSI::GraphZone::watershed(double threshold)
 {
 	//Find all "top node"
 	
@@ -611,11 +614,10 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 		throw std::runtime_error("Fuck you lonelyness");
 // 	}
 	assert(getNumEdges(v) > 0 && "Node without edges Oo");
-	//Find biggest neighbor vertex for fusion of zone
-	VertexZone biggest;
+	//Find Closest valued neighbor vertex for fusion of zone
+	VertexZone closest;
 	bool init = true;
 	EdgeIteratorZone out_i, out_end;
-	
 	//First find neighbor with biggest zone
 	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
 		out_i != out_end; out_i = ++out_i) {
@@ -629,19 +631,19 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 		if(init == true){
 // 			std::cout << "INIT" << std::endl;
-			biggest = targ;
+			closest = targ;
 			init = false;
 		}
 		else{
 // 			std::cout << "COMPARING SIZES " << std::endl;
-			if( (*this)[biggest].size() <(*this)[targ].size() ){
-				biggest = targ;
+			if( std::abs((*this)[closest].getValue() - (*this)[v].getValue() ) > std::abs( (*this)[targ].getValue() - (*this)[v].getValue()) ){
+				closest = targ;
 			}
 		}
 	
 	}
 	
-	removeVertexWhilePreservingEdges(v, biggest);
+	removeVertexWhilePreservingEdges(v, closest);
 }
 
 
@@ -816,16 +818,16 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 		Zone z_ripple = (*this)[might_be_ripple];
 		Zone z_base = (*this)[base_vertex];
 // 		std::cout << "PERCET : " << z_ripple.contactPoint(z_base) << std::endl;
-// 			cv::Mat graphmat2 = cv::Mat::zeros(400,400, CV_8U);
-// 			z_ripple.draw(graphmat2, cv::Scalar(255));
-// 			cv::imshow("ripple", graphmat2);
-// 			cv::waitKey(0);
-			
+// 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 		z_ripple.draw(graphmat2, cv::Scalar(255));
+// 		cv::imshow("ripple", graphmat2);
+// 		cv::waitKey(0);
+// 			
 // 			It's a ripple !
 		//ATTENTION Second magic number
 		if(z_ripple.contactPoint(z_base) >= 40){
 			
-			
+			std::cout << "PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
 			
 			return true;
 		}

@@ -165,13 +165,13 @@ BOOST_AUTO_TEST_CASE(trying)
 			cv::imwrite(stri, graphmat2);
 			cv::imwrite("../doc/Output/" + fn.filename().string(), slam);
 		// 	cv::imwrite(strired, cop);
-		// 	cv::imwrite(stridist, copp);
+// 			cv::imwrite(stridist, copp);
 		// 		cv::imshow("out_tmp", out_tmp);
 		// 	while(1)
 		// 		cv::waitKey(0);
 		// 		watershed.drawAllZones(out_tmp, 0);
 			std::cout << "Value of size to remove : " ;
-			
+// 			
 		}
 	}
 	
@@ -257,14 +257,14 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::ofstream outt("bob2.txt");
 		graph_slam.write(outt);
 
-		graph_slam.watershed(50);
+		graph_slam.watershed(0.25);
 		
 		int size_to_remove = 100;
 		
 		graphmat = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 		graph_slam.draw(graphmat);
-// 		cv::imshow("GRAPH FINAL before remove PCA", graphmat);
-// 		cv::waitKey(0);
+		cv::imshow("GRAPH FINAL before remove PCA", graphmat);
+		cv::waitKey(0);
 		
 		graph_slam.removeVertexUnderSize(size_to_remove, true);
 		graph_slam.removeLonelyVertices();
@@ -305,8 +305,8 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << "Printing to " << stri << std::endl;
 		cv::imwrite(stri, graphmat2);
 		cv::imwrite("../doc/Output/" + p.filename().string(), slam);
-	// 	cv::imwrite(strired, cop);
-	// 	cv::imwrite(stridist, copp);
+		cv::imwrite(strired, cop);
+		cv::imwrite(stridist, copp);
 	// 		cv::imshow("out_tmp", out_tmp);
 	// 	while(1)
 	// 		cv::waitKey(0);
