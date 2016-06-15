@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(trying)
 			std::ofstream outt("bob2.txt");
 			graph_slam.write(outt);
 
-			graph_slam.watershed(50);
+			graph_slam.watershed(0.25);
 			
 			int size_to_remove = 100;
 			graph_slam.removeVertexUnderSize(size_to_remove, true);
@@ -250,13 +250,27 @@ BOOST_AUTO_TEST_CASE(trying)
 	// 	
 	// 	
 		graph_slam.draw(graphmat_init);
-// 		cv::imshow("GRAPH_init", graphmat_init);
+		cv::imshow("GRAPH_init", graphmat_init);
 // 		cv::waitKey(0);
 		
 		
 		std::ofstream outt("bob2.txt");
 		graph_slam.write(outt);
 
+// 		//TODO : TEST
+// 		/*** PCA of all zones in Graph**/
+// 		
+// 		graph_slam.updatePCA();
+// 		
+// 		/*******************************/
+// 		
+// 		graph_slam.draw(graphmat);
+// // 		cv::imshow("GRAPH FINAL before remove", graphmat);
+// // 		cv::waitKey(0);
+// 		
+// 		graph_slam.removeRiplesv2();
+		
+		
 		graph_slam.watershed(0.25);
 		
 		int size_to_remove = 100;

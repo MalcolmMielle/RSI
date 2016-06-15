@@ -77,6 +77,7 @@ namespace AASS{
 			
 			
 			void fuse(const Zone& input){
+// 				assert(input.getValue() < _value);
 				for(size_t i = 0 ; i < input.size() ; ++i){
 					this->push_back(input.getZone()[i]);
 				}
@@ -105,8 +106,8 @@ namespace AASS{
 				
 				//Draw PCA
 // 				cv::circle(img, std::get<0>(_pca), 3, CV_RGB(255, 0, 255), 10);
-				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
-				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
+// 				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
+// 				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
 				
 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
 				
@@ -114,6 +115,10 @@ namespace AASS{
 				{
 					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
 				}
+				
+				std::string text;
+				text = std::to_string(_value);
+				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255));
 				
 			}
 
