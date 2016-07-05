@@ -33,3 +33,9 @@ target_link_libraries(test_collisionblob ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fu
 
 add_executable(test_comparezone test_comparezone.cpp)
 target_link_libraries(test_comparezone ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework)
+
+add_executable(harris_opencv harris_opencv.cpp)
+target_link_libraries(harris_opencv ${OpenCV_LIBS})
+
+add_executable(goodFeatTrack goodFeatTrack.cpp)
+target_link_libraries(goodFeatTrack ${OpenCV_LIBS})
