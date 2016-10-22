@@ -11,7 +11,7 @@
 
 namespace AASS{
 	namespace RSI{
-		
+
 		//TODO convert Mat to Eigen !
 
 		class GraphZone : public bettergraph::SimpleGraph<Zone, EdgeElement>{

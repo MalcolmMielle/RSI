@@ -9,6 +9,10 @@ namespace AASS{
 	
 	namespace RSI{
 		class Zone{
+			
+		private:
+			bool _flag_PCA;
+			
 		protected:
 			size_t _value;
 			std::deque <cv::Point2i> _zone;
@@ -23,11 +27,11 @@ namespace AASS{
 			std::vector< cv::Point> _contours;
 			
 		public:
-			Zone(){}; //Used for the read function of betterGraph
-			Zone(const cv::Size& size){
+			Zone() : _flag_PCA(false) {};
+			Zone(const cv::Size& size) : _flag_PCA(false){
 				_zone_mat = cv::Mat::zeros(size, CV_8U);
 			};
-			Zone(int rows, int cols){
+			Zone(int rows, int cols) : _flag_PCA(false){
 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
 			
@@ -62,12 +66,14 @@ namespace AASS{
 			double getPCAOrientation(){return _pca_orientation;}
 			double getPCAOrientation() const {return _pca_orientation;}
 			
+			///@brief return the center of the zone by doing the mean of all the points
 			cv::Point2i getCentroid(){
 				if( _zone.size() == 0 ){
 					throw std::runtime_error("zone is empty");
 				}
 				return cv::Point2i(_sum_of_x_and_y.y / _zone.size(), _sum_of_x_and_y.x / _zone.size());	
 			}
+			///@brief return the center of the zone by doing the mean of all the points
 			const cv::Point2i getCentroid() const {
 				if( _zone.size() == 0 ){
 					throw std::runtime_error("zone is empty");
@@ -122,7 +128,11 @@ namespace AASS{
 				
 			}
 
+			///@brief Calculate the principal components of a zone.
 			void PCA(){
+				
+				_flag_PCA = true;
+				
 				std::cout << "PCA" << std::endl;
 // 				find countour
 				cv::Mat copy_tmp;
@@ -294,7 +304,13 @@ namespace AASS{
 				
 			}
 			
+			///@brief return the length values of the two PC. Must be called after calling PCA at least once !
 			std::pair<double, double> getMaxMinPCA() const {
+				
+				if(_flag_PCA == false){
+					throw std::runtime_error("You forgot to call PCA before calling getMaxMin");
+				}
+				
 				double length1_x_own = (std::get<1>(_pca).x - std::get<0>(_pca).x);
 				length1_x_own = length1_x_own * length1_x_own;
 				double length1_y_own = (std::get<1>(_pca).y - std::get<0>(_pca).y);
@@ -319,6 +335,11 @@ namespace AASS{
 			}
 			
 			
+			/**
+			 * @brief Compare two zones by using the PCA values.
+			 * 
+			 * It normalize the PCA values using the max of each set of values and compare the difference between the max and min of each set.
+			 */
 			double compare(const Zone& zone_in) const {
 				
 				auto pca_max_min = getMaxMinPCA();
