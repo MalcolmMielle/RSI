@@ -39,3 +39,6 @@ target_link_libraries(harris_opencv ${OpenCV_LIBS})
 
 add_executable(goodFeatTrack goodFeatTrack.cpp)
 target_link_libraries(goodFeatTrack ${OpenCV_LIBS})
+
+add_executable(hungarian_test hungarian_test.c)
+target_link_libraries(hungarian_test hungarian_lib)
