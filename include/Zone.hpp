@@ -26,6 +26,11 @@ namespace AASS{
 			
 			std::vector< cv::Point> _contours;
 			
+			
+			//TODO:
+			int _size_classification; //Should be between 0 and 10 to be able to compare to zone size relative to other size in the same graph
+			
+			
 		public:
 			Zone() : _flag_PCA(false) {};
 			Zone(const cv::Size& size) : _flag_PCA(false){
@@ -34,6 +39,9 @@ namespace AASS{
 			Zone(int rows, int cols) : _flag_PCA(false){
 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
+			
+			void setSizeClassification(double size){_size_classification = size;}
+			double getSizeClassification(){return _size_classification;}
 			
 			void push_back(const cv::Point2i& p){_zone.push_back(p); addPoint(p);}
 			void push_front(const cv::Point2i& p){_zone.push_front(p); addPoint(p);}
