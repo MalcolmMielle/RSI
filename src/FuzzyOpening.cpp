@@ -61,6 +61,8 @@ void AASS::RSI::FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& out
 void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 {
 	
+// 	cv:imshow("SRCSRC", src);
+	
 	//Calcul distance image
 	cv::Mat distance_image, label;
 	if(src.channels() == 3){
@@ -88,7 +90,7 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 	
 	cv::copyMakeBorder( distance_image, distance_image, pad, pad, pad, pad, cv::BORDER_CONSTANT, 0 );
 	
-	output = cv::Mat::ones(distance_image.rows, distance_image.cols, CV_32F);
+	output = cv::Mat::zeros(distance_image.rows, distance_image.cols, CV_32F);
 	cv::Mat roi_output_final = output(cv::Rect(pad, pad, old_cols, old_rows));
 // 	std::cout << roi_output_final << std::endl;
 	//Update result 
@@ -106,21 +108,24 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 			else{
 // 				std::cout << "size is good " << dist_to_obstacle <<  std::endl;
 			}
-// 			std::cout << row << " " << col << " " << " dist : " <<dist_to_obstacle << " same " << (float)p[col] << " | " ;
+// 			std::cout << row << " " << col << " " << " dist : " <<dist_to_obstacle << " same " << (float)p[col] << " | " << std::endl;
 			
 			cv::Mat roi = distance_image(cv::Rect(col - (dist_to_obstacle), row - (dist_to_obstacle), dist_to_obstacle * 2, dist_to_obstacle * 2));
 			cv::Mat roi_output = output(cv::Rect(col - (dist_to_obstacle), row - (dist_to_obstacle), dist_to_obstacle * 2, dist_to_obstacle * 2));
 			if((int)dist_to_obstacle > 0){
 				addPointValueInCircle(roi, roi_output, dist_to_obstacle);
+// 				cv::imshow("out", roi_output);
+// 				cv::imshow("roi", roi);
+// 				cv::imshow("dist", distance_image);
+// 				cv::imshow("roi_output_final", roi_output_final);
+// 				cv::waitKey(1);
 			}
 			else{
 				p_output[col] = 0;
 // 				std::cout << "Wall" << std::endl;
 			}
 			
-// 			cv::imshow("out", roi_output);
-// 			cv::imshow("roi", roi);
-// 			cv::waitKey(0);
+			
 			
 			
 			
@@ -128,14 +133,16 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 // 		std::cout << std::endl;
 	}
 	
-	cv::normalize(roi_output_final, roi_output_final, 0, 255, cv::NORM_MINMAX, CV_8U);
+	//Need to be two different matrices now
+	cv::Mat outout;
+	cv::normalize(roi_output_final, outout, 0, 255, cv::NORM_MINMAX, CV_8U);
 	
 // 	std::cout << roi_output_final << std::endl;
 	
-// 	cv::imshow("out", roi_output_final);
+// 	cv::imshow("out", outout);
 // 	cv::waitKey(0);
 	
-	output = roi_output_final;
+	output = outout;
 
 }
 
