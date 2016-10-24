@@ -45,3 +45,7 @@ target_link_libraries(hungarian_test hungarian_lib)
 
 add_executable(test_zone_hungarian_itself test_zone_hungarian_itself.cpp)
 target_link_libraries(test_zone_hungarian_itself ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
+
+
+add_executable(test_zone_hungarian test_zone_hungarian.cpp)
+target_link_libraries(test_zone_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
