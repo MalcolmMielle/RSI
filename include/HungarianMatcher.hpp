@@ -31,7 +31,7 @@ namespace AASS{
 			
 			HungarianMatcher(){};
 			
-			 std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > match(GraphZone& source, GraphZone& target);
+			 std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > match(GraphZone& source, GraphZone& target, std::vector<int>& scores);
 			
 		private:
 			
@@ -40,7 +40,7 @@ namespace AASS{
 		};
 		
 		
-		inline std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target){
+		inline std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target, std::vector<int>& scores){
 			
 			hungarian_problem_t p;
 			
@@ -83,23 +83,52 @@ namespace AASS{
 			hungarian_print_assignment(&p);
 			
 			std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > out;
-			int i,j;
-// 			fprintf(stderr , "\n");
-			for(i=0; i<source.getNumVertices(); i++) {
-// 				fprintf(stderr, " [");
-				for(j=1; j<target.getNumVertices(); j++) {
-					if(p.assignment[i][j] == 1){
-						std::cout << "Matching " << i << " with " << j << std::endl;
-						std::cout << "Matching " << res[i * target.getNumVertices()].source << " with " << res[( i * target.getNumVertices() ) + j].target << std::endl;
-						out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res[i * target.getNumVertices()].source, res[( i * target.getNumVertices() ) + j].target));
+			// This depend on which one as more nodes !
+			// Goes along the line
+			if(source.getNumVertices() <= target.getNumVertices()){
+				
+				int i,j;
+	// 			fprintf(stderr , "\n");
+				for(i=0; i<source.getNumVertices(); i++) {
+	// 				fprintf(stderr, " [");
+					for(j=0; j<target.getNumVertices(); j++) {
+						if(p.assignment[i][j] == 1){
+							std::cout << "Matching " << i << " with " << j << std::endl;
+							std::cout << "Matching " << i * target.getNumVertices() << " with " << (i * target.getNumVertices() )  + j << std::endl;
+							
+							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at(i * target.getNumVertices()).source, res.at(( i * target.getNumVertices() ) + j).target));
+							scores.push_back(p.cost[i][j]);
+						}
 					}
+					
+					
+	// 				fprintf(stderr, "]\n");
 				}
-				
-				
-// 				fprintf(stderr, "]\n");
+			}
+			//Goes down the collomns
+			else{
+				int i,j;
+	// 			fprintf(stderr , "\n");
+				for(i=0; i<target.getNumVertices(); i++) {
+	// 				fprintf(stderr, " [");
+					for(j=0; j<source.getNumVertices(); j++) {
+						if(p.assignment[j][i] == 1){
+							
+							std::cout << "Matching " << i << " with " << j << std::endl;
+							std::cout << "Matching " << (j * target.getNumVertices()) + i << std::flush << " with " << i * target.getNumVertices() << std::endl;
+							
+							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at((j * target.getNumVertices()) + i).source, res.at(( i * target.getNumVertices() )).target));
+							scores.push_back(p.cost[j][i]);
+						}
+					}
+					
+					
+	// 				fprintf(stderr, "]\n");
+				}
 			}
 // 			fprintf(stderr, "\n");
 			
+			std::cout << "outout" << std::endl;
 			
 
 			/* free used memory */
@@ -111,6 +140,7 @@ namespace AASS{
 			}
 			free(m);
 			
+			std::cout << "return " <<out.size() << std::endl;
 			return out;
 		}	
 	}

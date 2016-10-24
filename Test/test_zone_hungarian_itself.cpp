@@ -92,7 +92,13 @@ BOOST_AUTO_TEST_CASE(trying)
 			
 	
 	AASS::RSI::HungarianMatcher hungmatch;
+	std::vector<int> scores;
+	auto match = hungmatch.match(graph_slam, graph_slam, scores);
 	
-	hungmatch.match(graph_slam, graph_slam);
+	for(size_t i = 0 ; i < match.size() ; ++i){
+		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
+		std::cout << "SCORE : " << scores[i] << std::endl;
+		cv::waitKey(0);
+	}
 	
 }

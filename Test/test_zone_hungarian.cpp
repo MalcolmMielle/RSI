@@ -19,7 +19,12 @@
 #include "hungarian.h"
 #include "HungarianMatcher.hpp"
 
+int i = 0;
+
 void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
+	
+	++i ;
+	
 	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 // 	
 // 	cv::imshow("input", slam);
@@ -70,6 +75,10 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	if(graph_slam.lonelyVertices())
 		throw std::runtime_error("Fuck you lonelyness");	
 	
+	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+	graph_slam.draw(graphmat2);
+	std::string s = std::to_string(i);
+	cv::imshow(s, graphmat2);
 }
 
 
@@ -80,11 +89,11 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Preprocessed/00.png";
+	std::string file = "../../Test/Preprocessed/11.png";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
-	std::string file2 = "../../Test/Preprocessed/01.png";
+	std::string file2 = "../../Test/Preprocessed/00.png";
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraph(file2, graph_slam2);
 	
@@ -103,13 +112,15 @@ BOOST_AUTO_TEST_CASE(trying)
 	/********** Hungarian matching of graph onto itself***************/
 			
 	AASS::RSI::HungarianMatcher hungmatch;
-	auto match = hungmatch.match(graph_slam, graph_slam2);
+	std::vector<int> scores;
+	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
 	
 	/********** Visualization ****************************************/
 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
 		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
 		cv::imshow("Zone2", graph_slam2[match[i].second].getZoneMat());
+		std::cout << "SCORE : " << scores[i] << std::endl;
 		cv::waitKey(0);
 	}
 	
