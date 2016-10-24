@@ -20,24 +20,29 @@ BOOST_AUTO_TEST_CASE(trying)
 {
 	
 	AASS::RSI::FuzzyOpening fuzzy_2;
-	fuzzy_2.fast(false);
+	fuzzy_2.fast(true);
 	
 	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.fast(false);
+	fuzzy_slam.fast(true);
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 	
 	char* str = argv[1];
 	cv::Mat slam = cv::imread(str, CV_LOAD_IMAGE_GRAYSCALE);
-	cv::Mat map = cv::imread("../Test/labfull.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat map = cv::imread("../Test/labsketch_trimmed.png", CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat out, out_slam;
 	
 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
 	
+	cv::threshold(map, map, 20, 255, cv::THRESH_BINARY);
+	cv::threshold(map, map, 20, 255, cv::THRESH_BINARY_INV);
+	
+	std::cout << "Base input" << std::endl;
 	cv::imshow("Base input ", map);
 	cv::imshow("SLAM", slam);
+	cv::waitKey(0);
 	fuzzy_2.fuzzyOpening(map, out, 500);
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 // 	std::cout << out << std::endl;

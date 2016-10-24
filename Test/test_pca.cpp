@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(trying)
 			
 			std::cout << "Number of vertices : " << graph_slam.getNumVertices() << " number of edges " << graph_slam.getNumEdges() << std::endl;
 			
-			std::string stri= "../doc/Output/";
+			std::string stri= "../doc/OutputOpenCV3/";
 			std::string strired= stri;
 			std::string stridist= stri;
 			
@@ -170,7 +170,9 @@ BOOST_AUTO_TEST_CASE(trying)
 		// 	while(1)
 		// 		cv::waitKey(0);
 		// 		watershed.drawAllZones(out_tmp, 0);
-			std::cout << "Value of size to remove : " ;
+			std::cout << "Value of size to remove : "  << graph_slam.getNumVertices() << std::endl;
+			exit(0);
+			
 // 			
 		}
 	}
@@ -180,7 +182,8 @@ BOOST_AUTO_TEST_CASE(trying)
 	else if(boost::filesystem::is_regular_file(p)){
 		std::cout << p.filename()<<std::endl;
 		std::string file = p.string();
-			
+		
+		std::cout << "Reading " << file << std::endl;
 		AASS::RSI::FuzzyOpening fuzzy_slam;
 		fuzzy_slam.fast(false);
 		
@@ -191,6 +194,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		cv::Mat out, out_slam;
 		cv::imshow("SLAM", slam);
+		cv::waitKey(0);
 	// 	fuzzy_2.fuzzyOpening(map, out, 500);
 		fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 	// 	std::cout << out << std::endl;
@@ -327,7 +331,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		std::cout << "Printing to " << stri << std::endl;
 		cv::imwrite(stri, graphmat2);
-		cv::imwrite("../doc/Output/" + p.filename().string(), slam);
+		cv::imwrite("../doc/OutputOPENCV3/" + p.filename().string(), slam);
 		cv::imwrite(strired, cop);
 		cv::imwrite(stridist, copp);
 	// 		cv::imshow("out_tmp", out_tmp);

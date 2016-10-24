@@ -11,6 +11,18 @@
 
 namespace AASS{
 	namespace RSI{
+		
+		
+		class ZoneCompared{
+		public:
+			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex source;
+			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex target;
+			double similarity;
+		};
+		
+		
+		
+		
 
 		//TODO convert Mat to Eigen !
 
@@ -90,6 +102,9 @@ namespace AASS{
 			
 			}
 			
+			/**
+			 * @brief Remove vertices with no edges
+			 */
 			void removeLonelyVertices(){
 				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
 				//vertices access all the vertix
@@ -132,13 +147,13 @@ namespace AASS{
 			void removeRiplesv2();
 			
 			
-						/**
+			/**
 			 * @brief remove ripples by looking at the pca and the angle between the main component and How much the zone is glued to it. If one of the angle is NOT a ripple then the zone is saved.
 			 * 
 			 * TODO
 			 * 
 			 */
-			void removeRiples(){
+			std::vector<int> removeRiples(){
 				updatePCA();
 				auto vp = boost::vertices((*this));
 				
@@ -231,6 +246,8 @@ namespace AASS{
 								
 								
 								
+								
+								
 							}
 						}
 					
@@ -242,121 +259,10 @@ namespace AASS{
 			
 			
 			
+			std::vector<ZoneCompared> compare(const GraphZone& target) const;
 			
 			
-			
-			/**
-			 * @brief remove ripples by looking at the pca and the angle between the main component and the direct link between the possible ripple and the center of the next zone. If one of the angle is NOT a ripple then the zone is saved.
-			 * ATTENTION IMPORTANT BUG -> Limitation : the center of the zone does not represent the actual direction of the link between the two zones.
-			 */
-// 			void removeRiples(){
-// 				updatePCA();
-// 				auto vp = boost::vertices((*this));
-// 				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
-// 					auto v = *vp.first;
-// 					++vp.first;
-// 					auto pca = (*this)[v].getPCA();
-// 					
-// 					//Find bigger direction
-// 					std::pair<cv::Point2i, cv::Point2i> line1;
-// 					std::pair<cv::Point2i, cv::Point2i> line2;
-// 					
-// 					double length1_x = (std::get<1>(pca).x - std::get<0>(pca).x);
-// 					length1_x = length1_x * length1_x;
-// 					double length1_y = (std::get<1>(pca).y - std::get<0>(pca).y);
-// 					length1_y = length1_y * length1_y;
-// 					double length1 = length1_x + length1_y;
-// 					
-// 					double length2_x = (std::get<2>(pca).x - std::get<0>(pca).x);
-// 					length2_x = length2_x * length2_x;
-// 					double length2_y = (std::get<2>(pca).y - std::get<0>(pca).y);
-// 					length2_y = length2_y * length2_y;
-// 					double length2 = length2_x + length2_y;
-// 					
-// 					double max = length1, min = length2;
-// 					if(max < min){
-// 						max = length2;
-// 						min = length1;
-// 					}
-// 					
-// 					std::cout << " max and 5 min " << max << " " << min * 5 << std::endl;
-// 					
-// 					//ATTENTION magic number
-// 					if(max > (min * 5)){
-// 						
-// 						// Might be a riple
-// 						
-// 						
-// 						// FIRST IDEA : try to see if orientation of pca is opposed to gradient.
-// 						
-// 						auto orientation_pca = (*this)[v].getPCAOrientation();
-// 						orientation_pca = orientation_pca * 180 / M_PI;
-// 						std::cout << "ORI " << orientation_pca << std::endl;
-// 						orientation_pca = (orientation_pca > 0) ? orientation_pca : orientation_pca + 360;
-// 						std::cout << "SHould only be positionve " << orientation_pca << std::endl;
-// 						
-// 						
-// 						
-// 						bool flag_ripple = true;
-// 						
-// 						//Maybe only do it with the current vertex seen and then fuse
-// 						EdgeIteratorZone out_i, out_end;
-// 						for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-// 							out_i != out_end; out_i = ++out_i) {
-// 							
-// 							EdgeZone e_second = *out_i;
-// 							VertexZone targ = boost::target(e_second, (*this));
-// 							VertexZone src = boost::source(e_second, (*this));
-// 						
-// 							auto p1 = (*this)[src].getCentroid();
-// 							auto p2 = (*this)[targ].getCentroid();
-// 						
-// 							//Putting poitn on center 0
-// 							cv::Point2i p3(p2.x - p1.x, p2.y -p1.y);
-// 							double orientation_link = atan2(p3.x, p3.y);
-// 							
-// 							orientation_link = orientation_link * 180 / M_PI;
-// 							orientation_link = (orientation_link > 0) ? orientation_link : orientation_link + 360;
-// 							
-// 							double max_tmp = orientation_link, min_tmp = orientation_pca;
-// 							if(max_tmp < min_tmp){
-// 								max_tmp = orientation_pca;
-// 								min_tmp = orientation_link;
-// 							}
-// 							
-// 							//Get value of both angles
-// 							double distance = max_tmp - min_tmp;
-// 							double distance2 = min_tmp + (360 - max_tmp);
-// 							
-// 							std::cout << "Distance " << distance << " distance 2 " << distance2 << " angles " << orientation_pca << " " << orientation_link << std::endl;
-// 							//If the distance betwen pca is close to 45 it's a ripple !
-// 							if( ( distance > 60 && distance < 110 ) || ( distance2 > 60 && distance2 < 110 ) ){
-// 								//It's a ripple
-// 							}
-// 							else{
-// 								std::cout << "NOT A RIPLE" << std::endl;
-// 								//Not a ripple ! We have to save it
-// 								flag_ripple = false;
-// 							}
-// 							
-// 							
-// 						}
-// 						
-// 						if(flag_ripple == true){
-// 							std::cout << "REMOVING " << std::endl;
-// 							removeVertexWhilePreservingEdges(v);
-// 						}
-// 						
-// 					}
-// 					//For debugging
-// // 					else{
-// // 						removeVertexWhilePreservingEdges(v);
-// // 					}
-// 					
-// 				}
-// 				
-// 				
-// 			}
+
 			
 		private:
 			/**

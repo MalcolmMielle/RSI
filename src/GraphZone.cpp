@@ -858,3 +858,35 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 
 }
 
+
+
+std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(const GraphZone& target) const {
+	
+	
+	std::vector<ZoneCompared> out;
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		auto v = *vp.first;
+		
+		std::pair<VertexIteratorZone, VertexIteratorZone> vp_target;
+		//vertices access all the vertix
+		for (vp_target = boost::vertices((*this)); vp_target.first != vp_target.second; ++vp_target.first) {
+			auto v_target = *vp_target.first;
+			
+			double similarity = (*this)[v].compare(target[v_target]);
+			
+			ZoneCompared zoneout;
+			zoneout.source = v;
+			zoneout.target = v_target;
+			zoneout.similarity = similarity;
+			out.push_back(zoneout);
+			
+		}
+	}
+	
+	assert(out.size() == (this->getNumVertices() * target.getNumVertices()));
+	return out;
+	
+	
+}

@@ -34,6 +34,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat out;
 	cv::imshow("Base input ", map);
 	cv::imshow("Sketch input ", sketch);
+	cv::waitKey(0);
 	fuzzy_2.fuzzyOpening(map, out, 35);
 // 	std::cout << out << std::endl;
 	

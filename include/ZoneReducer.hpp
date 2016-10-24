@@ -7,13 +7,13 @@ namespace AASS{
 	
 	namespace RSI{
 		
-		class ZoneReducer{
-		protected:
-			
-		public:
-			ZoneReducer(){}
-		
-		};
+// 		class ZoneReducer{
+// 		protected:
+// 			
+// 		public:
+// 			ZoneReducer(){}
+// 		
+// 		};
 		
 		
 		/**
