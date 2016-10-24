@@ -80,11 +80,11 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Preprocessed/08.png";
+	std::string file = "../../Test/Preprocessed/00.png";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
-	std::string file2 = "../../Test/Preprocessed/09.png";
+	std::string file2 = "../../Test/Preprocessed/01.png";
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraph(file2, graph_slam2);
 	

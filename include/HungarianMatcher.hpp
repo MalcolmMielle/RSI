@@ -31,7 +31,7 @@ namespace AASS{
 			
 			HungarianMatcher(){};
 			
-			 std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > match(const GraphZone& source, const GraphZone& target);
+			 std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > match(GraphZone& source, GraphZone& target);
 			
 		private:
 			
@@ -40,7 +40,7 @@ namespace AASS{
 		};
 		
 		
-		inline std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > AASS::RSI::HungarianMatcher::match(const GraphZone& source, const GraphZone& target){
+		inline std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target){
 			
 			hungarian_problem_t p;
 			
@@ -57,8 +57,8 @@ namespace AASS{
 			std::vector<int> simi;
 			auto it = res.begin();
 			for ( ; it != res.end() ; ++it){
-				int input = it->similarity*100;
-				std::cout << " pushing " << input << it->source << std::endl;
+				int input = it->getSimilarity()*100;
+				std::cout << " pushing " << input << " becaue " << it->getSimilarity()*100 << std::endl;
 				simi.push_back(input);
 			}
 			

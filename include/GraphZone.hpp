@@ -14,10 +14,39 @@ namespace AASS{
 		
 		
 		class ZoneCompared{
+			
+		protected:
+			//The closer to 0 the better!
+			double _similarity;
 		public:
 			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex source;
 			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex target;
-			double similarity;
+			double zone_similarity;
+			double zone_size_factor_source;
+			double zone_size_factor_target;
+			
+			ZoneCompared() : zone_size_factor_source(-1){};
+			
+			void update(){
+				assert(zone_size_factor_source <=1 && zone_size_factor_source >=0);
+				assert(zone_size_factor_target <=1 && zone_size_factor_target >=0);
+				
+				std::cout << "s " << zone_size_factor_source << std::endl;
+				std::cout << "s " << zone_size_factor_target << std::endl;
+				
+				double diff = zone_size_factor_source - zone_size_factor_target;
+				std::cout << "Diff " << diff << std::endl;
+
+				diff = std::abs<double>(diff);
+				std::cout << "Diff " << diff << std::endl;
+
+// 				diff = 1 - diff;
+				
+				std::cout << "Diff " << diff << std::endl;
+				_similarity = (zone_similarity + diff) / 2;
+// 				_similarity = diff;
+			};
+			double getSimilarity(){assert(zone_size_factor_source != -1); return _similarity;}
 		};
 		
 		
@@ -143,6 +172,43 @@ namespace AASS{
 				}
 			}
 			
+			void setSizesClassification() {
+				
+				std::cout << "setSize Classification " << std::endl;
+				std::vector<int> sizes;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+				int max = -1, min = -1;
+				auto vp = boost::vertices((*this));
+				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					int si = (*this)[v].size();
+					sizes.push_back(si);
+					if(max == 1 || max < si){
+						max = si;
+					}
+					if(min == 1 || min > si){
+						min = si;
+					}
+				}
+				
+				double div = (max - min);
+				
+				std::vector<double> all_scores;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 				int max = -1, min = -1;
+				vp = boost::vertices((*this));
+				int i = 0;
+				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					double score = (sizes[i] - min) / div;
+					++i ;
+					std::cout << "SCORE" << score << std::endl;
+					(*this)[v].setSizeClassification(score);
+				}
+				
+				
+			}
+			
 			
 			void removeRiplesv2();
 			
@@ -259,7 +325,7 @@ namespace AASS{
 			
 			
 			
-			std::vector<ZoneCompared> compare(const GraphZone& target) const;
+			std::vector<ZoneCompared> compare(GraphZone& target);
 			
 			
 

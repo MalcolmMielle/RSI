@@ -28,7 +28,7 @@ namespace AASS{
 			
 			
 			//TODO:
-			int _size_classification; //Should be between 0 and 10 to be able to compare to zone size relative to other size in the same graph
+			double _size_classification; //Should be between 0 and 10 to be able to compare to zone size relative to other size in the same graph
 			
 			
 		public:
@@ -41,7 +41,7 @@ namespace AASS{
 			};
 			
 			void setSizeClassification(double size){_size_classification = size;}
-			double getSizeClassification(){return _size_classification;}
+			double getSizeClassification() const {return _size_classification;}
 			
 			void push_back(const cv::Point2i& p){_zone.push_back(p); addPoint(p);}
 			void push_front(const cv::Point2i& p){_zone.push_front(p); addPoint(p);}
@@ -50,6 +50,7 @@ namespace AASS{
 			void pop_front(){removePoint(0); _zone.pop_front();}
 			
 			bool isEmpty(){return (0 == _zone.size());}
+			int size(){return _zone.size();}
 			void setImageSize(const cv::Mat& in){_zone_mat = cv::Mat::zeros(in.size(), CV_8U);};
 			
 			size_t size() const {return _zone.size();}
@@ -348,7 +349,7 @@ namespace AASS{
 			 * 
 			 * It normalize the PCA values using the max of each set of values and compare the difference between the max and min of each set.
 			 */
-			double compare(const Zone& zone_in) const {
+			double comparePCA(const Zone& zone_in) const {
 				
 				auto pca_max_min = getMaxMinPCA();
 				auto pca_max_min_input = zone_in.getMaxMinPCA();
@@ -381,6 +382,12 @@ namespace AASS{
 				
 			}
 			
+			
+			double compare(const Zone& zone_in) const {
+				std::cout << "Compare" <<std::endl;
+				double simi_zone = comparePCA(zone_in);
+				return simi_zone;
+			}
 			
 		private: 
 			void addPoint(const cv::Point2i& p){

@@ -860,8 +860,11 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 
 
 
-std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(const GraphZone& target) const {
+std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& target) {
 	
+	//Update the classification of all zones
+	setSizesClassification();
+	target.setSizesClassification();
 	
 	std::vector<ZoneCompared> out;
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
@@ -877,19 +880,26 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(const GraphZo
 			std::cout << "source " << v << std::endl;
 			double similarity = (*this)[v].compare(target[v_target]);
 			
+			//Create the zone comparison element with all values
 			ZoneCompared zoneout;
 			zoneout.source = v;
 			zoneout.target = v_target;
-			zoneout.similarity = similarity;
+			zoneout.zone_similarity = similarity;
+			std::cout << "WHYYYY" << (*this)[v].getSizeClassification() << std::endl;
+			zoneout.zone_size_factor_source = (*this)[v].getSizeClassification();
+			zoneout.zone_size_factor_target = target[v_target].getSizeClassification();
+			
+			//Create the zoneout similarity value
+			zoneout.update();
 			out.push_back(zoneout);
 			
 		}
 	}
 	
-	for(size_t i = 0 ; i < out.size() ; ++i){
-		
-		std::cout << out[i].source << std::endl;
-	}
+// 	for(size_t i = 0 ; i < out.size() ; ++i){
+// 		
+// 		out[i].update();
+// 	}
 	
 	assert(out.size() == (this->getNumVertices() * target.getNumVertices()));
 	return out;
