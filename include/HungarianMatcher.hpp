@@ -25,13 +25,27 @@ namespace AASS{
 		class HungarianMatcher{
 		
 		protected:
-			
+			hungarian_problem_t p;
 			
 		public:
 			
 			HungarianMatcher(){};
 			
+			//TODO : make sure all memory is freed
+			~HungarianMatcher(){
+				/* free used memory */
+				hungarian_free(&p);
+				
+				
+			}
+			
 			 std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > match(GraphZone& source, GraphZone& target, std::vector<int>& scores);
+			 
+			 const hungarian_problem_t& getHungarianProblem() const { return p;}
+			 hungarian_problem_t& getHungarianProblem() { return p;}
+			 
+			 int** getCost(){return p.cost;}
+// 			 const int** getCost() const {return p.cost;}
 			
 		private:
 			
@@ -42,7 +56,7 @@ namespace AASS{
 		
 		inline std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target, std::vector<int>& scores){
 			
-			hungarian_problem_t p;
+// 			hungarian_problem_t p;
 			
 			std::cout << "Creating the smilarity" << std::endl;
 			auto res = source.compare(target);
@@ -127,19 +141,16 @@ namespace AASS{
 				}
 			}
 // 			fprintf(stderr, "\n");
-			
-			std::cout << "outout" << std::endl;
-			
 
-			/* free used memory */
-			hungarian_free(&p);
-			
+//Freeing the memory
 			int idx;
 			for (idx=0; idx < 4; idx+=1) {
 				free(m[idx]);
 			}
 			free(m);
-			
+				
+				
+			std::cout << "outout" << std::endl;
 			std::cout << "return " <<out.size() << std::endl;
 			return out;
 		}	
