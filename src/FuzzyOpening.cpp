@@ -85,6 +85,10 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 // 	std::cout << " TYPE " << type2str(distance_image.type()) << std::endl;	
 	CV_Assert(distance_image.depth() == CV_32F);
 	
+// 	cv::normalize(distance_image, distance_image, 0, 255, cv::NORM_MINMAX, CV_8U);
+// 	cv::imshow("dista img", distance_image);
+// 	cv::waitKey(0);
+	
 	int pad = distance_image.rows;
 	int old_rows = distance_image.rows;
 	int old_cols = distance_image.cols;

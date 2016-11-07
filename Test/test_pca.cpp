@@ -211,6 +211,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		cv::Mat out_tmp;
 		cv::Mat out_tmp_slam;
 		
+		cv::imshow("Openedd", out_slam);
 	// 	cv::imshow("REDUCED", out_tmp_slam);
 		cv::Mat copp;
 		out_slam.copyTo(copp);
@@ -226,7 +227,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		cv::imshow("REDUCED", out_tmp_slam);
 		cv::Mat cop;
 		out_tmp_slam.copyTo(cop);
-	// 	cv::waitKey(0);
+		cv::waitKey(0);
 
 		
 		AASS::RSI::ZoneExtractor wzoneextract;
@@ -275,7 +276,8 @@ BOOST_AUTO_TEST_CASE(trying)
 // 		graph_slam.removeRiplesv2();
 		
 		
-		graph_slam.watershed(0.25);
+// 		graph_slam.watershed(0.25);
+		graph_slam.watershed(0.1);
 		
 		int size_to_remove = 100;
 		
