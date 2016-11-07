@@ -12,11 +12,13 @@ void AASS::RSI::FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& out
 	//TODO : make circle drawing faster ! The problem is escentially the drawing time of the circles
 	//If the algorithm doesn't need to run fast, we run a circluar element for more accurate result
 	if(_fast == false){
-		element = cv::Mat::zeros((value * 2) + 2 , (value * 2) + 2, CV_32F);
-		cv::circle(element, cv::Point2i((value), (value)), (value), cv::Scalar(1), -1);
-// 		cv::circle(element, cv::Point2i((value), (value)), (value)-1, cv::Scalar(1), -1);
-// 		cv::circle(element, cv::Point2i((value)-1, (value)), (value)-1, cv::Scalar(1), -1);
-// 		cv::circle(element, cv::Point2i((value), (value)-1), (value)-1, cv::Scalar(1), -1);
+// 		std::cout << "Value" << value << std::endl;
+		element = _masks.at(value - 1);
+// 		cv::imshow("MASK", element);
+// 		cv::waitKey(0);
+// 		element = cv::Mat::zeros((value * 2) + 2 , (value * 2) + 2, CV_32F);
+// 		cv::circle(element, cv::Point2i((value), (value)), (value), cv::Scalar(1), -1);
+
 		
 		//Needs to be not even
 // 		element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2*value +1, 2*value +1), cv::Point(value-1 , value-1 ) );
@@ -61,6 +63,8 @@ void AASS::RSI::FuzzyOpening::addPointValueInCircle(cv::Mat& input, cv::Mat& out
 void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, int size)
 {
 	
+	createAllMasks(size);
+	
 // 	cv:imshow("SRCSRC", src);
 	
 	//Calcul distance image
@@ -96,6 +100,7 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 	//Update result 
 	int count = 0;
 	for(int row = pad ; row < distance_image.rows - pad + 1 /*&& count < 15000*/ ; row++){
+		std::cout << "1 row \n";
 		float* p = distance_image.ptr<float>(row); //point to each row
 		float* p_output = output.ptr<float>(row); //point to each row
 		for(int col = pad ; col < distance_image.cols - pad + 1 /*&& count < 15000*/ ; col++){

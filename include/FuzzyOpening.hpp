@@ -36,6 +36,8 @@ namespace AASS{
 			* 1 : rectangle
 			*/
 		// 	size_t _element_id;
+		
+			std::deque<cv::Mat> _masks; //All circle of until size we need
 			
 		public:
 			FuzzyOpening(): _fast(false){};
@@ -66,6 +68,21 @@ namespace AASS{
 			
 			
 		private:
+			
+			void createAllMasks(int size){
+				
+				if(size != _masks.size()){
+					_masks.clear();
+					for(size_t i = 0 ; i < size ; ++i){
+						cv::Mat element = cv::Mat::zeros((i * 2) + 2 , (i * 2) + 2, CV_32F);
+						cv::circle(element, cv::Point2i((i), (i)), (i), cv::Scalar(1), -1);
+						_masks.push_back(element);
+					}
+					
+				}
+				
+			}
+			
 			
 		};
 
