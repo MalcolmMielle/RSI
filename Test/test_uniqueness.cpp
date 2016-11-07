@@ -17,8 +17,8 @@
 BOOST_AUTO_TEST_CASE(trying)
 {
 	
-	int argc = boost::unit_test::framework::master_test_suite().argc;
-	char** argv = boost::unit_test::framework::master_test_suite().argv;
+// 	int argc = boost::unit_test::framework::master_test_suite().argc;
+// 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
 	std::string file = "../../Test/Preprocessed/00.png";

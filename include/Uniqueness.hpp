@@ -115,7 +115,7 @@ namespace AASS{
 					auto variance_v = variance(score_tmp, mean_v);
 					std::cout << "variance " << variance_v << std::endl;
 					auto min = std::min_element<std::vector<int>::iterator>(score_tmp.begin(), score_tmp.end());
-					std::cout << "min " << *min << std::endl;
+// 					std::cout << "min " << *min << std::endl;
 					
 					bool uniq = isUnique(variance_v, mean_v, *min);
 					
@@ -125,6 +125,10 @@ namespace AASS{
 					else {
 						std::cout << "The zone is NOT unique" << std::endl;
 					}
+					
+					double score = uniquenesScoreRow(score_tmp, variance_v, mean_v);
+					
+					std::cout << "The score of the zone is " << score << std::endl;
 					
 				}
 				
@@ -151,7 +155,7 @@ namespace AASS{
 				auto it = input.begin();
 				for(it ; it != input.end() ; ++it){
 					variance = variance + ( (*it - mean) * (*it - mean) );
-					std::cout << "variance " << variance << std::endl;
+// 					std::cout << "variance " << variance << std::endl;
 				}
 				
 				return variance / (double) input.size();
@@ -166,23 +170,58 @@ namespace AASS{
 				return sum / (double) input.size();
 			}
 			
+			/** 
+			 * @brief return true if the min is at least 1 standard deviation from the mean
+			 */
 			bool isUnique(double variance_model_1, double mean_v, int input){
-				std::cout << "input : " << variance_model_1 << " " << mean_v << " " << input << std::endl;
+// 				std::cout << "input : " << variance_model_1 << " " << mean_v << " " << input << std::endl;
 				//standard deviation is square root of variance.
 				double sdeviation = sqrt(variance_model_1);
 // 				boost::math::normal nd(mean_v, sdeviation);
 // 				double var =  boost::math::pdf(nd, input);
 // 				double low_mean =  boost::math::pdf(nd, mean);
 				
-				std::cout << "Mean " << mean_v << " super mean " << mean_v - ( 3 * sdeviation) << " min gauss " << input << std::endl;
+// 				std::cout << "Mean " << mean_v << " super mean " << mean_v - ( 3 * sdeviation) << " min gauss " << input << std::endl;
 				
 				//ATTENTION Magic number
-				if(input <= mean_v - (2.5 * sdeviation)){
+				if(input <= mean_v - sdeviation){
 					return true;
 				}
 				else{
 					return false;
 				}
+			}
+			
+			/**
+			 * @brief Test if the row represent a unique zone or note and return the associated uniqueness score.
+			 * 
+			 */
+			double uniquenesScoreRow(std::vector<int> scores, double variance_model_1, double mean_v){
+				
+				double score_tmp = 1;
+				
+				double sdeviation = sqrt(variance_model_1);
+				boost::math::normal nd(mean_v, sdeviation);
+				
+				bool flag_isUnique = false;
+				auto it = scores.begin();
+				for(it; it != scores.end() ; it++){
+					if(*it <= mean_v - sdeviation){
+						flag_isUnique = true;
+						double prob1 =  boost::math::cdf(nd, *it + 0.5);
+						double prob2 =  boost::math::cdf(nd, *it - 0.5);
+						double res = prob1 - prob2 ;
+						if(res > 1 || res < 0){
+							throw std::runtime_error("the cdf in base proba failed and it's not supposed to EVER");
+						}
+						score_tmp = score_tmp - res;
+					}
+				}
+				
+				if(flag_isUnique == false){
+					score_tmp = 0 ;
+				}
+				return score_tmp;
 			}
 			
 			
