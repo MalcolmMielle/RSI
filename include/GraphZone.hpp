@@ -25,27 +25,32 @@ namespace AASS{
 			double zone_size_factor_source;
 			double zone_size_factor_target;
 			
-			ZoneCompared() : zone_size_factor_source(-1){};
+			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2, double simi) : source(v), target(v2), _similarity(simi), zone_size_factor_source(0){};
 			
-			void update(){
-				assert(zone_size_factor_source <=1 && zone_size_factor_source >=0);
-				assert(zone_size_factor_target <=1 && zone_size_factor_target >=0);
-				
-				std::cout << "s " << zone_size_factor_source << std::endl;
-				std::cout << "s " << zone_size_factor_target << std::endl;
-				
-				double diff = zone_size_factor_source - zone_size_factor_target;
-				std::cout << "Diff " << diff << std::endl;
-
-				diff = std::abs<double>(diff);
-				std::cout << "Diff " << diff << std::endl;
-
-// 				diff = 1 - diff;
-				
-				std::cout << "Diff " << diff << std::endl;
-				_similarity = (zone_similarity + diff) / 2;
-// 				_similarity = diff;
-			};
+			///@brief calculate the similarity value depending on all attributes
+// 			void update(){
+// 				assert(zone_size_factor_source <=1 && zone_size_factor_source >=0);
+// 				assert(zone_size_factor_target <=1 && zone_size_factor_target >=0);
+// 				
+// 				std::cout << "s " << zone_size_factor_source << std::endl;
+// 				std::cout << "s " << zone_size_factor_target << std::endl;
+// 				
+// 				double diff = zone_size_factor_source - zone_size_factor_target;
+// 				std::cout << "Diff " << diff << std::endl;
+// 
+// 				diff = std::abs<double>(diff);
+// 				std::cout << "Diff " << diff << std::endl;
+// 
+// // 				diff = 1 - diff;
+// 				
+// 				std::cout << "Diff " << diff << std::endl;
+// 				
+// 				//ATTENTION : compare zone_similarity + diff in size
+// 				_similarity = (zone_similarity + diff) / 2;
+// 				//ATTENTION : compare diff in size
+// // 				_similarity = diff;
+// 			};
+			
 			double getSimilarity(){assert(zone_size_factor_source != -1); return _similarity;}
 		};
 		
@@ -172,6 +177,7 @@ namespace AASS{
 				}
 			}
 			
+			///@brief force the value of each zone depending on the size from biggest zone to smallest
 			void setSizesClassification() {
 				
 				std::cout << "setSize Classification " << std::endl;

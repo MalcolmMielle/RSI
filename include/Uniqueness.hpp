@@ -86,23 +86,19 @@ namespace AASS{
 		public:
 			Uniqueness() : _score(0){};
 			
-			void uniqueness(const std::string& file){
-				
-				//Create the graph
-				AASS::RSI::GraphZone graph_slam;
-				initGraph(file, graph_slam);
-						
+			std::vector<std::pair<GraphZone::Vertex, double> > uniqueness(AASS::RSI::GraphZone& graph_slam) const {
+				std::vector<std::pair<GraphZone::Vertex, double> > out;
 				//Match it onto itself
 				AASS::RSI::HungarianMatcher hungmatch;
 				std::vector<int> scores;
 				auto match = hungmatch.match(graph_slam, graph_slam, scores);
-				auto cost = hungmatch.getCost();
+				auto cost = hungmatch.getCostNonConstOptimized();
 				//Get the uniqueness out of the proba distrib
 				
 				for(int i = 0 ; i < graph_slam.getNumVertices() ; i++) {
 					
 					std::vector<int> score_tmp;
-					std::cout << "exporting" << std::endl;
+// 					std::cout << "exporting" << std::endl;
 					
 					for(int j = 0 ; j < graph_slam.getNumVertices() ; j++) {
 						std::cout << cost[i][j] << " " ;
@@ -115,7 +111,7 @@ namespace AASS{
 					auto variance_v = variance(score_tmp, mean_v);
 					std::cout << "variance " << variance_v << std::endl;
 					auto min = std::min_element<std::vector<int>::iterator>(score_tmp.begin(), score_tmp.end());
-// 					std::cout << "min " << *min << std::endl;
+					std::cout << "min " << *min << std::endl;
 					
 					bool uniq = isUnique(variance_v, mean_v, *min);
 					
@@ -128,17 +124,30 @@ namespace AASS{
 					
 					double score = uniquenesScoreRow(score_tmp, variance_v, mean_v);
 					
-					std::cout << "The score of the zone is " << score << std::endl;
+					out.push_back(std::pair<GraphZone::Vertex, double>(match[i].first, score) );
+					std::cout << "The score of the zone is " << score << std::endl << std::endl;
 					
 				}
 				
+				return out;
+				
+			}
+			
+			std::vector<std::pair<GraphZone::Vertex, double> > uniqueness(const std::string& file) const {
+				
+				//Create the graph
+				AASS::RSI::GraphZone graph_slam;
+				initGraph(file, graph_slam);
+						
+				
+				return uniqueness(graph_slam);
 				
 				
 			}
 			
 		private:
 			
-			bool initGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
+			bool initGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam) const {
 				
 				//Create the graph
 				makeGraphSketch(file, graph_slam);
@@ -150,7 +159,7 @@ namespace AASS{
 								
 			}
 			
-			double variance(std::vector<int> input, double mean){
+			double variance(std::vector<int> input, double mean) const{
 				double variance = 0 ;
 				auto it = input.begin();
 				for(it ; it != input.end() ; ++it){
@@ -161,7 +170,7 @@ namespace AASS{
 				return variance / (double) input.size();
 			}
 			
-			double mean(std::vector<int> input){
+			double mean(std::vector<int> input) const {
 				double sum = 0;
 				auto it = input.begin();
 				for(it ; it != input.end() ; ++it){
@@ -173,7 +182,7 @@ namespace AASS{
 			/** 
 			 * @brief return true if the min is at least 1 standard deviation from the mean
 			 */
-			bool isUnique(double variance_model_1, double mean_v, int input){
+			bool isUnique(double variance_model_1, double mean_v, int input) const {
 // 				std::cout << "input : " << variance_model_1 << " " << mean_v << " " << input << std::endl;
 				//standard deviation is square root of variance.
 				double sdeviation = sqrt(variance_model_1);
@@ -194,13 +203,15 @@ namespace AASS{
 			
 			/**
 			 * @brief Test if the row represent a unique zone or note and return the associated uniqueness score.
+			 * TODO : better normalizatin of this score for now 0.98 is not good.
 			 * 
 			 */
-			double uniquenesScoreRow(std::vector<int> scores, double variance_model_1, double mean_v){
+			double uniquenesScoreRow(std::vector<int> scores, double variance_model_1, double mean_v) const {
 				
 				double score_tmp = 1;
 				
 				double sdeviation = sqrt(variance_model_1);
+				std::cout << "sd " << sdeviation << std::endl;
 				boost::math::normal nd(mean_v, sdeviation);
 				
 				bool flag_isUnique = false;
@@ -229,7 +240,7 @@ namespace AASS{
 			* @brief Calcule the probability based on the normal distribution.
 			* Since it represent the pdf, the probability is given by the integral between two values. Must use the cdf
 			*/
-			double normalDistribution(double variance_model_1, double e1_input, int e_model)
+			double normalDistribution(double variance_model_1, double e1_input, int e_model) const 
 			{
 
 				

@@ -19,6 +19,75 @@
 #include "hungarian.h"
 #include "HungarianMatcher.hpp"
 
+
+
+void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
+	
+	cv::Mat obst_copy;
+	obstacle.copyTo(obst_copy);
+	
+	cv::Mat obst_model_copy;
+	obstacle_model.copyTo(obst_model_copy);
+	
+// 	cv::Mat draw_links = cv::Mat::zeros(obst_model_copy.size(), CV_8UC3);
+// 	cv::Mat draw_graph = cv::Mat::zeros(obst_copy.size(), CV_8UC3);
+// 	cv::Mat draw_graph_model = cv::Mat::zeros(obst_model_copy.size(), CV_8UC3);
+	
+	int cols_max = obst_model_copy.size().width;
+	if(cols_max < obst_copy.size().width){
+		cols_max = obst_copy.size().width;
+	}
+	
+	cv::Size size(cols_max, obst_model_copy.size().height + obst_copy.size().height);
+	cv::Mat all = cv::Mat::zeros(size, CV_8UC3);
+// 	cv::Mat only_linked = cv::Mat::zeros(size, CV_8UC3);
+	cv::Mat all_maps = cv::Mat::zeros(size, CV_8UC3);
+	
+	cv::Mat roi = all(cv::Rect(0,0,obst_copy.size().width,obst_copy.size().height));
+// 	cv::Mat roi_linked = only_linked(cv::Rect(0,0,obst_copy.size().width,obst_copy.size().height));
+	cv::Mat roi_model = all(cv::Rect(0 ,obst_copy.size().height, obst_model_copy.size().width,obst_model_copy.size().height));
+	
+// 	cv::Mat roi_maps = all_maps(cv::Rect(0,0,obst_copy.size().width,obst_copy.size().height));
+// 	cv::Mat roi_model_maps = all_maps(cv::Rect(0 ,obst_copy.size().height, obst_model_copy.size().width,obst_model_copy.size().height));
+	
+// 	gp_real.draw(roi);
+// 	gp_model.draw(roi_model);
+	
+	obst_copy.copyTo(roi);
+	obst_model_copy.copyTo(roi_model);
+	
+	cv::Scalar color;
+	cv::RNG rrng(12345);
+		
+	if(all.channels() == 1){
+		color = rrng.uniform(50, 255);
+	}
+	
+	else if(all.channels() == 3){
+		color[1] = rrng.uniform(50, 255);
+		color[2] = rrng.uniform(50, 255);
+		color[3] = rrng.uniform(50, 255);
+	}
+	
+	cv::Scalar color_model;
+
+	
+	auto it = matches.begin();
+	
+	for( ; it != matches.end() ; ++it){
+		std::cout << "DRAW LINE " << std::endl;
+		
+		auto point = gp_model[it->second].getCentroid();
+		point.y = point.y + obst_model_copy.size().height;
+		
+		cv::line(all, gp_real[it->first].getCentroid(), point, color, 5);
+	}
+	
+	cv::imshow("all links", all);
+	
+}
+
+
 BOOST_AUTO_TEST_CASE(trying)
 {
 	
@@ -26,7 +95,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/pylon.png";
+	std::string file = "../../Test/Preprocessed/00.png";
 	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	
 	cv::imshow("input", slam);
@@ -95,10 +164,13 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::vector<int> scores;
 	auto match = hungmatch.match(graph_slam, graph_slam, scores);
 	
-	for(size_t i = 0 ; i < match.size() ; ++i){
-		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
-		std::cout << "SCORE : " << scores[i] << std::endl;
-		cv::waitKey(0);
-	}
+// 	for(size_t i = 0 ; i < match.size() ; ++i){
+// 		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
+// 		std::cout << "SCORE : " << scores[i] << std::endl;
+// 		cv::waitKey(0);
+// 	}
 	
+	
+	draw(graph_slam, graph_slam, slam , slam, match);
+	cv::waitKey(0);
 }

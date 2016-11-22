@@ -44,7 +44,8 @@ namespace AASS{
 			 const hungarian_problem_t& getHungarianProblem() const { return p;}
 			 hungarian_problem_t& getHungarianProblem() { return p;}
 			 
-			 int** getCost(){return p.cost;}
+			 //TODO : cost is not const !!! save it at the begining
+			 int** getCostNonConstOptimized(){return p.cost;}
 // 			 const int** getCost() const {return p.cost;}
 			
 		private:
@@ -96,6 +97,10 @@ namespace AASS{
 			fprintf(stderr, "assignment:");
 			hungarian_print_assignment(&p);
 			
+			/* some output */
+			fprintf(stderr, "cost-matrix:");
+			hungarian_print_costmatrix(&p);
+			
 			std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > out;
 			// This depend on which one as more nodes !
 			// Goes along the line
@@ -106,12 +111,14 @@ namespace AASS{
 				for(i=0; i<source.getNumVertices(); i++) {
 	// 				fprintf(stderr, " [");
 					for(j=0; j<target.getNumVertices(); j++) {
+						
+						std::cout << p.cost[i][j] << " " << std::endl;
 						if(p.assignment[i][j] == 1){
-							std::cout << "Matching " << i << " with " << j << std::endl;
-							std::cout << "Matching " << i * target.getNumVertices() << " with " << (i * target.getNumVertices() )  + j << std::endl;
+							std::cout << "Matching " << i << " with " << j << " cost " << simi.at( ( i*target.getNumVertices() ) + j) << std::endl;
+// 							std::cout << "Matching " << i * target.getNumVertices() << " with " << (i * target.getNumVertices() )  + j << std::endl;
 							
 							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at(i * target.getNumVertices()).source, res.at(( i * target.getNumVertices() ) + j).target));
-							scores.push_back(p.cost[i][j]);
+							scores.push_back(simi.at( ( i*target.getNumVertices() ) + j));
 						}
 					}
 					
@@ -128,11 +135,11 @@ namespace AASS{
 					for(j=0; j<source.getNumVertices(); j++) {
 						if(p.assignment[j][i] == 1){
 							
-							std::cout << "Matching " << i << " with " << j << std::endl;
-							std::cout << "Matching " << (j * target.getNumVertices()) + i << std::flush << " with " << i * target.getNumVertices() << std::endl;
+							std::cout << "Matching " << i << " with " << j << " cost " << simi.at( ( i*source.getNumVertices() ) + j)<< std::endl;
+// 							std::cout << "Matching " << (j * target.getNumVertices()) + i << std::flush << " with " << i * target.getNumVertices() << std::endl;
 							
 							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at((j * target.getNumVertices()) + i).source, res.at(( i * target.getNumVertices() )).target));
-							scores.push_back(p.cost[j][i]);
+							scores.push_back(simi.at( ( i*source.getNumVertices() ) + j));
 						}
 					}
 					

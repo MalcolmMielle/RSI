@@ -384,9 +384,32 @@ namespace AASS{
 			
 			
 			double compare(const Zone& zone_in) const {
+				//Compare their elongation
 				std::cout << "Compare" <<std::endl;
 				double simi_zone = comparePCA(zone_in);
-				return simi_zone;
+				
+				// Compare the relative size				
+				assert(zone_in.getSizeClassification() <=1 && zone_in.getSizeClassification() >=0);
+				assert(getSizeClassification() <=1 && getSizeClassification() >=0);
+				
+				std::cout << "s " << zone_in.getSizeClassification() << std::endl;
+				std::cout << "s " << getSizeClassification() << std::endl;
+				
+				double diff = zone_in.getSizeClassification() - getSizeClassification();
+				std::cout << "Diff " << diff << std::endl;
+
+				diff = std::abs<double>(diff);
+				std::cout << "Diff " << diff << std::endl;
+
+// 				diff = 1 - diff;
+				
+				std::cout << "Diff " << diff << std::endl;
+				
+				//ATTENTION : compare zone_similarity + diff in size
+				return (simi_zone + diff) / 2;
+				//ATTENTION : compare diff in size
+// 				return diff;
+				
 			}
 			
 		private: 

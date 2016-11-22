@@ -19,6 +19,81 @@
 #include "hungarian.h"
 #include "HungarianMatcher.hpp"
 
+#include "Uniqueness.hpp"
+
+
+
+void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
+	
+	cv::Mat obst_copy;
+	obstacle.copyTo(obst_copy);
+	
+	cv::imshow("OBSOBS", obst_copy);
+	
+	cv::Mat obst_model_copy;
+	obstacle_model.copyTo(obst_model_copy);
+	
+// 	cv::Mat draw_links = cv::Mat::zeros(obst_model_copy.size(), CV_8UC3);
+// 	cv::Mat draw_graph = cv::Mat::zeros(obst_copy.size(), CV_8UC3);
+// 	cv::Mat draw_graph_model = cv::Mat::zeros(obst_model_copy.size(), CV_8UC3);
+	
+	int cols_max = obst_model_copy.size().width;
+	if(cols_max < obst_copy.size().width){
+		cols_max = obst_copy.size().width;
+	}
+	
+	cv::Size size(cols_max, obst_model_copy.size().height + obst_copy.size().height);
+	cv::Mat all = cv::Mat::zeros(size, CV_8UC1);
+// 	cv::Mat only_linked = cv::Mat::zeros(size, CV_8UC3);
+	cv::Mat all_maps = cv::Mat::zeros(size, CV_8UC3);
+	
+	cv::Mat roi = all(cv::Rect(0,0,obst_copy.size().width,obst_copy.size().height));
+// 	cv::Mat roi_linked = only_linked(cv::Rect(0,0,obst_copy.size().width,obst_copy.size().height));
+	cv::Mat roi_model = all(cv::Rect(0 ,obst_copy.size().height, obst_model_copy.size().width,obst_model_copy.size().height));
+	
+// 	cv::Mat roi_maps = all_maps(cv::Rect(0,0,obst_copy.size().width,obst_copy.size().height));
+// 	cv::Mat roi_model_maps = all_maps(cv::Rect(0 ,obst_copy.size().height, obst_model_copy.size().width,obst_model_copy.size().height));
+	
+// 	gp_real.draw(roi);
+// 	gp_model.draw(roi_model);
+	
+	obst_copy.copyTo(roi);
+	obst_model_copy.copyTo(roi_model);
+	
+	cv::Scalar color;
+	cv::RNG rrng(12345);
+		
+	if(all.channels() == 1){
+		color = rrng.uniform(50, 255);
+	}
+	
+	else if(all.channels() == 3){
+		color[1] = rrng.uniform(50, 255);
+		color[3] = rrng.uniform(50, 255);
+		color[2] = rrng.uniform(50, 255);
+	}
+// 	
+// 	cv::Scalar color_model;
+// 
+// 	
+	auto it = matches.begin();
+	
+	for( ; it != matches.end() ; ++it){
+		std::cout << "DRAW LINE " << std::endl;
+		
+		auto point = gp_model[it->second].getCentroid();
+		point.y = point.y + obst_copy.size().height;
+		
+		cv::line(all, gp_real[it->first].getCentroid(), point, color, 5);
+	}
+	
+	cv::imshow("all links", all);
+	
+}
+
+
+
+
 int i = 0;
 
 void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
@@ -89,13 +164,17 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Preprocessed/11.png";
+	std::string file = "../../Test/Preprocessed/01.png";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
-	std::string file2 = "../../Test/Preprocessed/00.png";
+	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	
+	std::string file2 = "../../Test/Preprocessed/05.png";
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraph(file2, graph_slam2);
+	
+	cv::Mat slam2 = cv::imread(file2, CV_LOAD_IMAGE_GRAYSCALE);
 	
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	
@@ -115,14 +194,50 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::vector<int> scores;
 	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
 	
+	/********** Uniqueness *******************************************/
+	
+	AASS::RSI::Uniqueness unique;
+	
+	std::cout << "FIRST UNIA" << std::endl;
+	
+	auto uni1 = unique.uniqueness(graph_slam);
+	
+	/********** Uniqueness *******************************************/
+	
+	std::cout << "SECOND UNIA" << std::endl;
+	
+	auto uni2 = unique.uniqueness(graph_slam2);
+	
 	/********** Visualization ****************************************/
 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
 		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
 		cv::imshow("Zone2", graph_slam2[match[i].second].getZoneMat());
-		std::cout << "SCORE : " << scores[i] << std::endl;
+		
+		//TODO: Add uniqueness measurement with it
+		std::cout << "SCORE : " << scores[i] << "Uniqueness : ";
+		
+		
+		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
+			if(it->first == match[i].first){
+				std::cout << it->second << " ";
+			}
+		}
+		std::cout << " And " ;
+		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
+			if(it->first == match[i].second){
+				std::cout << it->second << " ";
+			}
+		}
+		
+		std::cout << std::endl;
+		
 		cv::waitKey(0);
 	}
+	
+	cv::imshow("TEST", slam1);
+	draw(graph_slam, graph_slam2, slam1, slam2, match);
+	cv::waitKey(0);
 	
 }
 
