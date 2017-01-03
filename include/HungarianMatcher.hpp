@@ -73,7 +73,7 @@ namespace AASS{
 			auto it = res.begin();
 			for ( ; it != res.end() ; ++it){
 				int input = it->getSimilarity()*100;
-				std::cout << " pushing " << input << " becaue " << it->getSimilarity()*100 << std::endl;
+// 				std::cout << " pushing " << input << " becaue " << it->getSimilarity()*100 << std::endl;
 				simi.push_back(input);
 			}
 			
@@ -112,10 +112,11 @@ namespace AASS{
 	// 				fprintf(stderr, " [");
 					for(j=0; j<target.getNumVertices(); j++) {
 						
-						std::cout << p.cost[i][j] << " " << std::endl;
+// 						std::cout << p.cost[i][j] << " " << std::endl;
 						if(p.assignment[i][j] == 1){
-							std::cout << "Matching " << i << " with " << j << " cost " << simi.at( ( i*target.getNumVertices() ) + j) << std::endl;
-// 							std::cout << "Matching " << i * target.getNumVertices() << " with " << (i * target.getNumVertices() )  + j << std::endl;
+							std::cout << "Matching lol2" << i << " with " << j << " cost " << simi.at( ( i*target.getNumVertices() ) + j) << std::endl;
+							std::cout << "Matching " << i * target.getNumVertices() << " with " << (i * target.getNumVertices() )  + j << std::endl;
+							std::cout << res.at(i * target.getNumVertices()).source << " " << res.at(( i * target.getNumVertices() ) + j).target << std::endl;
 							
 							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at(i * target.getNumVertices()).source, res.at(( i * target.getNumVertices() ) + j).target));
 							scores.push_back(simi.at( ( i*target.getNumVertices() ) + j));
@@ -126,19 +127,28 @@ namespace AASS{
 	// 				fprintf(stderr, "]\n");
 				}
 			}
-			//Goes down the collomns
+			//Goes down the column
 			else{
+				std::cout << "Source more than target" << std::endl;
 				int i,j;
 	// 			fprintf(stderr , "\n");
 				for(i=0; i<target.getNumVertices(); i++) {
 	// 				fprintf(stderr, " [");
 					for(j=0; j<source.getNumVertices(); j++) {
+// 						std::cout << " ass " << p.assignment[j][i] << std::endl;
 						if(p.assignment[j][i] == 1){
 							
-							std::cout << "Matching " << i << " with " << j << " cost " << simi.at( ( i*source.getNumVertices() ) + j)<< std::endl;
-// 							std::cout << "Matching " << (j * target.getNumVertices()) + i << std::flush << " with " << i * target.getNumVertices() << std::endl;
+							std::cout << "Matching lol " << j << " with " << i << " cost " << simi.at( j * target.getNumVertices()) + i << std::endl;
 							
-							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at((j * target.getNumVertices()) + i).source, res.at(( i * target.getNumVertices() )).target));
+							std::cout << "Matching " <<j * target.getNumVertices()  +i << std::flush << " with " <<  j * target.getNumVertices() + i << std::endl;
+							
+							std::cout << res.at(j * target.getNumVertices() + i).source << " " << res.at(j * target.getNumVertices() + i).target << std::endl;
+							
+							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(
+								res.at((j * target.getNumVertices()) + i).source, 
+								res.at((j * target.getNumVertices()) + i).target)
+							);
+							
 							scores.push_back(simi.at( ( i*source.getNumVertices() ) + j));
 						}
 					}
@@ -159,6 +169,12 @@ namespace AASS{
 				
 			std::cout << "outout" << std::endl;
 			std::cout << "return " <<out.size() << std::endl;
+			
+			for(size_t i = 0 ; i < out.size() ; ++i){
+				std::cout << "matching " << i << " : " << out[i].first << " " << out[i].second << std::endl;
+			}
+			
+			
 			return out;
 		}	
 	}

@@ -101,10 +101,10 @@ namespace AASS{
 // 					std::cout << "exporting" << std::endl;
 					
 					for(int j = 0 ; j < graph_slam.getNumVertices() ; j++) {
-						std::cout << cost[i][j] << " " ;
+// 						std::cout << cost[i][j] << " " ;
 						score_tmp.push_back(cost[i][j]);
 					}
-					std::cout << std::endl;
+// 					std::cout << std::endl;
 					
 					auto mean_v = mean(score_tmp);
 					std::cout << "mean " << mean_v << std::endl;

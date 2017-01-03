@@ -330,7 +330,7 @@ namespace AASS{
 			}
 			
 			
-			
+			///@brief return source first and target second
 			std::vector<ZoneCompared> compare(GraphZone& target);
 			
 			

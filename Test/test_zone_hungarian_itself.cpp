@@ -173,4 +173,6 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	draw(graph_slam, graph_slam, slam , slam, match);
 	cv::waitKey(0);
+	
+	std::cout << "FIN" << std::endl;
 }

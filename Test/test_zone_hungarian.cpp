@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	
-	std::string file2 = "../../Test/Preprocessed/05.png";
+	std::string file2 = "../../Test/Preprocessed/03.png";
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraph(file2, graph_slam2);
 	
@@ -190,6 +190,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	/********** Hungarian matching of graph onto itself***************/
 			
+	std::cout << "Hungarian Match" << std::endl;
 	AASS::RSI::HungarianMatcher hungmatch;
 	std::vector<int> scores;
 	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
@@ -211,11 +212,12 @@ BOOST_AUTO_TEST_CASE(trying)
 	/********** Visualization ****************************************/
 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
+		std::cout << "matching " << i << " : " << match[i].first << " " << match[i].second << std::endl;
 		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
 		cv::imshow("Zone2", graph_slam2[match[i].second].getZoneMat());
 		
 		//TODO: Add uniqueness measurement with it
-		std::cout << "SCORE : " << scores[i] << "Uniqueness : ";
+		std::cout << "SCORE : " << scores[i] << " Uniqueness : ";
 		
 		
 		for( auto it = uni1.begin(); it != uni1.end() ; ++it){

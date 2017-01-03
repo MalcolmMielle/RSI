@@ -871,13 +871,13 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 	//vertices access all the vertix
 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
 		auto v = *vp.first;
-		std::cout << "new source" << std::endl;
+// 		std::cout << "new source" << std::endl;
 		std::pair<VertexIteratorZone, VertexIteratorZone> vp_target;
 		//vertices access all the vertix
 		for (vp_target = boost::vertices(target); vp_target.first != vp_target.second; ++vp_target.first) {
 			auto v_target = *vp_target.first;
 			
-			std::cout << "source " << v << std::endl;
+// 			std::cout << "source " << v << std::endl;
 			double similarity = (*this)[v].compare(target[v_target]);
 			
 			//Create the zone comparison element with all values
