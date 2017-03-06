@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Preprocessed/00.png";
+	std::string file = "../../Test/Preprocessed/13.png";
 	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	
 	cv::imshow("input", slam);

@@ -21,6 +21,7 @@
 
 #include "Uniqueness.hpp"
 
+#include "Kmean.hpp"
 
 
 void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
@@ -91,6 +92,86 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 	
 }
 
+
+
+void makeGraphSLAM(const std::string& file, AASS::RSI::GraphZone& graph_slam){
+	
+	cv::Mat slam_tmp = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+// 	
+	cv::imshow("input", slam_tmp);
+	cv::waitKey(0);
+	
+	cv::threshold(slam_tmp, slam_tmp, 20, 255, cv::THRESH_BINARY);
+	cv::threshold(slam_tmp, slam_tmp, 20, 255, cv::THRESH_BINARY_INV);
+	
+	cv::imshow("input", slam_tmp);
+	cv::waitKey(0);
+	std::cout << "/************ FUZZY OPENING*************/ \n";
+	
+	cv::blur(slam_tmp, slam_tmp, cv::Size(15,15));
+	
+	cv::imshow("input", slam_tmp);
+	cv::waitKey(0);
+	
+	cv::threshold(slam_tmp, slam_tmp, 200, 255, cv::THRESH_BINARY);
+	cv::threshold(slam_tmp, slam_tmp, 20, 0, cv::THRESH_TOZERO);
+	
+// 	cv::Mat invSrc =  cv::Scalar::all(255) - slam_tmp;
+	
+	cv::imshow("input", slam_tmp);
+	cv::waitKey(0);
+	
+	cv::Mat slam;		
+	AASS::RSI::Kmeans kmeans;
+	kmeans.setK(4);
+	kmeans.kmeansColor(slam_tmp, slam);
+	
+	AASS::RSI::FuzzyOpening fuzzy_slam;
+	fuzzy_slam.fast(false);
+	
+	cv::Mat out_slam;
+	cv::imshow("SLAM", slam);
+	cv::waitKey(0);
+	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
+	std::cout << "Done opening " << std::endl;
+	out_slam.convertTo(out_slam, CV_8U);
+	
+// 	std::cout << out << std::endl;
+	
+	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
+	cv::Mat out_tmp_slam;
+	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+	cv::imshow("REDUCED", out_tmp_slam);
+	cv::waitKey(0);
+	
+	AASS::RSI::ZoneExtractor zone_maker;
+	std::cout << "WHATERSHED SLAM" << std::endl;
+	zone_maker.extract(out_tmp_slam);
+	
+	std::cout << "Got the ZONES" << std::endl;
+
+	// 	std::cout << "Getting the graph" << std::endl;
+	
+	std::cout << "/*********** MAKING AND TRIMMING THE GRAPH ***************/\n";
+	graph_slam = zone_maker.getGraph();
+	graph_slam.removeVertexValue(0);
+
+	std::cout << "Number of nodes" << graph_slam.getNumVertices() << std::endl;
+	
+	//Watershed Algorithm
+	graph_slam.watershed(0.25);
+	
+	int size_to_remove = 100;
+	graph_slam.removeVertexUnderSize(size_to_remove, true);
+	graph_slam.removeLonelyVertices();
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness");	
+	
+	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+	graph_slam.draw(graphmat2);
+	std::string s = "Blob";
+	cv::imshow(s, graphmat2);
+}
 
 
 
@@ -164,15 +245,15 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Saeed/20170131135829.png";
+	std::string file = "../../Test/Saeed/bird.png";
 	AASS::RSI::GraphZone graph_slam;
-	makeGraph(file, graph_slam);
-	
+	makeGraphSLAM(file, graph_slam);
+		
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	
-	std::string file2 = "../../Test/Saeed/HIH_03.png";
+	std::string file2 = "../../Test/Saeed/bird2.png";
 	AASS::RSI::GraphZone graph_slam2;
-	makeGraph(file2, graph_slam2);
+	makeGraphSLAM(file2, graph_slam2);
 	
 	cv::Mat slam2 = cv::imread(file2, CV_LOAD_IMAGE_GRAYSCALE);
 	
@@ -242,4 +323,5 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::waitKey(0);
 	
 }
+
 

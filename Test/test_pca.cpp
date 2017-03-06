@@ -171,7 +171,6 @@ BOOST_AUTO_TEST_CASE(trying)
 		// 		cv::waitKey(0);
 		// 		watershed.drawAllZones(out_tmp, 0);
 			std::cout << "Value of size to remove : "  << graph_slam.getNumVertices() << std::endl;
-			exit(0);
 			
 // 			
 		}

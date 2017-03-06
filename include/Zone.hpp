@@ -383,6 +383,11 @@ namespace AASS{
 			}
 			
 			
+			/** @brief comparison this is where I choose to use PCA or not *
+			 *
+			 * 
+			 */
+			
 			double compare(const Zone& zone_in) const {
 				//Compare their elongation
 // 				std::cout << "Compare" <<std::endl;
@@ -406,9 +411,9 @@ namespace AASS{
 // 				std::cout << "Diff " << diff << std::endl;
 				
 				//ATTENTION : compare zone_similarity + diff in size
-				return (simi_zone + diff) / 2;
+// 				return (simi_zone + diff) / 2;
 				//ATTENTION : compare diff in size
-// 				return diff;
+				return diff;
 				
 			}
 			
