@@ -50,6 +50,10 @@ target_link_libraries(test_zone_hungarian_itself ${OpenCV_LIBS} ${vodigrex_LIBRA
 add_executable(test_zone_hungarian test_zone_hungarian.cpp)
 target_link_libraries(test_zone_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
 
+
+add_executable(test_valgrind_errors test_valgrind_errors.cpp)
+target_link_libraries(test_valgrind_errors ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib hungarian_lib)
+
 add_executable(test_slam_hungarian test_slam_maps_hungarian.cpp)
 target_link_libraries(test_slam_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} Fuzzylib -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
 

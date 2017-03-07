@@ -18,6 +18,7 @@ namespace AASS{
 		protected:
 			//The closer to 0 the better!
 			double _similarity;
+			
 		public:
 			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex source;
 			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex target;
@@ -59,10 +60,13 @@ namespace AASS{
 		
 
 		//TODO convert Mat to Eigen !
+		// ATTENTION: if uniqueness is calculated and then a node is added, then the flag to check if the uniqueness was updated is wrong... Need to do it either every time a node is added but it will need to move the addVertex function here.
 
 		class GraphZone : public bettergraph::SimpleGraph<Zone, EdgeElement>{
 			
 		protected:
+			///@brief -1 if not init
+			int _nb_of_unique;
 			
 		public:
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::GraphType GraphZoneType;
@@ -71,7 +75,19 @@ namespace AASS{
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::VertexIterator VertexIteratorZone;
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::EdgeIterator EdgeIteratorZone;
 
-			GraphZone(){};
+			GraphZone(): _nb_of_unique(-1){};
+			
+			void setNumUnique(int n){_nb_of_unique = n;}
+			double getNumUnique(){if(_nb_of_unique != -1){return _nb_of_unique;}else{return getNumVertices();}}
+			
+			bool zoneUniquenessWasCalculated(){
+				if(_nb_of_unique == -1){
+					return false;
+				}
+				else{
+					return true;
+				}
+			}
 			
 			void draw(cv::Mat& drawmat) const;
 			void drawPartial(cv::Mat& drawmat) const;
@@ -177,7 +193,7 @@ namespace AASS{
 				}
 			}
 			
-			///@brief force the value of each zone depending on the size from biggest zone to smallest
+			///@brief force the value of each zone depending on the size from biggest zone to smallest. Normalize it between 0  for the smallest zone and 1 for the largest.
 			void setSizesClassification() {
 				
 				std::cout << "setSize Classification " << std::endl;
@@ -212,6 +228,7 @@ namespace AASS{
 					(*this)[v].setSizeClassification(score);
 				}
 				
+				std::cout <<"DONE" << std::endl;
 				
 			}
 			

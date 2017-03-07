@@ -4,14 +4,21 @@
 #include <iostream>
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
+#include <stdexcept>
 
 namespace AASS{
 	
 	namespace RSI{
+		/**
+		 * bool _isUnique: true if the zone is unique, false otherwise. It is initialised as true, so that every new zone is considered ofr comparison unless setUniqueness as been explicitely called before.
+		 * 
+		 * bool _uniqueness_calculated: flag to check if the zone was initialised or not.
+		 */
 		class Zone{
 			
 		private:
 			bool _flag_PCA;
+			bool _uniqueness_calculated;
 			
 		protected:
 			size_t _value;
@@ -26,22 +33,46 @@ namespace AASS{
 			
 			std::vector< cv::Point> _contours;
 			
+			bool _isUnique;
+			
 			
 			//TODO:
 			double _size_classification; //Should be between 0 and 10 to be able to compare to zone size relative to other size in the same graph
 			
 			
 		public:
-			Zone() : _flag_PCA(false) {};
-			Zone(const cv::Size& size) : _flag_PCA(false){
+			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true) {};
+			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true){
 				_zone_mat = cv::Mat::zeros(size, CV_8U);
 			};
-			Zone(int rows, int cols) : _flag_PCA(false){
+			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true){
 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
 			
 			void setSizeClassification(double size){_size_classification = size;}
 			double getSizeClassification() const {return _size_classification;}
+			
+			void setUniqueness(bool b){
+				_uniqueness_calculated = true;
+				_isUnique = b;
+				assert(_isUnique == b);
+			}
+			
+			bool isUnique() const {	
+				std::cout << "Watwat " << _uniqueness_calculated << std::endl; 
+// 				if(_uniqueness_calculated == false){
+// // 					std::cout << "FUCK" << std::endl;
+// // 					throw std::runtime_error("you forgot to set the uniqueness first");
+// // 					std::cout << "FUCK2" << std::endl;
+// 				}
+// 				else{
+// 					std::cout << "Supposed it's good" << std::endl;
+// 				}
+				return _isUnique;
+				
+			}
+			
+			bool uniquenessInit(){return _uniqueness_calculated;}
 			
 			void push_back(const cv::Point2i& p){_zone.push_back(p); addPoint(p);}
 			void push_front(const cv::Point2i& p){_zone.push_front(p); addPoint(p);}
@@ -179,6 +210,10 @@ namespace AASS{
 					
 					throw std::runtime_error("MORE THAN ONE CONTOUR !");
 				}
+				if(contours.size() == 0 ){
+					throw std::runtime_error("NO CONTOUR IN ZONE !");
+				}
+				std::cout << "Contour size " << contours.size() << std::endl;
 				_contours = contours[0];
 				auto area = cv::contourArea(contours[0]);
 				getOrientation(contours[0]);
@@ -345,7 +380,7 @@ namespace AASS{
 			
 			
 			/**
-			 * @brief Compare two zones by using the PCA values.
+			 * @brief Compare two zones by using the PCA values. the lowest the score the better the matching
 			 * 
 			 * It normalize the PCA values using the max of each set of values and compare the difference between the max and min of each set.
 			 */
@@ -383,12 +418,16 @@ namespace AASS{
 			}
 			
 			
-			/** @brief comparison this is where I choose to use PCA or not *
-			 *
-			 * 
+			/** @brief comparison this is where I choose to use PCA or not. The lowest the score, the better the matching 
 			 */
 			
 			double compare(const Zone& zone_in) const {
+				
+				if(zone_in.isUnique() == false || this->isUnique() == false){
+					//One of the zone is not unique
+					return 1;
+				}
+				
 				//Compare their elongation
 // 				std::cout << "Compare" <<std::endl;
 				double simi_zone = comparePCA(zone_in);
@@ -404,16 +443,22 @@ namespace AASS{
 // 				std::cout << "Diff " << diff << std::endl;
 
 				diff = std::abs<double>(diff);
-// 				std::cout << "Diff " << diff << std::endl;
+				std::cout << "Diff " << diff << std::endl;
 
 // 				diff = 1 - diff;
 				
 // 				std::cout << "Diff " << diff << std::endl;
 				
-				//ATTENTION : compare zone_similarity + diff in size
-// 				return (simi_zone + diff) / 2;
-				//ATTENTION : compare diff in size
-				return diff;
+				//If both have similar size, we compare the PCA also
+				if(diff <= 0.5){
+					//ATTENTION : compare zone_similarity + diff in size
+					return (simi_zone + diff) / 2;
+				}
+				//Otherwise, we only return the shape comparison since it is pretty bad.
+				else{
+					//ATTENTION : compare diff in size
+					return diff;
+				}
 				
 			}
 			
@@ -446,17 +491,32 @@ namespace AASS{
 				//Store the position of the object
 				auto pos = cv::Point(pca_analysis.mean.at<double>(0, 0),
 								pca_analysis.mean.at<double>(0, 1));
+				
+				std::cout << "ytuple " << pos << std::endl;
 			
 				//Store the eigenvalues and eigenvectors
 				std::vector<cv::Point2d> eigen_vecs(2);
 				std::vector<double> eigen_val(2);
+				
+				if(pca_analysis.eigenvalues.at<double>(0, 0) == 0){
+					throw std::runtime_error("No eigen value");
+				}
+				
 				for (int i = 0; i < 2; ++i)
 				{
+					std::cout << "Prints " << pca_analysis.eigenvectors.at<double>(i, 0);
+					std::cout << " " << pca_analysis.eigenvectors.at<double>(i, 1);
+					std::cout << " " << pca_analysis.eigenvalues.at<double>(0, i) << std::endl;
 					eigen_vecs[i] = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0),
 											pca_analysis.eigenvectors.at<double>(i, 1));
 			
 					eigen_val[i] = pca_analysis.eigenvalues.at<double>(0, i);
-				}				
+					
+					std::cout << "DONE" << std::endl;
+				}
+				
+				std::cout << "ytuple " << pos << " " << pos + 0.02 * cv::Point(eigen_vecs[0].x * eigen_val[0], eigen_vecs[0].y * eigen_val[0]) <<  " " << pos + 0.02 * cv::Point(eigen_vecs[1].x * eigen_val[1], eigen_vecs[1].y * eigen_val[1]) << std::endl;
+				
 				_pca = std::tuple<cv::Point2i, cv::Point2i, cv::Point2i>(pos, pos + 0.02 * cv::Point(eigen_vecs[0].x * eigen_val[0], eigen_vecs[0].y * eigen_val[0]), pos + 0.02 * cv::Point(eigen_vecs[1].x * eigen_val[1], eigen_vecs[1].y * eigen_val[1]));
 			
 				_pca_orientation = atan2(eigen_vecs[0].y, eigen_vecs[0].x);

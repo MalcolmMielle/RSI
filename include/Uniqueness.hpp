@@ -86,6 +86,9 @@ namespace AASS{
 		public:
 			Uniqueness() : _score(0){};
 			
+			/**
+			 * @brief Match a graph onto itself and check the cost of matching one zone onto all the other. Use a normal distribution to know which ones are relevant.
+			 */
 			std::vector<std::pair<GraphZone::Vertex, double> > uniqueness(AASS::RSI::GraphZone& graph_slam) const {
 				std::vector<std::pair<GraphZone::Vertex, double> > out;
 				//Match it onto itself
@@ -95,6 +98,7 @@ namespace AASS{
 				auto cost = hungmatch.getCostNonConstOptimized();
 				//Get the uniqueness out of the proba distrib
 				
+				int count = 0 ;
 				for(int i = 0 ; i < graph_slam.getNumVertices() ; i++) {
 					
 					std::vector<int> score_tmp;
@@ -117,6 +121,7 @@ namespace AASS{
 					
 					if(uniq == true){
 						std::cout << "The zone is unique" << std::endl;
+						++count;
 					}
 					else {
 						std::cout << "The zone is NOT unique" << std::endl;
@@ -127,7 +132,11 @@ namespace AASS{
 					out.push_back(std::pair<GraphZone::Vertex, double>(match[i].first, score) );
 					std::cout << "The score of the zone is " << score << std::endl << std::endl;
 					
+					graph_slam[match[i].first].setUniqueness(uniq);
+					
 				}
+				graph_slam.setNumUnique(count);
+				assert(graph_slam.getNumUnique() == count);
 				
 				return out;
 				

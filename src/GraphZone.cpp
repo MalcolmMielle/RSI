@@ -586,6 +586,8 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 
 void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in)
 {
+	assert(v != v_to_fuse_in);
+	
 	EdgeIteratorZone out_i, out_end;
 	//Since we fuse the old zone in biggest we only need to link them to biggest
 	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
@@ -616,7 +618,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 	std::cout << (*this)[v] <<std::endl;
 	removeVertex(v);
 	
-	(*this)[v_to_fuse_in].PCA();
+// 	(*this)[v_to_fuse_in].PCA();
 	
 }
 
@@ -877,22 +879,30 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 		for (vp_target = boost::vertices(target); vp_target.first != vp_target.second; ++vp_target.first) {
 			auto v_target = *vp_target.first;
 			
-// 			std::cout << "source " << v << std::endl;
-			double similarity = (*this)[v].compare(target[v_target]);
+			//Compare only if both zone are not non unique
+			if((*this)[v].isUnique() == true && target[v_target].isUnique() == true){
 			
-			//Create the zone comparison element with all values
-			ZoneCompared zoneout(v, v_target, similarity);
-			
-// 			zoneout.source = v;
-// 			zoneout.target = v_target;
-// 			zoneout.zone_similarity = similarity;
-// 			std::cout << "WHYYYY" << (*this)[v].getSizeClassification() << std::endl;
-// 			zoneout.zone_size_factor_source = (*this)[v].getSizeClassification();
-// 			zoneout.zone_size_factor_target = target[v_target].getSizeClassification();
-			
-			//Create the zoneout similarity value
-// 			zoneout.update();
-			out.push_back(zoneout);
+				std::cout << "source " << v << std::endl;
+				double similarity = (*this)[v].compare(target[v_target]);
+				
+				//Create the zone comparison element with all values
+				ZoneCompared zoneout(v, v_target, similarity);
+				
+	// 			zoneout.source = v;
+	// 			zoneout.target = v_target;
+	// 			zoneout.zone_similarity = similarity;
+	// 			std::cout << "WHYYYY" << (*this)[v].getSizeClassification() << std::endl;
+	// 			zoneout.zone_size_factor_source = (*this)[v].getSizeClassification();
+	// 			zoneout.zone_size_factor_target = target[v_target].getSizeClassification();
+				
+				//Create the zoneout similarity value
+	// 			zoneout.update();
+				out.push_back(zoneout);
+			}
+			else{
+				
+				std::cout << "NOT UNIQUE" << std::endl;
+			}
 			
 		}
 	}
@@ -902,7 +912,8 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 // 		out[i].update();
 // 	}
 	
-	assert(out.size() == (this->getNumVertices() * target.getNumVertices()));
+	std::cout << out.size() << "==" << this->getNumUnique() << "*" << target.getNumUnique() << std::endl;
+	assert(out.size() == (this->getNumUnique() * target.getNumUnique()));
 	return out;
 	
 }

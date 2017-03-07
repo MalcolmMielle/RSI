@@ -98,28 +98,28 @@ void makeGraphSLAM(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	cv::Mat slam_tmp = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 // 	
-	cv::imshow("input", slam_tmp);
-	cv::waitKey(0);
+// 	cv::imshow("input", slam_tmp);
+// 	cv::waitKey(0);
 	
 	cv::threshold(slam_tmp, slam_tmp, 20, 255, cv::THRESH_BINARY);
 	cv::threshold(slam_tmp, slam_tmp, 20, 255, cv::THRESH_BINARY_INV);
 	
-	cv::imshow("input", slam_tmp);
-	cv::waitKey(0);
+// 	cv::imshow("input", slam_tmp);
+// 	cv::waitKey(0);
 	std::cout << "/************ FUZZY OPENING*************/ \n";
 	
 	cv::blur(slam_tmp, slam_tmp, cv::Size(15,15));
 	
-	cv::imshow("input", slam_tmp);
-	cv::waitKey(0);
+// 	cv::imshow("input", slam_tmp);
+// 	cv::waitKey(0);
 	
 	cv::threshold(slam_tmp, slam_tmp, 200, 255, cv::THRESH_BINARY);
 	cv::threshold(slam_tmp, slam_tmp, 20, 0, cv::THRESH_TOZERO);
 	
 // 	cv::Mat invSrc =  cv::Scalar::all(255) - slam_tmp;
 	
-	cv::imshow("input", slam_tmp);
-	cv::waitKey(0);
+// 	cv::imshow("input", slam_tmp);
+// 	cv::waitKey(0);
 	
 	cv::Mat slam;		
 	AASS::RSI::Kmeans kmeans;
@@ -130,8 +130,8 @@ void makeGraphSLAM(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	fuzzy_slam.fast(false);
 	
 	cv::Mat out_slam;
-	cv::imshow("SLAM", slam);
-	cv::waitKey(0);
+// 	cv::imshow("SLAM", slam);
+// 	cv::waitKey(0);
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 	std::cout << "Done opening " << std::endl;
 	out_slam.convertTo(out_slam, CV_8U);
@@ -141,8 +141,8 @@ void makeGraphSLAM(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
-	cv::imshow("REDUCED", out_tmp_slam);
-	cv::waitKey(0);
+// 	cv::imshow("REDUCED", out_tmp_slam);
+// 	cv::waitKey(0);
 	
 	AASS::RSI::ZoneExtractor zone_maker;
 	std::cout << "WHATERSHED SLAM" << std::endl;
@@ -170,7 +170,7 @@ void makeGraphSLAM(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 	graph_slam.draw(graphmat2);
 	std::string s = "Blob";
-	cv::imshow(s, graphmat2);
+// 	cv::imshow(s, graphmat2);
 }
 
 
@@ -234,7 +234,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
 	graph_slam.draw(graphmat2);
 	std::string s = std::to_string(i);
-	cv::imshow(s, graphmat2);
+// 	cv::imshow(s, graphmat2);
 }
 
 
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Saeed/bird.png";
+	std::string file = "../../Test/Saeed/bird4.png";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraphSLAM(file, graph_slam);
 		
@@ -267,14 +267,20 @@ BOOST_AUTO_TEST_CASE(trying)
 	graph_slam2.updatePCA();
 	graph_slam2.removeRiplesv2();
 	
-	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
+// 	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
 	
-	/********** Hungarian matching of graph onto itself***************/
-			
-	std::cout << "Hungarian Match" << std::endl;
-	AASS::RSI::HungarianMatcher hungmatch;
-	std::vector<int> scores;
-	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
+	/********** Drawing the graphs *******************************************/
+	
+	cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.draw(graphmat);
+	
+	cv::Mat graphmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
+	graph_slam2.draw(graphmat2);
+	
+// 	cv::imshow("graph1", graphmat);
+// 	cv::imshow("graph2", graphmat2);
+// 	cv::waitKey(0);
+	
 	
 	/********** Uniqueness *******************************************/
 	
@@ -284,14 +290,29 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	auto uni1 = unique.uniqueness(graph_slam);
 	
-	/********** Uniqueness *******************************************/
-	
+// 	/********** Uniqueness *******************************************/
+// 	
 	std::cout << "SECOND UNIA" << std::endl;
 	
 	auto uni2 = unique.uniqueness(graph_slam2);
 	
-	/********** Visualization ****************************************/
+	assert(graph_slam.zoneUniquenessWasCalculated() == true);
+	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
 	
+	
+	/********** Hungarian matching of graph onto itself***************/
+			
+	std::cout << "Hungarian Match" << std::endl;
+	AASS::RSI::HungarianMatcher hungmatch;
+	std::vector<int> scores;
+	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
+	
+// 	exit(0);
+	
+
+// 	
+// 	/********** Visualization ****************************************/
+// 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
 		std::cout << "matching " << i << " : " << match[i].first << " " << match[i].second << std::endl;
 		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
