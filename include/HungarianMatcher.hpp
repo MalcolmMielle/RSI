@@ -9,6 +9,25 @@ namespace AASS{
 	namespace RSI{
 		
 		
+// 		class Match{
+// 		public:
+// 			GraphZone::Vertex source;
+// 			GraphZone::Vertex target;
+// 			int score;
+// 
+// 			Match(const GraphZone::Vertex& firstt, const GraphZone::Vertex& secondd, int scoree) : source(firstt), target(secondd), score(scoree){}
+// 			
+// 			//Return a value ranking the matching between 0 (bad) and 100 (perfect)
+// 			double getRanking(const GraphZone& gsource, const GraphZone& gtarget){
+// 				double uscore =  gsource[source].getUniquenessScore();
+// 				double uscore0 = gtarget[target].getUniquenessScore();				
+// 				return ((100 * std::min(uscore, uscore0)) + (100 - score)) / 2;
+// 			}
+// 			
+// 		};
+		
+		
+		
 		int** array_to_matrix(const std::vector<int>& m, int rows, int cols) {
 			int i,j;
 			int** r;
@@ -42,7 +61,7 @@ namespace AASS{
 				
 			}
 			
-			 std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > match(GraphZone& source, GraphZone& target, std::vector<int>& scores);
+			 std::vector< ZoneCompared > match(GraphZone& source, GraphZone& target, std::vector<int>& scores);
 			 
 			 const hungarian_problem_t& getHungarianProblem() const { return p;}
 			 hungarian_problem_t& getHungarianProblem() { return p;}
@@ -57,8 +76,15 @@ namespace AASS{
 			
 		};
 		
-		
-		inline std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target, std::vector<int>& scores){
+		/**
+		 * @brief match two graph using the uniqueness and the hungarian.
+		 * 
+		 * @param[in] source: source graph
+		 * @param[in] target: target graph
+		 * @param[out] scores: list of score for the matching between 0 and 100. 0 is good and 100 is really bad.
+		 * @return vector of paris of matching between vertex.
+		 */
+		inline std::vector< ZoneCompared > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target, std::vector<int>& scores){
 			
 			std::cout << "TATENTIONDKJ " << source.zoneUniquenessWasCalculated() << " sadoifdsgiouh " << target.zoneUniquenessWasCalculated() << std::endl;
 // 			assert(source.zoneUniquenessWasCalculated() == true);
@@ -79,6 +105,8 @@ namespace AASS{
 			auto it = res.begin();
 			for ( ; it != res.end() ; ++it){
 				int input = it->getSimilarity()*100;
+				assert(input <= 100);
+				assert(input >= 0);
 				std::cout << " pushing " << input << " because " << it->getSimilarity()*100 << std::endl;
 				simi.push_back(input);
 			}
@@ -86,7 +114,7 @@ namespace AASS{
 			assert(simi.size() == source.getNumUnique()*target.getNumUnique());
 			
 			std::cout << "OUT source on rows and target on cols" << std::endl;
-			int** m = array_to_matrix(simi,source.getNumUnique(), target.getNumUnique());
+			int** m = array_to_matrix(simi, source.getNumUnique(), target.getNumUnique());
 			
 			std::cout << "INit" << std::endl;
 			
@@ -111,7 +139,7 @@ namespace AASS{
 			fprintf(stderr, "cost-matrix:");
 			hungarian_print_costmatrix(&p);
 			
-			std::vector< std::pair<GraphZone::Vertex, GraphZone::Vertex> > out;
+			std::vector< ZoneCompared > out;
 			// This depend on which one as more nodes !
 			// Goes along the line
 			if(source.getNumUnique() <= target.getNumUnique()){
@@ -130,7 +158,12 @@ namespace AASS{
 							std::cout << "Matching " << i * target.getNumUnique() << " with " << (i * target.getNumUnique() )  + j << std::endl;
 							std::cout << res.at(i * target.getNumUnique()).source << " " << res.at(( i * target.getNumUnique() ) + j).target << std::endl;
 							
-							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(res.at(i * target.getNumUnique()).source, res.at(( i * target.getNumUnique() ) + j).target));
+// 							ZoneCompared m(res.at(i * target.getNumUnique()).source, res.at(( i * target.getNumUnique() ) + j).target, simi.at( ( i*target.getNumUnique() ) + j));
+							
+							assert(res.at(( i * target.getNumUnique() ) + j).source == res.at(i * target.getNumUnique()).source);
+							assert(simi.at( ( i*target.getNumUnique() ) + j) == (int) (res.at(( i * target.getNumUnique() ) + j).getSimilarity() * 100 ));
+							
+							out.push_back(res.at(( i * target.getNumUnique() ) + j));
 							scores.push_back(simi.at( ( i*target.getNumUnique() ) + j));
 						}
 					}
@@ -141,12 +174,14 @@ namespace AASS{
 			}
 			//Goes down the column
 			else{
+				assert(out.size() == 0);
 				std::cout << "Source more than target" << std::endl;
 				int i,j;
 	// 			fprintf(stderr , "\n");
-				for(i=0; i<target.getNumUnique(); i++) {
+				std::cout << "target " << target.getNumUnique() << " source " << source.getNumUnique() << std::endl;
+				for(i = 0; i < target.getNumUnique(); i++) {
 	// 				fprintf(stderr, " [");
-					for(j=0; j<source.getNumUnique(); j++) {
+					for(j = 0; j < source.getNumUnique(); j++) {
 // 						std::cout << " ass " << p.assignment[j][i] << std::endl;
 						if(p.assignment[j][i] == 1){
 							
@@ -156,10 +191,20 @@ namespace AASS{
 							
 							std::cout << res.at(j * target.getNumUnique() + i).source << " " << res.at(j * target.getNumUnique() + i).target << std::endl;
 							
-							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(
-								res.at((j * target.getNumUnique()) + i).source, 
-								res.at((j * target.getNumUnique()) + i).target)
-							);
+// 							ZoneCompared m(res.at((j * target.getNumUnique()) + i).source, 
+// 										   res.at((j * target.getNumUnique()) + i).target, 
+// 										   simi.at( ( i*source.getNumUnique() ) + j));
+// 							out.push_back(m);
+// 							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(
+// 								res.at((j * target.getNumUnique()) + i).source, 
+// 								res.at((j * target.getNumUnique()) + i).target)
+// 							);
+							
+// 							std::cout << simi.at( ( i*source.getNumUnique() ) + j) <<"==" << (int) (res.at((j * target.getNumUnique()) + i).getSimilarity() * 100 )<< std::endl;
+							
+// 							assert(simi.at( ( i*source.getNumUnique() ) + j) == (int) (res.at((j * target.getNumUnique()) + i).getSimilarity() * 100 ) );
+							
+							out.push_back( res.at((j * target.getNumUnique()) + i) );
 							
 							scores.push_back(simi.at( ( i*source.getNumUnique() ) + j));
 						}
@@ -183,7 +228,7 @@ namespace AASS{
 			std::cout << "return " <<out.size() << std::endl;
 			
 			for(size_t i = 0 ; i < out.size() ; ++i){
-				std::cout << "matching " << i << " : " << out[i].first << " " << out[i].second << std::endl;
+				std::cout << "matching " << i << " : " << out[i].source << " " << out[i].target << std::endl;
 			}
 			
 			

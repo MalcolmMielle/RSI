@@ -23,7 +23,7 @@
 
 
 
-void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
+void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< AASS::RSI::ZoneCompared > matches){
 	
 	cv::Mat obst_copy;
 	obstacle.copyTo(obst_copy);
@@ -81,10 +81,10 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 	for( ; it != matches.end() ; ++it){
 		std::cout << "DRAW LINE " << std::endl;
 		
-		auto point = gp_model[it->second].getCentroid();
+		auto point = gp_model[it->target].getCentroid();
 		point.y = point.y + obst_copy.size().height;
 		
-		cv::line(all, gp_real[it->first].getCentroid(), point, color, 5);
+		cv::line(all, gp_real[it->source].getCentroid(), point, color, 5);
 	}
 	
 	cv::imshow("all links", all);
@@ -212,25 +212,29 @@ BOOST_AUTO_TEST_CASE(trying)
 	/********** Visualization ****************************************/
 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
-		std::cout << "matching " << i << " : " << match[i].first << " " << match[i].second << std::endl;
-		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
-		cv::imshow("Zone2", graph_slam2[match[i].second].getZoneMat());
+		std::cout << "matching " << i << " : " << match[i].source << " " << match[i].target << std::endl;
+		cv::imshow("Zone1", graph_slam[match[i].source].getZoneMat());
+		cv::imshow("Zone2", graph_slam2[match[i].target].getZoneMat());
 		
 		//TODO: Add uniqueness measurement with it
-		std::cout << "SCORE of similarity (diff than uniqueness) : " << scores[i] << " Uniqueness : ";
+		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " << scores[i] << " Uniqueness : ";
 		
+		std::cout << graph_slam[match[i].source].getUniquenessScore() << " ";
+		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
+		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
+		std::cout << match[i].getSimilarity() << " " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
 		
-		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
-			if(it->first == match[i].first){
-				std::cout << it->second << " ";
-			}
-		}
-		std::cout << " And " ;
-		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
-			if(it->first == match[i].second){
-				std::cout << it->second << " ";
-			}
-		}
+// 		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
+// 			if(it->first == match[i].source){
+// 				std::cout << it->second << " ";
+// 			}
+// 		}
+// 		std::cout << " And " ;
+// 		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
+// 			if(it->first == match[i].target){
+// 				std::cout << it->second << " ";
+// 			}
+// 		}
 		
 		std::cout << std::endl;
 		

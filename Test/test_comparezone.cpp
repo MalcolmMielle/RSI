@@ -53,8 +53,9 @@ BOOST_AUTO_TEST_CASE(trying)
 			auto v2 = *vp.first;
 			auto zoneslam2 = graph_slam[v2];
 			auto zoneslam = graph_slam[v];
-			std::cout << "Compare : " << zoneslam.compare(zoneslam2) << std::endl;
-			std::cout << "Compare itself : " << zoneslam.compare(zoneslam) << std::endl;
+			double p, h;
+			std::cout << "Compare : " << zoneslam.compare(zoneslam2, p, h) << std::endl;
+			std::cout << "Compare itself : " << zoneslam.compare(zoneslam, p, h) << std::endl;
 		}
 		std::cout << "OU"<< std::endl;
 	}

@@ -34,6 +34,7 @@ namespace AASS{
 			std::vector< cv::Point> _contours;
 			
 			bool _isUnique;
+			double _uniqueness_score;
 			
 			
 			//TODO:
@@ -41,20 +42,21 @@ namespace AASS{
 			
 			
 		public:
-			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true) {};
-			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true){
+			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0) {};
+			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0){
 				_zone_mat = cv::Mat::zeros(size, CV_8U);
 			};
-			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true){
+			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0){
 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
 			
 			void setSizeClassification(double size){_size_classification = size;}
 			double getSizeClassification() const {return _size_classification;}
 			
-			void setUniqueness(bool b){
+			void setUniqueness(bool b, double u_score){
 				_uniqueness_calculated = true;
 				_isUnique = b;
+				_uniqueness_score = u_score;
 				assert(_isUnique == b);
 			}
 			
@@ -73,6 +75,7 @@ namespace AASS{
 			}
 			
 			bool uniquenessInit(){return _uniqueness_calculated;}
+			double getUniquenessScore() const {if(_uniqueness_calculated == false){throw std::runtime_error("score uniqueness asked but zone uniqueness was not init");} return _uniqueness_score;}
 			
 			void push_back(const cv::Point2i& p){_zone.push_back(p); addPoint(p);}
 			void push_front(const cv::Point2i& p){_zone.push_front(p); addPoint(p);}
@@ -157,6 +160,7 @@ namespace AASS{
 				
 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
 				
+				
 				for (int i = 0; i < _contours.size(); ++i)
 				{
 					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
@@ -167,7 +171,13 @@ namespace AASS{
 				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255));
 				
 			}
-
+			
+			std::vector< cv::Point > getContour(){
+				updateContour();
+				return _contours;
+			}
+			
+			
 			///@brief Calculate the principal components of a zone.
 			void PCA(){
 				
@@ -175,48 +185,50 @@ namespace AASS{
 				
 				std::cout << "PCA" << std::endl;
 // 				find countour
-				cv::Mat copy_tmp;
-				_zone_mat.copyTo(copy_tmp);
-				cv::Mat copy =  cv::Scalar::all(255) - _zone_mat;
+				updateContour();
 				
-				
-				std::vector< std::vector< cv::Point> > contours;
-				std::vector<cv::Vec4i> hierarchy;
-				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-				
-// 				assert(contours.size() >= 1 && "More than one shape in Zone");
-				
-				// Calculate the area of each contour
-				
-				//Use a lambda function to sort the contours
-				std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
-				
-				if(contours.size() < 1)
-				{
-					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-					draw(graphmat2, cv::Scalar(255));
-// 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
-// 					if(contours[0].size() < contours[1].size()){
-// 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-// 						for (int i = 0; i < contours[0].size(); ++i)
-// 						{
-// 							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
-// 						}
-						cv::imshow("fina", graphmat2);
-// 						cv::waitKey(0);	
-// 						throw std::runtime_error("Calculating PCA with zone not in order");
-// 					}
-					cv::waitKey(0);
-					
-					throw std::runtime_error("MORE THAN ONE CONTOUR !");
-				}
-				if(contours.size() == 0 ){
-					throw std::runtime_error("NO CONTOUR IN ZONE !");
-				}
-				std::cout << "Contour size " << contours.size() << std::endl;
-				_contours = contours[0];
-				auto area = cv::contourArea(contours[0]);
-				getOrientation(contours[0]);
+// 				cv::Mat copy_tmp;
+// 				_zone_mat.copyTo(copy_tmp);
+// 				cv::Mat copy =  cv::Scalar::all(255) - _zone_mat;
+// 				
+// 				
+// 				std::vector< std::vector< cv::Point> > contours;
+// 				std::vector<cv::Vec4i> hierarchy;
+// 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+// 				
+// // 				assert(contours.size() >= 1 && "More than one shape in Zone");
+// 				
+// 				// Calculate the area of each contour
+// 				
+// 				//Use a lambda function to sort the contours
+// 				std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
+// 				
+// 				if(contours.size() < 1)
+// 				{
+// 					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 					draw(graphmat2, cv::Scalar(255));
+// // 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
+// // 					if(contours[0].size() < contours[1].size()){
+// // 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// // 						for (int i = 0; i < contours[0].size(); ++i)
+// // 						{
+// // 							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
+// // 						}
+// 						cv::imshow("fina", graphmat2);
+// // 						cv::waitKey(0);	
+// // 						throw std::runtime_error("Calculating PCA with zone not in order");
+// // 					}
+// 					cv::waitKey(0);
+// 					
+// 					throw std::runtime_error("MORE THAN ONE CONTOUR !");
+// 				}
+// 				if(contours.size() == 0 ){
+// 					throw std::runtime_error("NO CONTOUR IN ZONE !");
+// 				}
+// 				std::cout << "Contour size " << contours.size() << std::endl;
+// 				_contours = contours[0];
+				auto area = cv::contourArea(_contours);
+				getOrientation(_contours);
 
 				
 				std::cout << "PCAAAAA" << std::endl;
@@ -418,10 +430,10 @@ namespace AASS{
 			}
 			
 			
-			/** @brief comparison this is where I choose to use PCA or not. The lowest the score, the better the matching 
+			/** @brief comparison this is where I choose to use PCA or not. The lowest the score, the better the matching. Result is between 0 and 1
 			 */
 			
-			double compare(const Zone& zone_in) const {
+			double compare(const Zone& zone_in, double& size_diff, double& pca_diff) const {
 				
 				if(zone_in.isUnique() == false || this->isUnique() == false){
 					//One of the zone is not unique
@@ -431,6 +443,7 @@ namespace AASS{
 				//Compare their elongation
 // 				std::cout << "Compare" <<std::endl;
 				double simi_zone = comparePCA(zone_in);
+				
 				
 				// Compare the relative size				
 				assert(zone_in.getSizeClassification() <=1 && zone_in.getSizeClassification() >=0);
@@ -444,22 +457,72 @@ namespace AASS{
 
 				diff = std::abs<double>(diff);
 				std::cout << "Diff " << diff << std::endl;
+				
 
 // 				diff = 1 - diff;
 				
 // 				std::cout << "Diff " << diff << std::endl;
 				
 				//If both have similar size, we compare the PCA also
-				if(diff <= 0.5){
+				if(diff <= 0.25){
 					//ATTENTION : compare zone_similarity + diff in size
+// 					assert((simi_zone + diff) / 2 < diff);
+					size_diff = diff;
+					pca_diff = simi_zone;
 					return (simi_zone + diff) / 2;
+					
 				}
 				//Otherwise, we only return the shape comparison since it is pretty bad.
 				else{
 					//ATTENTION : compare diff in size
-					return diff;
+					size_diff = diff;
+					pca_diff = 1;
+					return (diff + 1) / 2;
+					
 				}
 				
+			}
+			
+		void updateContour(){
+				cv::Mat copy_tmp;
+				_zone_mat.copyTo(copy_tmp);
+				cv::Mat copy =  cv::Scalar::all(255) - _zone_mat;
+				
+				std::vector< std::vector< cv::Point> > contours;
+				std::vector<cv::Vec4i> hierarchy;
+				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+				
+// 				assert(contours.size() >= 1 && "More than one shape in Zone");
+				
+				// Calculate the area of each contour
+				
+				//Use a lambda function to sort the contours
+				std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
+				
+				if(contours.size() < 1)
+				{
+					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+					draw(graphmat2, cv::Scalar(255));
+// 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
+// 					if(contours[0].size() < contours[1].size()){
+// 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 						for (int i = 0; i < contours[0].size(); ++i)
+// 						{
+// 							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
+// 						}
+						cv::imshow("fina", graphmat2);
+// 						cv::waitKey(0);	
+// 						throw std::runtime_error("Calculating PCA with zone not in order");
+// 					}
+					cv::waitKey(0);
+					
+					throw std::runtime_error("MORE THAN ONE CONTOUR !");
+				}
+				if(contours.size() == 0 ){
+					throw std::runtime_error("NO CONTOUR IN ZONE !");
+				}
+				std::cout << "Contour size " << contours.size() << std::endl;
+				_contours = contours[0];
 			}
 			
 		private: 
@@ -523,6 +586,10 @@ namespace AASS{
 				
 				
 			}
+			
+			
+			
+
 			
 		};
 		

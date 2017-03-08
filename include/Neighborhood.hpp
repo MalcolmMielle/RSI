@@ -63,7 +63,8 @@ namespace AASS{
 			
 			double compareShape(const Neighbor& n1) const{
 				
-				return _element.first.compare(n1.getVertexElement());
+				double p, h;
+				return _element.first.compare(n1.getVertexElement(), p, h);
 				
 			}
 			

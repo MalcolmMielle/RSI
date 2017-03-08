@@ -7,55 +7,11 @@
 #include "EdgeZone.hpp"
 #include "Utils.hpp"
 #include "bettergraph/SimpleGraph.hpp"
+#include "ZoneCompared.hpp"
 
 
 namespace AASS{
 	namespace RSI{
-		
-		
-		class ZoneCompared{
-			
-		protected:
-			//The closer to 0 the better!
-			double _similarity;
-			
-		public:
-			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex source;
-			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex target;
-			double zone_similarity;
-			double zone_size_factor_source;
-			double zone_size_factor_target;
-			
-			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2, double simi) : source(v), target(v2), _similarity(simi), zone_size_factor_source(0){};
-			
-			///@brief calculate the similarity value depending on all attributes
-// 			void update(){
-// 				assert(zone_size_factor_source <=1 && zone_size_factor_source >=0);
-// 				assert(zone_size_factor_target <=1 && zone_size_factor_target >=0);
-// 				
-// 				std::cout << "s " << zone_size_factor_source << std::endl;
-// 				std::cout << "s " << zone_size_factor_target << std::endl;
-// 				
-// 				double diff = zone_size_factor_source - zone_size_factor_target;
-// 				std::cout << "Diff " << diff << std::endl;
-// 
-// 				diff = std::abs<double>(diff);
-// 				std::cout << "Diff " << diff << std::endl;
-// 
-// // 				diff = 1 - diff;
-// 				
-// 				std::cout << "Diff " << diff << std::endl;
-// 				
-// 				//ATTENTION : compare zone_similarity + diff in size
-// 				_similarity = (zone_similarity + diff) / 2;
-// 				//ATTENTION : compare diff in size
-// // 				_similarity = diff;
-// 			};
-			
-			double getSimilarity(){assert(zone_size_factor_source != -1); return _similarity;}
-		};
-		
-		
 		
 		
 
@@ -181,6 +137,29 @@ namespace AASS{
 // 					(*this)[v].PCA();
 					try{
 						(*this)[v].PCA();
+					}
+					catch(std::exception& e){
+						std::cout << "Here : " << e.what() << std::endl;
+						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+						(*this)[v].draw(graphmat2, cv::Scalar(100));
+						cv::imshow("fused", graphmat2);
+						cv::waitKey(0);	
+						exit(0);
+					}
+				}
+			}
+			
+			void updateContours(){
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+				auto vp = boost::vertices((*this));
+				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
+					std::cout <<"Updating Contours "<< std::endl;
+					auto v = *vp.first;
+					++vp.first;
+					
+// 					(*this)[v].PCA();
+					try{
+						(*this)[v].updateContour();
 					}
 					catch(std::exception& e){
 						std::cout << "Here : " << e.what() << std::endl;
@@ -371,6 +350,9 @@ namespace AASS{
 			bool isRipple(const AASS::RSI::GraphZone::VertexZone& base_vertex, const AASS::RSI::GraphZone::VertexZone& might_be_ripple) const;
 			
 		};
+		
+		
+		
 
 	}
 }

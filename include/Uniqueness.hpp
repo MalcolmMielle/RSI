@@ -93,20 +93,27 @@ namespace AASS{
 				std::vector<std::pair<GraphZone::Vertex, double> > out;
 				//Match it onto itself
 				AASS::RSI::HungarianMatcher hungmatch;
+				
+				//Easier to have int for the nromal distrib
 				std::vector<int> scores;
 				auto match = hungmatch.match(graph_slam, graph_slam, scores);
 				auto cost = hungmatch.getCostNonConstOptimized();
-				//Get the uniqueness out of the proba distrib
+				
+				auto res = graph_slam.compare(graph_slam);
+				//Get the uniqueness out of the proba distrib				
 				
 				int count = 0 ;
 				for(int i = 0 ; i < graph_slam.getNumVertices() ; i++) {
 					
 					std::vector<int> score_tmp;
+					std::vector<int> sc_tmp;
 // 					std::cout << "exporting" << std::endl;
 					
 					for(int j = 0 ; j < graph_slam.getNumVertices() ; j++) {
-// 						std::cout << cost[i][j] << " " ;
-						score_tmp.push_back(cost[i][j]);
+						std::cout << res[ (graph_slam.getNumVertices() * i) + j].getSimilarity() << " and " ;
+						score_tmp.push_back(res[ (graph_slam.getNumVertices() * i) + j].getSimilarity() * 100);
+						std::cout << cost[j][i] << " : " ;
+						sc_tmp.push_back(cost[j][i]);
 					}
 // 					std::cout << std::endl;
 					
@@ -117,24 +124,37 @@ namespace AASS{
 					auto min = std::min_element<std::vector<int>::iterator>(score_tmp.begin(), score_tmp.end());
 					std::cout << "min " << *min << std::endl;
 					
+					auto mean_vs = mean(sc_tmp);
+					std::cout << "means " << mean_vs << std::endl;
+					auto variance_vs = variance(sc_tmp, mean_vs);
+					std::cout << "variances " << variance_vs << std::endl;
+					auto mins = std::min_element<std::vector<int>::iterator>(sc_tmp.begin(), sc_tmp.end());
+					std::cout << "mins " << *mins << std::endl;
+					
+// 					assert((int)(mean_v * 100) == (int) mean_vs);
+// 					assert((int)(variance_v * 100) == (int) variance_vs);
+// 					assert((int)(min * 100) == (int) mins);
+					
 					bool uniq = isUnique(variance_v, mean_v, *min);
+					double score;
 					
 					if(uniq == true){
 						std::cout << "The zone is unique" << std::endl;
 						++count;
+						score = uniquenesScoreRow(score_tmp, variance_v, mean_v);
 					}
 					else {
 						std::cout << "The zone is NOT unique" << std::endl;
+						score = 0 ;
 					}
 					
-					double score = uniquenesScoreRow(score_tmp, variance_v, mean_v);
-					
-					out.push_back(std::pair<GraphZone::Vertex, double>(match[i].first, score) );
+					out.push_back(std::pair<GraphZone::Vertex, double>(res[ (graph_slam.getNumVertices() * i)].source, score) );
 					std::cout << "The score of the zone is " << score << std::endl << std::endl;
 					
-					graph_slam[match[i].first].setUniqueness(uniq);
+					graph_slam[res[ (graph_slam.getNumVertices() * i)].source].setUniqueness(uniq, score);
 					
 				}
+// 				exit(0);
 				graph_slam.setNumUnique(count);
 				assert(graph_slam.getNumUnique() == count);
 				
@@ -191,7 +211,7 @@ namespace AASS{
 			/** 
 			 * @brief return true if the min is at least 1 standard deviation from the mean
 			 */
-			bool isUnique(double variance_model_1, double mean_v, int input) const {
+			bool isUnique(double variance_model_1, double mean_v, double input) const {
 // 				std::cout << "input : " << variance_model_1 << " " << mean_v << " " << input << std::endl;
 				//standard deviation is square root of variance.
 				double sdeviation = sqrt(variance_model_1);
@@ -220,7 +240,7 @@ namespace AASS{
 				double score_tmp = 1;
 				
 				double sdeviation = sqrt(variance_model_1);
-				std::cout << "sd " << sdeviation << std::endl;
+				std::cout << "sd " << sdeviation << "mean " << mean_v << " variance " << variance_model_1 << std::endl;
 				boost::math::normal nd(mean_v, sdeviation);
 				
 				bool flag_isUnique = false;
@@ -238,9 +258,23 @@ namespace AASS{
 					}
 				}
 				
-				if(flag_isUnique == false){
-					score_tmp = 0 ;
-				}
+				//on sd is 20% of the value on one side, so the max we can remove is 20% close to the sd.
+				//Min value is : 1 - boost::math::cdf(nd, mean_v - sdeviation + 0.5) and max is 1
+				double min = (1 - boost::math::cdf(nd, mean_v - sdeviation + 0.5) );
+				
+				assert(score_tmp >= min );
+				assert(score_tmp <= 1 );
+				
+				std::cout << "score " << score_tmp << " min " << min << std::endl;
+				
+				score_tmp = ( score_tmp -  min ) / (1 - min );
+				
+				std::cout << "score " << score_tmp  << std::endl;
+				
+// 				if(flag_isUnique == false){
+// 					score_tmp = 0 ;
+// 				}
+				assert(flag_isUnique == true);
 				return score_tmp;
 			}
 			
@@ -249,7 +283,7 @@ namespace AASS{
 			* @brief Calcule the probability based on the normal distribution.
 			* Since it represent the pdf, the probability is given by the integral between two values. Must use the cdf
 			*/
-			double normalDistribution(double variance_model_1, double e1_input, int e_model) const 
+			double normalDistribution(double variance_model_1, double e1_input, double e_model) const 
 			{
 
 				

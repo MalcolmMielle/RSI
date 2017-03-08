@@ -1,4 +1,5 @@
 #include "GraphZone.hpp"
+#include "ZoneCompared.hpp"
 
 void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 {
@@ -883,10 +884,14 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 			if((*this)[v].isUnique() == true && target[v_target].isUnique() == true){
 			
 				std::cout << "source " << v << std::endl;
-				double similarity = (*this)[v].compare(target[v_target]);
+				double diff_size;
+				double pca_diff;
+				double similarity = (*this)[v].compare(target[v_target], diff_size, pca_diff);
 				
 				//Create the zone comparison element with all values
 				ZoneCompared zoneout(v, v_target, similarity);
+				zoneout.size_diff = diff_size;
+				zoneout.pca_diff = pca_diff;
 				
 	// 			zoneout.source = v;
 	// 			zoneout.target = v_target;

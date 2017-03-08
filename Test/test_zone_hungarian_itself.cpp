@@ -21,7 +21,7 @@
 
 
 
-void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
+void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< AASS::RSI::ZoneCompared > matches){
 	
 	cv::Mat obst_copy;
 	obstacle.copyTo(obst_copy);
@@ -77,10 +77,10 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 	for( ; it != matches.end() ; ++it){
 		std::cout << "DRAW LINE " << std::endl;
 		
-		auto point = gp_model[it->second].getCentroid();
+		auto point = gp_model[it->target].getCentroid();
 		point.y = point.y + obst_model_copy.size().height;
 		
-		cv::line(all, gp_real[it->first].getCentroid(), point, color, 5);
+		cv::line(all, gp_real[it->source].getCentroid(), point, color, 5);
 	}
 	
 	cv::imshow("all links", all);

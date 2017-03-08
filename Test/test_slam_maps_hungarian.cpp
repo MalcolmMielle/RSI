@@ -24,7 +24,7 @@
 #include "Kmean.hpp"
 
 
-void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
+void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< AASS::RSI::ZoneCompared > matches){
 	
 	cv::Mat obst_copy;
 	obstacle.copyTo(obst_copy);
@@ -82,10 +82,10 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 	for( ; it != matches.end() ; ++it){
 		std::cout << "DRAW LINE " << std::endl;
 		
-		auto point = gp_model[it->second].getCentroid();
+		auto point = gp_model[it->target].getCentroid();
 		point.y = point.y + obst_copy.size().height;
 		
-		cv::line(all, gp_real[it->first].getCentroid(), point, color, 5);
+		cv::line(all, gp_real[it->source].getCentroid(), point, color, 5);
 	}
 	
 	cv::imshow("all links", all);
@@ -225,7 +225,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	//Watershed Algorithm
 	graph_slam.watershed(0.25);
 	
-	int size_to_remove = 100;
+	int size_to_remove = 200;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
 	graph_slam.removeLonelyVertices();
 	if(graph_slam.lonelyVertices())
@@ -243,15 +243,24 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
-		
-// 	std::string file = argv[1];
-	std::string file = "../../Test/Saeed/bird4.png";
+	std::string file;
+// 	if(argc > 2){
+		file = argv[1];
+// 	}
+// 	else{
+// 		file = "../../Test/Saeed/bird4.png";
+// 	}
 	AASS::RSI::GraphZone graph_slam;
 	makeGraphSLAM(file, graph_slam);
 		
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-	
-	std::string file2 = "../../Test/Saeed/bird2.png";
+	std::string file2;
+// 	if(argc > 3){
+		file2 = argv[2];
+// 	}
+// 	else{
+// 		file2 = "../../Test/Saeed/bird2.png";
+// 	}
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraphSLAM(file2, graph_slam2);
 	
@@ -261,11 +270,13 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	graph_slam.updatePCA();
 	graph_slam.removeRiplesv2();
+	graph_slam.updateContours();
 	
 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
 	
 	graph_slam2.updatePCA();
 	graph_slam2.removeRiplesv2();
+	graph_slam2.updateContours();
 	
 // 	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
 	
@@ -277,8 +288,8 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat graphmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
 	graph_slam2.draw(graphmat2);
 	
-// 	cv::imshow("graph1", graphmat);
-// 	cv::imshow("graph2", graphmat2);
+	cv::imshow("graph1", graphmat);
+	cv::imshow("graph2", graphmat2);
 // 	cv::waitKey(0);
 	
 	
@@ -309,31 +320,39 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 // 	exit(0);
 	
+	std::sort(match.begin(), match.end(), [&graph_slam, &graph_slam2](AASS::RSI::ZoneCompared &match, AASS::RSI::ZoneCompared &match1){
+		return match.getRanking(graph_slam, graph_slam2) > match1.getRanking(graph_slam, graph_slam2); 
+	} );
+	
 
 // 	
 // 	/********** Visualization ****************************************/
 // 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
-		std::cout << "matching " << i << " : " << match[i].first << " " << match[i].second << std::endl;
-		cv::imshow("Zone1", graph_slam[match[i].first].getZoneMat());
-		cv::imshow("Zone2", graph_slam2[match[i].second].getZoneMat());
+		std::cout << "matching " << i << " : " << match[i].source << " " << match[i].target << std::endl;
+		cv::imshow("Zone1", graph_slam[match[i].source].getZoneMat());
+		cv::imshow("Zone2", graph_slam2[match[i].target].getZoneMat());
 		
 		//TODO: Add uniqueness measurement with it
-		std::cout << "SCORE of similarity (diff than uniqueness) : " << scores[i] << " Uniqueness : ";
+		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " <<  " \nUniqueness : ";
 		
+		std::cout << graph_slam[match[i].source].getUniquenessScore() << " ";
+		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
+		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
+		std::cout << " score " << match[i].getSimilarity() << " diff size " << match[i].size_diff << " pca diff " << match[i].pca_diff << " rank " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
 		
-		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
-			if(it->first == match[i].first){
-				std::cout << it->second << " ";
-			}
-		}
-		std::cout << " And " ;
-		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
-			if(it->first == match[i].second){
-				std::cout << it->second << " ";
-			}
-		}
-		
+// 		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
+// 			if(it->first == match[i].first){
+// 				std::cout << it->second << " ";
+// 			}
+// 		}
+// 		std::cout << " And " ;
+// 		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
+// 			if(it->first == match[i].second){
+// 				std::cout << it->second << " ";
+// 			}
+// 		}
+// 		
 		std::cout << std::endl;
 		
 		cv::waitKey(0);
