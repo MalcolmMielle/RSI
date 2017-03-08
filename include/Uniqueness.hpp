@@ -92,12 +92,12 @@ namespace AASS{
 			std::vector<std::pair<GraphZone::Vertex, double> > uniqueness(AASS::RSI::GraphZone& graph_slam) const {
 				std::vector<std::pair<GraphZone::Vertex, double> > out;
 				//Match it onto itself
-				AASS::RSI::HungarianMatcher hungmatch;
+// 				AASS::RSI::HungarianMatcher hungmatch;
 				
 				//Easier to have int for the nromal distrib
 				std::vector<int> scores;
-				auto match = hungmatch.match(graph_slam, graph_slam, scores);
-				auto cost = hungmatch.getCostNonConstOptimized();
+// 				auto match = hungmatch.match(graph_slam, graph_slam, scores);
+// 				auto cost = hungmatch.getCostNonConstOptimized();
 				
 				auto res = graph_slam.compare(graph_slam);
 				//Get the uniqueness out of the proba distrib				
@@ -112,8 +112,8 @@ namespace AASS{
 					for(int j = 0 ; j < graph_slam.getNumVertices() ; j++) {
 						std::cout << res[ (graph_slam.getNumVertices() * i) + j].getSimilarity() << " and " ;
 						score_tmp.push_back(res[ (graph_slam.getNumVertices() * i) + j].getSimilarity() * 100);
-						std::cout << cost[j][i] << " : " ;
-						sc_tmp.push_back(cost[j][i]);
+// 						std::cout << cost[j][i] << " : " ;
+// 						sc_tmp.push_back(cost[j][i]);
 					}
 // 					std::cout << std::endl;
 					
@@ -124,12 +124,6 @@ namespace AASS{
 					auto min = std::min_element<std::vector<int>::iterator>(score_tmp.begin(), score_tmp.end());
 					std::cout << "min " << *min << std::endl;
 					
-					auto mean_vs = mean(sc_tmp);
-					std::cout << "means " << mean_vs << std::endl;
-					auto variance_vs = variance(sc_tmp, mean_vs);
-					std::cout << "variances " << variance_vs << std::endl;
-					auto mins = std::min_element<std::vector<int>::iterator>(sc_tmp.begin(), sc_tmp.end());
-					std::cout << "mins " << *mins << std::endl;
 					
 // 					assert((int)(mean_v * 100) == (int) mean_vs);
 // 					assert((int)(variance_v * 100) == (int) variance_vs);

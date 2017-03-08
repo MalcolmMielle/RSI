@@ -172,7 +172,24 @@ namespace AASS{
 				}
 			}
 			
-			///@brief force the value of each zone depending on the size from biggest zone to smallest. Normalize it between 0  for the smallest zone and 1 for the largest.
+			///@brief update all zones and element of the graph: update PCA, remove Ripples, update countours, clasify shapes, clssify PCA
+			void update(){
+				updatePCA();
+				removeRiplesv2();
+				updateContours();
+				setSizesClassification();
+				setPCAClassification();
+			}
+			
+			
+			//TODO
+			///@brief force the value of each zone depending on the uniqueness of the PCA. Normalize it between 0 for the smallest zone and 1 for the largest.
+			void setPCAClassification() {
+				
+			}
+			
+			
+			///@brief force the value of each zone depending on the size from biggest zone to smallest. Normalize it between 0 for the smallest zone and 1 for the largest.
 			void setSizesClassification() {
 				
 				std::cout << "setSize Classification " << std::endl;

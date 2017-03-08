@@ -148,9 +148,10 @@ namespace AASS{
 	// 			fprintf(stderr , "\n");
 				for(i=0; i<source.getNumUnique(); i++) {
 	// 				fprintf(stderr, " [");
+					std::cout << " i " << std::endl;
 					for(j=0; j<target.getNumUnique(); j++) {
 						
-// 						std::cout << p.cost[i][j] << " " << std::endl;
+						std::cout << " w " << std::endl;
 						if(p.assignment[i][j] == 1){
 							
 							std::cout << "Matching lol2" << i << " with " << j << " cost " << simi.at( ( i*target.getNumUnique() ) + j) << std::endl;
@@ -161,10 +162,14 @@ namespace AASS{
 // 							ZoneCompared m(res.at(i * target.getNumUnique()).source, res.at(( i * target.getNumUnique() ) + j).target, simi.at( ( i*target.getNumUnique() ) + j));
 							
 							assert(res.at(( i * target.getNumUnique() ) + j).source == res.at(i * target.getNumUnique()).source);
+							std::cout << "u" << std::endl;
 							assert(simi.at( ( i*target.getNumUnique() ) + j) == (int) (res.at(( i * target.getNumUnique() ) + j).getSimilarity() * 100 ));
+							std::cout << "u" << std::endl;
 							
 							out.push_back(res.at(( i * target.getNumUnique() ) + j));
+							std::cout << "u" << std::endl;
 							scores.push_back(simi.at( ( i*target.getNumUnique() ) + j));
+							std::cout << "u" << std::endl;
 						}
 					}
 					
@@ -215,12 +220,15 @@ namespace AASS{
 				}
 			}
 // 			fprintf(stderr, "\n");
-
+			std::cout << " out " << std::endl;
 //Freeing the memory
 			int idx;
-			for (idx=0; idx < 4; idx+=1) {
+			for (idx = 0; idx < source.getNumUnique(); idx += 1) {
+				std::cout << "free" << std::endl;
 				free(m[idx]);
+				std::cout << " afterfree" << std::endl;
 			}
+			std::cout << "final free" << std::endl;
 			free(m);
 				
 				

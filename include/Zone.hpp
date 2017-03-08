@@ -37,21 +37,40 @@ namespace AASS{
 			double _uniqueness_score;
 			
 			
-			//TODO:
-			double _size_classification; //Should be between 0 and 10 to be able to compare to zone size relative to other size in the same graph
+			double _size_classification; //Should be between 0 and 1 to be able to compare to zone size relative to other size in the same graph
+			
+			//TODO
+			double _pca_classification; //Should be between 0 and 1 to be able to compare to zone pcas relative to other pca in the same graph
 			
 			
 		public:
-			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0) {};
-			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0){
+			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1) {};
+			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
 				_zone_mat = cv::Mat::zeros(size, CV_8U);
 			};
-			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0){
+			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
 			
+			void print() const {
+				std::cout << "Size classification " <<  _size_classification << " " ;
+				
+				auto pca_max_min = getMaxMinPCA();				
+				if(pca_max_min.first > 0){
+					double normalizer_own = 1 / pca_max_min.first;
+					pca_max_min.second = pca_max_min.second * normalizer_own;
+					pca_max_min.first = pca_max_min.first * normalizer_own;
+				}				
+				double diff = pca_max_min.first - pca_max_min.second;
+				
+				std::cout << "Diff pca " << diff << " ";
+			}
+			
 			void setSizeClassification(double size){_size_classification = size;}
-			double getSizeClassification() const {return _size_classification;}
+			double getSizeClassification() const {if(_size_classification == -1 ){throw std::runtime_error("Classificatio size not set");} return _size_classification;}
+			
+			void setPCAClassification(double size){_pca_classification = size;}
+			double getPCAClassification() const {if(_pca_classification == -1 ){throw std::runtime_error("Classificatio pca not set");}return _pca_classification;}
 			
 			void setUniqueness(bool b, double u_score){
 				_uniqueness_calculated = true;
@@ -441,16 +460,11 @@ namespace AASS{
 				}
 				
 				//Compare their elongation
-// 				std::cout << "Compare" <<std::endl;
 				double simi_zone = comparePCA(zone_in);
-				
-				
+
 				// Compare the relative size				
 				assert(zone_in.getSizeClassification() <=1 && zone_in.getSizeClassification() >=0);
 				assert(getSizeClassification() <=1 && getSizeClassification() >=0);
-				
-// 				std::cout << "s " << zone_in.getSizeClassification() << std::endl;
-// 				std::cout << "s " << getSizeClassification() << std::endl;
 				
 				double diff = zone_in.getSizeClassification() - getSizeClassification();
 // 				std::cout << "Diff " << diff << std::endl;
@@ -464,7 +478,8 @@ namespace AASS{
 // 				std::cout << "Diff " << diff << std::endl;
 				
 				//If both have similar size, we compare the PCA also
-				if(diff <= 0.25){
+				//ATTENTION Magic number
+				if(diff <= 0.15){
 					//ATTENTION : compare zone_similarity + diff in size
 // 					assert((simi_zone + diff) / 2 < diff);
 					size_diff = diff;

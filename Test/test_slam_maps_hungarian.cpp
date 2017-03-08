@@ -223,7 +223,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "Number of nodes" << graph_slam.getNumVertices() << std::endl;
 	
 	//Watershed Algorithm
-	graph_slam.watershed(0.25);
+	graph_slam.watershed(1);
 	
 	int size_to_remove = 200;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
@@ -268,15 +268,17 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	
-	graph_slam.updatePCA();
-	graph_slam.removeRiplesv2();
-	graph_slam.updateContours();
+// 	graph_slam.updatePCA();
+// 	graph_slam.removeRiplesv2();
+// 	graph_slam.updateContours();
+	graph_slam.update();
 	
 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
 	
-	graph_slam2.updatePCA();
-	graph_slam2.removeRiplesv2();
-	graph_slam2.updateContours();
+// 	graph_slam2.updatePCA();
+// 	graph_slam2.removeRiplesv2();
+// 	graph_slam2.updateContours();
+	graph_slam2.update();
 	
 // 	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
 	
@@ -340,6 +342,11 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
 		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
 		std::cout << " score " << match[i].getSimilarity() << " diff size " << match[i].size_diff << " pca diff " << match[i].pca_diff << " rank " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
+		
+		std::cout << std::endl << "zone 1 " ;
+		graph_slam[match[i].source].print(); 
+		std::cout << std::endl << "zone 2 ";
+		graph_slam2[match[i].target].print();
 		
 // 		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
 // 			if(it->first == match[i].first){
