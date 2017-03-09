@@ -105,9 +105,10 @@ namespace AASS{
 			auto it = res.begin();
 			for ( ; it != res.end() ; ++it){
 				int input = it->getSimilarity()*100;
+				std::cout << " pushing " << input << " because " << it->getSimilarity()*100 << std::endl;
 				assert(input <= 100);
 				assert(input >= 0);
-				std::cout << " pushing " << input << " because " << it->getSimilarity()*100 << std::endl;
+				
 				simi.push_back(input);
 			}
 			

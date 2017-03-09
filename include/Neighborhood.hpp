@@ -63,8 +63,10 @@ namespace AASS{
 			
 			double compareShape(const Neighbor& n1) const{
 				
+				throw std::runtime_error("Do not use, Neighbor class");
 				double p, h;
-				return _element.first.compare(n1.getVertexElement(), p, h);
+// 				ZoneCompared zcomp;
+// 				return _element.first.compare(n1.getVertexElement(), p, h);
 				
 			}
 			

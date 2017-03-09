@@ -886,12 +886,17 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 				std::cout << "source " << v << std::endl;
 				double diff_size;
 				double pca_diff;
-				double similarity = (*this)[v].compare(target[v_target], diff_size, pca_diff);
+				ZoneCompared zoneout(v, v_target);
+				double similarity = (*this)[v].compare(target[v_target], zoneout);
 				
 				//Create the zone comparison element with all values
-				ZoneCompared zoneout(v, v_target, similarity);
-				zoneout.size_diff = diff_size;
-				zoneout.pca_diff = pca_diff;
+// 				ZoneCompared zoneout(v, v_target, similarity);
+// 				
+// 				//ATTENTION Testing
+// 				zoneout.size_diff = diff_size;
+// 				zoneout.pca_diff = pca_diff;
+// 				zoneout.size_source = (*this)[v].getSizeClassification();
+// 				zoneout.size_target = target[v_target].getSizeClassification();
 				
 	// 			zoneout.source = v;
 	// 			zoneout.target = v_target;

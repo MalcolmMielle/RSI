@@ -9,12 +9,17 @@
 namespace AASS{
 	
 	namespace RSI{
+		
+		class ZoneCompared;
+		
 		/**
 		 * bool _isUnique: true if the zone is unique, false otherwise. It is initialised as true, so that every new zone is considered ofr comparison unless setUniqueness as been explicitely called before.
 		 * 
 		 * bool _uniqueness_calculated: flag to check if the zone was initialised or not.
 		 */
 		class Zone{
+			
+			
 			
 		private:
 			bool _flag_PCA;
@@ -54,22 +59,13 @@ namespace AASS{
 			
 			void print() const {
 				std::cout << "Size classification " <<  _size_classification << " " ;
-				
-				auto pca_max_min = getMaxMinPCA();				
-				if(pca_max_min.first > 0){
-					double normalizer_own = 1 / pca_max_min.first;
-					pca_max_min.second = pca_max_min.second * normalizer_own;
-					pca_max_min.first = pca_max_min.first * normalizer_own;
-				}				
-				double diff = pca_max_min.first - pca_max_min.second;
-				
-				std::cout << "Diff pca " << diff << " ";
+				std::cout << "pca clasificcation " << _pca_classification << " ";
 			}
 			
-			void setSizeClassification(double size){_size_classification = size;}
+			void setSizeClassification(double size){assert(size <= 1); assert(size >= 0); _size_classification = size;}
 			double getSizeClassification() const {if(_size_classification == -1 ){throw std::runtime_error("Classificatio size not set");} return _size_classification;}
 			
-			void setPCAClassification(double size){_pca_classification = size;}
+			void setPCAClassification(double size){assert(size <= 1); assert(size >= 0); _pca_classification = size;}
 			double getPCAClassification() const {if(_pca_classification == -1 ){throw std::runtime_error("Classificatio pca not set");}return _pca_classification;}
 			
 			void setUniqueness(bool b, double u_score){
@@ -409,6 +405,29 @@ namespace AASS{
 				return std::pair<double, double>(max_own, min_own);
 			}
 			
+			/**
+			 * @brief return the difference of the pca between 0 and 1.
+			 * 
+			 * Normalize between zero and 1 by dividing by the max of the two PCA values and doing max - min
+			 */
+			double getPCADiff() const {
+				auto pca_max_min = getMaxMinPCA();
+				
+				if(pca_max_min.first > 0){
+					double normalizer_own = 1 / pca_max_min.first;
+					pca_max_min.second = pca_max_min.second * normalizer_own;
+					pca_max_min.first = pca_max_min.first * normalizer_own;
+				}
+				
+				double pca_diff = pca_max_min.first - pca_max_min.second;
+				std::cout << "pca diff " << pca_diff << std::endl;
+				assert(pca_diff >= 0 && "similarity measure of Zone should not be negative");
+				assert(pca_diff <= 1 && "similarity measure of Zone should not be mopre than one");
+				
+				return pca_diff;
+				
+			}
+			
 			
 			/**
 			 * @brief Compare two zones by using the PCA values. the lowest the score the better the matching
@@ -417,26 +436,26 @@ namespace AASS{
 			 */
 			double comparePCA(const Zone& zone_in) const {
 				
-				auto pca_max_min = getMaxMinPCA();
-				auto pca_max_min_input = zone_in.getMaxMinPCA();
-				
-// 				std::cout << "max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
-				
-				if(pca_max_min.first > 0){
-					double normalizer_own = 1 / pca_max_min.first;
-					pca_max_min.second = pca_max_min.second * normalizer_own;
-					pca_max_min.first = pca_max_min.first * normalizer_own;
-				}
-				if(pca_max_min_input.first > 0){
-					double normalizer_input = 1 / pca_max_min_input.first;
-					pca_max_min_input.second = pca_max_min_input.second * normalizer_input;
-					pca_max_min_input.first = pca_max_min_input.first * normalizer_input;
-				}
+// 				auto pca_max_min = getMaxMinPCA();
+// 				auto pca_max_min_input = zone_in.getMaxMinPCA();
+// 				
+// // 				std::cout << "max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
+// 				
+// 				if(pca_max_min.first > 0){
+// 					double normalizer_own = 1 / pca_max_min.first;
+// 					pca_max_min.second = pca_max_min.second * normalizer_own;
+// 					pca_max_min.first = pca_max_min.first * normalizer_own;
+// 				}
+// 				if(pca_max_min_input.first > 0){
+// 					double normalizer_input = 1 / pca_max_min_input.first;
+// 					pca_max_min_input.second = pca_max_min_input.second * normalizer_input;
+// 					pca_max_min_input.first = pca_max_min_input.first * normalizer_input;
+// 				}
 				
 // 				std::cout << " normilzed max mins "<< pca_max_min.first << " " << pca_max_min.second << " " << pca_max_min_input.first << " " << pca_max_min_input.second  << std::endl;
 				
-				double diff = pca_max_min.first - pca_max_min.second;
-				double diff_input = pca_max_min_input.first - pca_max_min_input.second;
+				double diff = getPCADiff();
+				double diff_input = zone_in.getPCADiff();
 				
 				double similarity = diff - diff_input;
 				similarity = std::abs(similarity);
@@ -452,93 +471,9 @@ namespace AASS{
 			/** @brief comparison this is where I choose to use PCA or not. The lowest the score, the better the matching. Result is between 0 and 1
 			 */
 			
-			double compare(const Zone& zone_in, double& size_diff, double& pca_diff) const {
-				
-				if(zone_in.isUnique() == false || this->isUnique() == false){
-					//One of the zone is not unique
-					return 1;
-				}
-				
-				//Compare their elongation
-				double simi_zone = comparePCA(zone_in);
-
-				// Compare the relative size				
-				assert(zone_in.getSizeClassification() <=1 && zone_in.getSizeClassification() >=0);
-				assert(getSizeClassification() <=1 && getSizeClassification() >=0);
-				
-				double diff = zone_in.getSizeClassification() - getSizeClassification();
-// 				std::cout << "Diff " << diff << std::endl;
-
-				diff = std::abs<double>(diff);
-				std::cout << "Diff " << diff << std::endl;
-				
-
-// 				diff = 1 - diff;
-				
-// 				std::cout << "Diff " << diff << std::endl;
-				
-				//If both have similar size, we compare the PCA also
-				//ATTENTION Magic number
-				if(diff <= 0.15){
-					//ATTENTION : compare zone_similarity + diff in size
-// 					assert((simi_zone + diff) / 2 < diff);
-					size_diff = diff;
-					pca_diff = simi_zone;
-					return (simi_zone + diff) / 2;
-					
-				}
-				//Otherwise, we only return the shape comparison since it is pretty bad.
-				else{
-					//ATTENTION : compare diff in size
-					size_diff = diff;
-					pca_diff = 1;
-					return (diff + 1) / 2;
-					
-				}
-				
-			}
+			double compare(const AASS::RSI::Zone& zone_in, AASS::RSI::ZoneCompared& zone_out) const;
 			
-		void updateContour(){
-				cv::Mat copy_tmp;
-				_zone_mat.copyTo(copy_tmp);
-				cv::Mat copy =  cv::Scalar::all(255) - _zone_mat;
-				
-				std::vector< std::vector< cv::Point> > contours;
-				std::vector<cv::Vec4i> hierarchy;
-				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-				
-// 				assert(contours.size() >= 1 && "More than one shape in Zone");
-				
-				// Calculate the area of each contour
-				
-				//Use a lambda function to sort the contours
-				std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
-				
-				if(contours.size() < 1)
-				{
-					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-					draw(graphmat2, cv::Scalar(255));
-// 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
-// 					if(contours[0].size() < contours[1].size()){
-// 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-// 						for (int i = 0; i < contours[0].size(); ++i)
-// 						{
-// 							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
-// 						}
-						cv::imshow("fina", graphmat2);
-// 						cv::waitKey(0);	
-// 						throw std::runtime_error("Calculating PCA with zone not in order");
-// 					}
-					cv::waitKey(0);
-					
-					throw std::runtime_error("MORE THAN ONE CONTOUR !");
-				}
-				if(contours.size() == 0 ){
-					throw std::runtime_error("NO CONTOUR IN ZONE !");
-				}
-				std::cout << "Contour size " << contours.size() << std::endl;
-				_contours = contours[0];
-			}
+			void updateContour();
 			
 		private: 
 			void addPoint(const cv::Point2i& p){

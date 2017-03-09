@@ -186,6 +186,46 @@ namespace AASS{
 			///@brief force the value of each zone depending on the uniqueness of the PCA. Normalize it between 0 for the smallest zone and 1 for the largest.
 			void setPCAClassification() {
 				
+				std::cout << "set PCA Classification " << std::endl;
+				std::vector<double> pca_comp;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+				double max = -1, min = -1;
+				auto vp = boost::vertices((*this));
+				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					double si = (*this)[v].getPCADiff();
+					pca_comp.push_back(si);
+					if(max == -1 || max < si){
+						max = si;
+					}
+					if(min == -1 || min > si){
+						min = si;
+					}
+				}
+				
+				assert(max != -1);
+				assert(min != -1);
+				assert(pca_comp.size() == getNumVertices());
+				
+				std::cout << "max " << max << " min " << min << std::endl;
+				double div = (max - min);
+				assert(div != 0);
+				std::cout << "div " << div << " min " << min << std::endl;
+				
+				std::vector<double> all_scores;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 				int max = -1, min = -1;
+				vp = boost::vertices((*this));
+				int i = 0;
+				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					double score = (pca_comp[i] - min) / div;
+					++i ;
+					std::cout << "SCORE" << score << std::endl;
+					(*this)[v].setPCAClassification(score);
+				}
+				
+				std::cout <<"DONE" << std::endl;
 			}
 			
 			
@@ -201,10 +241,10 @@ namespace AASS{
 					auto v = *vp.first;
 					int si = (*this)[v].size();
 					sizes.push_back(si);
-					if(max == 1 || max < si){
+					if(max == -1 || max < si){
 						max = si;
 					}
-					if(min == 1 || min > si){
+					if(min == -1 || min > si){
 						min = si;
 					}
 				}

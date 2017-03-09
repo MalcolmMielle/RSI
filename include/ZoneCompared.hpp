@@ -28,8 +28,10 @@ namespace AASS{
 			//TESTING
 			double pca_diff;
 			double size_diff;
+			double size_source;
+			double size_target;
 			
-			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2, double simi) : source(v), target(v2), _similarity(simi), zone_size_factor_source(0){};
+			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2) : source(v), target(v2), _similarity(-1), zone_size_factor_source(0){};
 			
 			///@brief calculate the similarity value depending on all attributes
 // 			void update(){
@@ -55,8 +57,11 @@ namespace AASS{
 // // 				_similarity = diff;
 // 			};
 			
-			double getSimilarity() const {assert(zone_size_factor_source != -1); return _similarity;}
+			void setSimilarity(double si){_similarity = si;}
+			double getSimilarity() const {assert(_similarity != -1); return _similarity;}
 			double getRanking(const GraphZone& gsource, const GraphZone& gtarget) const;
+			
+			void print(){std::cout << " score " << getSimilarity() << " size source " << size_source << " size target " << size_target << " diff size " <<size_diff << " pca diff " << pca_diff ;}
 		};
 	}
 }

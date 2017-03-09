@@ -162,15 +162,27 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
+	std::string file;
+// 	if(argc > 2){
+		file = argv[1];
+// 	}
+// 	else{
+// 		file = "../../Test/Saeed/bird4.png";
+// 	}
+	
 		
-// 	std::string file = argv[1];
-	std::string file = "../../Test/Saeed/20170131135829.png";
+	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	std::string file2;
+// 	if(argc > 3){
+		file2 = argv[2];
+// 	}
+// 	else{
+// 		file2 = "../../Test/Saeed/bird2.png";
+// 	}
+		
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
-	
-	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-	
-	std::string file2 = "../../Test/Saeed/HIH_03.png";
+		
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraph(file2, graph_slam2);
 	
@@ -178,22 +190,32 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	
-	graph_slam.updatePCA();
-	graph_slam.removeRiplesv2();
+// 	graph_slam.updatePCA();
+// 	graph_slam.removeRiplesv2();
+// 	graph_slam.updateContours();
+	graph_slam.update();
 	
 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
 	
-	graph_slam2.updatePCA();
-	graph_slam2.removeRiplesv2();
+// 	graph_slam2.updatePCA();
+// 	graph_slam2.removeRiplesv2();
+// 	graph_slam2.updateContours();
+	graph_slam2.update();
 	
-	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
+// 	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
 	
-	/********** Hungarian matching of graph onto itself***************/
-			
-	std::cout << "Hungarian Match" << std::endl;
-	AASS::RSI::HungarianMatcher hungmatch;
-	std::vector<int> scores;
-	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
+	/********** Drawing the graphs *******************************************/
+	
+	cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.draw(graphmat);
+	
+	cv::Mat graphmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
+	graph_slam2.draw(graphmat2);
+	
+	cv::imshow("graph1", graphmat);
+	cv::imshow("graph2", graphmat2);
+// 	cv::waitKey(0);
+	
 	
 	/********** Uniqueness *******************************************/
 	
@@ -203,39 +225,68 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	auto uni1 = unique.uniqueness(graph_slam);
 	
-	/********** Uniqueness *******************************************/
-	
+// 	/********** Uniqueness *******************************************/
+// 	
 	std::cout << "SECOND UNIA" << std::endl;
 	
 	auto uni2 = unique.uniqueness(graph_slam2);
 	
-	/********** Visualization ****************************************/
+	assert(graph_slam.zoneUniquenessWasCalculated() == true);
+	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
 	
+	
+	/********** Hungarian matching of graph onto itself***************/
+			
+	std::cout << "Hungarian Match" << std::endl;
+	AASS::RSI::HungarianMatcher hungmatch;
+	std::vector<int> scores;
+	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
+	
+// 	exit(0);
+	
+	std::sort(match.begin(), match.end(), [&graph_slam, &graph_slam2](AASS::RSI::ZoneCompared &match, AASS::RSI::ZoneCompared &match1){
+		return match.getRanking(graph_slam, graph_slam2) > match1.getRanking(graph_slam, graph_slam2); 
+	} );
+	
+
+// 	
+// 	/********** Visualization ****************************************/
+// 	
 	for(size_t i = 0 ; i < match.size() ; ++i){
 		std::cout << "matching " << i << " : " << match[i].source << " " << match[i].target << std::endl;
 		cv::imshow("Zone1", graph_slam[match[i].source].getZoneMat());
 		cv::imshow("Zone2", graph_slam2[match[i].target].getZoneMat());
 		
 		//TODO: Add uniqueness measurement with it
-		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " << scores[i] << " Uniqueness : ";
+		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " <<  " \nUniqueness : ";
 		
 		std::cout << graph_slam[match[i].source].getUniquenessScore() << " ";
 		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
 		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
-		std::cout << match[i].getSimilarity() << " " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
+		
+		std::cout << "Match print :" << std::endl;
+		
+		match[i].print();
+		
+		std::cout << "\nrank " << match[i].getRanking(graph_slam, graph_slam2) << std::endl;
+		
+		std::cout << std::endl << "zone 1 ";
+		graph_slam[match[i].source].print();  
+		std::cout << std::endl << "zone 2 ";
+		graph_slam2[match[i].target].print();
 		
 // 		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
-// 			if(it->first == match[i].source){
+// 			if(it->first == match[i].first){
 // 				std::cout << it->second << " ";
 // 			}
 // 		}
 // 		std::cout << " And " ;
 // 		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
-// 			if(it->first == match[i].target){
+// 			if(it->first == match[i].second){
 // 				std::cout << it->second << " ";
 // 			}
 // 		}
-		
+// 		
 		std::cout << std::endl;
 		
 		cv::waitKey(0);

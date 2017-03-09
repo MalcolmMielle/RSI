@@ -341,8 +341,16 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << graph_slam[match[i].source].getUniquenessScore() << " ";
 		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
 		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
-		std::cout << " score " << match[i].getSimilarity() << " diff size " << match[i].size_diff << " pca diff " << match[i].pca_diff << " rank " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
 		
+		std::cout << "Match print :" << std::endl;
+		
+		match[i].print();
+		
+		std::cout << "\nrank " << match[i].getRanking(graph_slam, graph_slam2) << std::endl;
+		
+// 		std::cout << " score " << match[i].getSimilarity() << " diff size " << match[i].size_diff << " pca diff " << match[i].pca_diff << " rank " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
+		
+		std::cout << "Zone  print :" << std::endl;
 		std::cout << std::endl << "zone 1 " ;
 		graph_slam[match[i].source].print(); 
 		std::cout << std::endl << "zone 2 ";

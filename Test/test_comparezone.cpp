@@ -46,16 +46,19 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	BOOST_CHECK_EQUAL(graph_slam.getNumVertices(), 2);
 	
+	
 	for (auto vp = boost::vertices(graph_slam.getGraph()); vp.first != vp.second;) {
 		auto v = *vp.first;
 		++vp.first;
 		if(vp.first != vp.second){
 			auto v2 = *vp.first;
+			
+			AASS::RSI::ZoneCompared zcomp(v, v2);
 			auto zoneslam2 = graph_slam[v2];
 			auto zoneslam = graph_slam[v];
 			double p, h;
-			std::cout << "Compare : " << zoneslam.compare(zoneslam2, p, h) << std::endl;
-			std::cout << "Compare itself : " << zoneslam.compare(zoneslam, p, h) << std::endl;
+			std::cout << "Compare : " << zoneslam.compare(zoneslam2, zcomp) << std::endl;
+			std::cout << "Compare itself : " << zoneslam.compare(zoneslam, zcomp) << std::endl;
 		}
 		std::cout << "OU"<< std::endl;
 	}
