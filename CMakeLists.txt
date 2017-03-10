@@ -26,6 +26,13 @@ add_definitions(-std=c++11)
 include_directories(include ${vodigrex_INCLUDE_DIRS} include/hungarian)
 
 add_subdirectory(src)
+
+add_library(RSILIB
+			src/FuzzyOpening.cpp src/ZoneExtractor.cpp src/Kmean.cpp src/GraphZone.cpp src/ZoneCompared.cpp src/Zone.cpp
+			)
+
+
+
 add_subdirectory(include)
 
 # add_executable(rsi main.cpp)
@@ -36,3 +43,26 @@ add_subdirectory(include)
 # install(TARGETS rsi RUNTIME DESTINATION bin)
 
 add_subdirectory(Test)
+
+
+# uninstall target
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+## Installing the files
+
+FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+FILE(GLOB files_hung "${CMAKE_CURRENT_SOURCE_DIR}/include/hungarian/*.hpp")
+INSTALL(FILES ${files} DESTINATION include/RSI)
+INSTALL(FILES ${files_hung} DESTINATION include/RSI/hungarian)
+INSTALL(FILES rsi-config.cmake DESTINATION lib/RSI)
+INSTALL(TARGETS RSILIB DESTINATION lib/RSI)
+
+
+
+
