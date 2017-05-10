@@ -11,6 +11,7 @@ namespace AASS{
 	namespace RSI{
 		
 		class ZoneCompared;
+		class ZoneComparedInterface;
 		
 		/**
 		 * bool _isUnique: true if the zone is unique, false otherwise. It is initialised as true, so that every new zone is considered ofr comparison unless setUniqueness as been explicitely called before.
@@ -187,8 +188,15 @@ namespace AASS{
 				
 			}
 			
+			///Update the contour before giving it to always be up to date
 			std::vector< cv::Point > getContour(){
 				updateContour();
+				return _contours;
+			}
+			
+			///Do not update the contour since it's unmmutable. Need to call update before to be sure.
+			std::vector< cv::Point > getContour() const {
+// 				updateContour();
 				return _contours;
 			}
 			
@@ -471,7 +479,7 @@ namespace AASS{
 			/** @brief comparison this is where I choose to use PCA or not. The lowest the score, the better the matching. Result is between 0 and 1
 			 */
 			
-			double compare(const AASS::RSI::Zone& zone_in, AASS::RSI::ZoneCompared& zone_out) const;
+			ZoneComparedInterface compare(const AASS::RSI::Zone& zone_in) const;
 			
 			void updateContour();
 			

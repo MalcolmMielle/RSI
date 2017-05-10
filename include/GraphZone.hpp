@@ -177,6 +177,7 @@ namespace AASS{
 				updatePCA();
 				removeRiplesv2();
 				updateContours();
+				updatePCA();
 				setSizesClassification();
 				setPCAClassification();
 			}

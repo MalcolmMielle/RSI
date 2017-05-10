@@ -53,12 +53,14 @@ BOOST_AUTO_TEST_CASE(trying)
 		if(vp.first != vp.second){
 			auto v2 = *vp.first;
 			
-			AASS::RSI::ZoneCompared zcomp(v, v2);
+			AASS::RSI::ZoneCompared zcomp(v, v2, graph_slam);
 			auto zoneslam2 = graph_slam[v2];
 			auto zoneslam = graph_slam[v];
 			double p, h;
-			std::cout << "Compare : " << zoneslam.compare(zoneslam2, zcomp) << std::endl;
-			std::cout << "Compare itself : " << zoneslam.compare(zoneslam, zcomp) << std::endl;
+			auto res = zoneslam.compare(zoneslam2);
+			auto res2 = zoneslam.compare(zoneslam);
+			std::cout << "Compare : " << res.getSimilarity() << std::endl;
+			std::cout << "Compare itself : " << res2.getSimilarity() << std::endl;
 		}
 		std::cout << "OU"<< std::endl;
 	}

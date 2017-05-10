@@ -2,11 +2,15 @@
 #include "ZoneCompared.hpp"
 
 
-double AASS::RSI::Zone::compare(const AASS::RSI::Zone& zone_in, AASS::RSI::ZoneCompared& zone_out) const {				
-	if(zone_in.isUnique() == false || this->isUnique() == false){
-		//One of the zone is not unique
-		return 1;
-	}
+AASS::RSI::ZoneComparedInterface AASS::RSI::Zone::compare(const AASS::RSI::Zone& zone_in) const {
+	
+// // // // 	//DO this outside of the function 
+// 	if(zone_in.isUnique() == false || this->isUnique() == false){
+// 		//One of the zone is not unique
+// 		return 1;
+// 	}
+	
+	AASS::RSI::ZoneComparedInterface zone_out(*this, zone_in);
 	
 	//Compare their elongation
 	double simi_zone = comparePCA(zone_in);
@@ -52,7 +56,7 @@ double AASS::RSI::Zone::compare(const AASS::RSI::Zone& zone_in, AASS::RSI::ZoneC
 	zone_out.size_target = zone_in.getSizeClassification();
 	zone_out.setSimilarity(res);
 	
-	return res;
+	return zone_out;
 	
 // 				//If both have similar size, we compare the PCA also
 // 				//ATTENTION Magic number
