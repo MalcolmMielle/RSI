@@ -23,7 +23,7 @@
 
 
 
-void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< AASS::RSI::ZoneCompared > matches){
+void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
 	
 	cv::Mat obst_copy;
 	obstacle.copyTo(obst_copy);
@@ -81,10 +81,10 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 	for( ; it != matches.end() ; ++it){
 		std::cout << "DRAW LINE " << std::endl;
 		
-		auto point = gp_model[it->target].getCentroid();
+		auto point = gp_model[it->second].getCentroid();
 		point.y = point.y + obst_copy.size().height;
 		
-		cv::line(all, gp_real[it->source].getCentroid(), point, color, 5);
+		cv::line(all, gp_real[it->first].getCentroid(), point, color, 5);
 	}
 	
 	cv::imshow("all links", all);
@@ -113,8 +113,8 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	fuzzy_slam.fast(false);
 	
 	cv::Mat out_slam;
-// 	cv::imshow("SLAM", slam);
-// 	cv::waitKey(0);
+ 	cv::imshow("SLAM", slam);
+	cv::waitKey(0);
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 	std::cout << "Done opening " << std::endl;
 	out_slam.convertTo(out_slam, CV_8U);
@@ -124,8 +124,8 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
-// 	cv::imshow("REDUCED", out_tmp_slam);
-// 	cv::waitKey(0);
+	cv::imshow("REDUCED", out_tmp_slam);
+	cv::waitKey(0);
 	
 	AASS::RSI::ZoneExtractor zone_maker;
 	std::cout << "WHATERSHED SLAM" << std::endl;
@@ -151,9 +151,9 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 		throw std::runtime_error("Fuck you lonelyness");	
 	
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
-	// graph_slam.draw(graphmat2);
-	// std::string s = std::to_string(i);
-	// cv::imshow(s, graphmat2);
+	graph_slam.draw(graphmat2);
+	std::string s = std::to_string(i);
+	cv::imshow(s, graphmat2);
 }
 
 
@@ -162,142 +162,27 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
-	std::string file;
-// 	if(argc > 2){
-		file = argv[1];
-// 	}
-// 	else{
-// 		file = "../../Test/Saeed/bird4.png";
-// 	}
-	
 		
-	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-	std::string file2;
-// 	if(argc > 3){
-		file2 = argv[2];
-// 	}
-// 	else{
-// 		file2 = "../../Test/Saeed/bird2.png";
-// 	}
-		
+// 	std::string file = argv[1];
+	std::string file = "../../Test/Thermal/cold.jpg";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-	
-
-	AASS::RSI::GraphZone graph_slam2;
-	makeGraph(file2, graph_slam2);
-	
-	cv::Mat slam2 = cv::imread(file2, CV_LOAD_IMAGE_GRAYSCALE);
-	
+		
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	
-// 	graph_slam.updatePCA();
-// 	graph_slam.removeRiplesv2();
-// 	graph_slam.updateContours();
-	graph_slam.update();
+	graph_slam.updatePCA();
+	graph_slam.removeRiplesv2();
+
+    cv::Mat graphmat;
+	slam1.copyTo(graphmat);
+    graph_slam.draw(graphmat);
+	cv::imshow("GRAPH", graphmat);
 	
 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
-	
-// 	graph_slam2.updatePCA();
-// 	graph_slam2.removeRiplesv2();
-// 	graph_slam2.updateContours();
-	graph_slam2.update();
-	
-	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
 
-
-	/*********** print grsahs *****************/
-
-	cv::Mat gmat = cv::Mat::zeros(slam1.size(), CV_8U);
-	graph_slam.draw(gmat);
-	cv::imshow("input", gmat);
-
-	cv::Mat gmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
-	graph_slam2.draw(gmat2);
-	cv::imshow("model", gmat2);
-	cv::waitKey(0);
-	
-	
-	/********** Uniqueness *******************************************/
-	
-	AASS::RSI::Uniqueness unique;
-	
-	std::cout << "FIRST UNIA" << std::endl;
-	
-	auto uni1 = unique.uniqueness(graph_slam);
-	
-// 	/********** Uniqueness *******************************************/
-// 	
-	std::cout << "SECOND UNIA" << std::endl;
-	
-	auto uni2 = unique.uniqueness(graph_slam2);
-	
-	assert(graph_slam.zoneUniquenessWasCalculated() == true);
-	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
-	
-	
-	/********** Hungarian matching of graph onto itself***************/
-			
-	std::cout << "Hungarian Match" << std::endl;
-	AASS::RSI::HungarianMatcher hungmatch;
-	std::vector<int> scores;
-	auto match = hungmatch.match(graph_slam, graph_slam2, scores);
-	
-// 	exit(0);
-	
-	std::sort(match.begin(), match.end(), [&graph_slam, &graph_slam2](AASS::RSI::ZoneCompared &match, AASS::RSI::ZoneCompared &match1){
-		return match.getRanking(graph_slam, graph_slam2) > match1.getRanking(graph_slam, graph_slam2); 
-	} );
+    cv::waitKey(0);
 	
 
-// 	
-// 	/********** Visualization ****************************************/
-// 	
-	for(size_t i = 0 ; i < match.size() ; ++i){
-		std::cout << "matching " << i << " : " << match[i].source << " " << match[i].target << std::endl;
-		cv::imshow("Zone1", graph_slam[match[i].source].getZoneMat());
-		cv::imshow("Zone2", graph_slam2[match[i].target].getZoneMat());
-		
-		//TODO: Add uniqueness measurement with it
-		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " <<  " \nUniqueness : ";
-		
-		std::cout << graph_slam[match[i].source].getUniquenessScore() << " ";
-		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
-		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
-		
-		std::cout << "Match print :" << std::endl;
-		
-		match[i].print();
-		
-		std::cout << "\nrank " << match[i].getRanking(graph_slam, graph_slam2) << std::endl;
-		
-		std::cout << std::endl << "zone 1 ";
-		graph_slam[match[i].source].print();  
-		std::cout << std::endl << "zone 2 ";
-		graph_slam2[match[i].target].print();
-		
-// 		for( auto it = uni1.begin(); it != uni1.end() ; ++it){
-// 			if(it->first == match[i].first){
-// 				std::cout << it->second << " ";
-// 			}
-// 		}
-// 		std::cout << " And " ;
-// 		for( auto it = uni2.begin(); it != uni2.end() ; ++it){
-// 			if(it->first == match[i].second){
-// 				std::cout << it->second << " ";
-// 			}
-// 		}
-// 		
-		std::cout << std::endl;
-		
-		cv::waitKey(0);
-	}
-	
-	cv::imshow("TEST", slam1);
-	draw(graph_slam, graph_slam2, slam1, slam2, match);
-	cv::waitKey(0);
-	
 }
-

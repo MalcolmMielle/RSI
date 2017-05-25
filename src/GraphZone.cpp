@@ -772,7 +772,18 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 			}
 			if(is_visited == true){
 				std::cout << (*this)[targ].getValue() << " " << (*this)[base_vertex].getValue() << std::endl;
-				throw std::runtime_error("WE ARE REMOVING A TOP");
+
+				// throw std::runtime_error("WE ARE REMOVING A TOP");
+				std::cout << "Here : " <<  std::endl;
+				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+				(*this)[targ].draw(graphmat2, cv::Scalar(100));
+				cv::imshow("fused", graphmat2);
+
+				cv::Mat graphmat22 = cv::Mat::zeros(600,600, CV_8U);
+				(*this)[base_vertex].draw(graphmat22, cv::Scalar(100));
+				cv::imshow("fused base", graphmat22);
+
+				cv::waitKey(0);	
 			}
 			
 			
@@ -785,7 +796,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 				std::cout << "Here : " << e.what() << std::endl;
 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 				(*this)[targ].draw(graphmat2, cv::Scalar(100));
-				cv::imshow("fused", graphmat2);
+				cv::imshow("fused 222", graphmat2);
 				cv::waitKey(0);	
 				exit(0);
 			}
@@ -809,38 +820,13 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZone& might_be_ripple) const
 {
 	
-	auto pca_ripple = (*this)[might_be_ripple].getPCA();
-	
-	//Find bigger direction
-	std::pair<cv::Point2i, cv::Point2i> line1;
-	std::pair<cv::Point2i, cv::Point2i> line2;
-	
-	double length1_x = (std::get<1>(pca_ripple).x - std::get<0>(pca_ripple).x);
-	length1_x = length1_x * length1_x;
-	double length1_y = (std::get<1>(pca_ripple).y - std::get<0>(pca_ripple).y);
-	length1_y = length1_y * length1_y;
-	double length1 = length1_x + length1_y;
-	
-	double length2_x = (std::get<2>(pca_ripple).x - std::get<0>(pca_ripple).x);
-	length2_x = length2_x * length2_x;
-	double length2_y = (std::get<2>(pca_ripple).y - std::get<0>(pca_ripple).y);
-	length2_y = length2_y * length2_y;
-	double length2 = length2_x + length2_y;
-	
-	double max = length1, min = length2;
-	if(max < min){
-		max = length2;
-		min = length1;
-	}
-	
-	std::cout << " max and 5 min " << max << " " << min * 5 << std::endl;
 	
 	//ATTENTION magic number
 // 	if(max > (min * 5)){
 // 	if(true == true){
 		
-		Zone z_ripple = (*this)[might_be_ripple];
-		Zone z_base = (*this)[base_vertex];
+	Zone z_ripple = (*this)[might_be_ripple];
+	Zone z_base = (*this)[base_vertex];
 // 		std::cout << "PERCET : " << z_ripple.contactPoint(z_base) << std::endl;
 // 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 // 		z_ripple.draw(graphmat2, cv::Scalar(255));
@@ -848,15 +834,54 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 // 		cv::waitKey(0);
 // 			
 // 			It's a ripple !
-		//ATTENTION Second magic number
-		if(z_ripple.contactPoint(z_base) >= 40){
-			
-			std::cout << "PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
-			
+	//ATTENTION Second magic number
+	int nb_contact = z_ripple.contactPoint(z_base);
+	
+	//BEST FOR SKETCHMAPS
+	//Check that the object is not enterely circled by the zone. i.e a windows or a object in the room
+	if(nb_contact >= 40){
+		std::cout << "it is a ripple: PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
+		return true;
+	}
+
+		//It might be a contained object so we need to check pca now
+	else if(nb_contact >= 60){
+		std::cout << "NO :(. We have something with more than 60percent contact. Press any key and enter to continue" << std::endl;
+		int tmp_a;
+		std::cin >> tmp_a;
+
+		auto pca_ripple = (*this)[might_be_ripple].getPCA();
+		
+		//Find bigger direction
+		std::pair<cv::Point2i, cv::Point2i> line1;
+		std::pair<cv::Point2i, cv::Point2i> line2;
+		
+		double length1_x = (std::get<1>(pca_ripple).x - std::get<0>(pca_ripple).x);
+		length1_x = length1_x * length1_x;
+		double length1_y = (std::get<1>(pca_ripple).y - std::get<0>(pca_ripple).y);
+		length1_y = length1_y * length1_y;
+		double length1 = length1_x + length1_y;
+		
+		double length2_x = (std::get<2>(pca_ripple).x - std::get<0>(pca_ripple).x);
+		length2_x = length2_x * length2_x;
+		double length2_y = (std::get<2>(pca_ripple).y - std::get<0>(pca_ripple).y);
+		length2_y = length2_y * length2_y;
+		double length2 = length2_x + length2_y;
+		
+		double max = length1, min = length2;
+		if(max < min){
+			max = length2;
+			min = length1;
+		}
+		
+		std::cout << " max and 5 min " << max << " " << min * 10 << std::endl;
+		//if it is very alongated
+		if(max > (min * 10)){
 			return true;
 		}
+	}
 // 	}
-	
+
 	return false;
 
 }
