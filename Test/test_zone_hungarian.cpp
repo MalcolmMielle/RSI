@@ -151,9 +151,9 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 		throw std::runtime_error("Fuck you lonelyness");	
 	
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
-	graph_slam.draw(graphmat2);
-	std::string s = std::to_string(i);
-	cv::imshow(s, graphmat2);
+	// graph_slam.draw(graphmat2);
+	// std::string s = std::to_string(i);
+	// cv::imshow(s, graphmat2);
 }
 
 
@@ -164,13 +164,13 @@ BOOST_AUTO_TEST_CASE(trying)
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 // 	std::string file = argv[1];
-	std::string file = "../../Test/Saeed/20170131135829.png";
+	std::string file = "../../Test/Preprocessed/00.png";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	
-	std::string file2 = "../../Test/Saeed/HIH_03.png";
+	std::string file2 = "../../Test/Preprocessed/model_simple.png";
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraph(file2, graph_slam2);
 	
@@ -187,6 +187,18 @@ BOOST_AUTO_TEST_CASE(trying)
 	graph_slam2.removeRiplesv2();
 	
 	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
+
+
+	/*********** print grsahs *****************/
+
+	cv::Mat gmat = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.draw(gmat);
+	cv::imshow("input", gmat);
+
+	cv::Mat gmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
+	graph_slam2.draw(gmat2);
+	cv::imshow("model", gmat2);
+	cv::waitKey(0);
 	
 	/********** Hungarian matching of graph onto itself***************/
 			

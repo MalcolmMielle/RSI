@@ -836,13 +836,16 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 	
 	//BEST FOR SKETCHMAPS
 	//Check that the object is not enterely circled by the zone. i.e a windows or a object in the room
-	// if(nb_contact >= 40 && nb_contact <= 60){
-		// std::cout << "it is a ripple: PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
-		// return true;
-	// }
+	if(nb_contact >= 40){
+		std::cout << "it is a ripple: PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
+		return true;
+	}
 
 		//It might be a contained object so we need to check pca now
-	if(nb_contact >= 40){
+	else if(nb_contact >= 60){
+		std::cout << "NO :(. We have something with more than 60percent contact. Press any key and enter to continue" << std::endl;
+		int tmp_a;
+		std::cin >> tmp_a;
 
 		auto pca_ripple = (*this)[might_be_ripple].getPCA();
 		
