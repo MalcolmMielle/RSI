@@ -48,6 +48,7 @@ namespace AASS{
 			void draw(cv::Mat& drawmat) const;
 			void drawPartial(cv::Mat& drawmat) const;
 			void draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
+			void drawUnique(cv::Mat& drawmat) const;
 			
 			///@brief Remove all vertex with Value value. Do not preserve edges or zones
 			void removeVertexValue(int value){
@@ -184,7 +185,7 @@ namespace AASS{
 			
 			
 			//TODO
-			///@brief force the value of each zone depending on the uniqueness of the PCA. Normalize it between 0 for the smallest zone and 1 for the largest.
+			///@brief force the value of each zone depending on the uniqueness of the PCA. Normalize it between 0 for the smallest difference and 1 for the largest.
 			void setPCAClassification() {
 				
 				std::cout << "set PCA Classification " << std::endl;

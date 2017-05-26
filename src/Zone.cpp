@@ -40,7 +40,7 @@ AASS::RSI::ZoneComparedInterface AASS::RSI::Zone::compare(const AASS::RSI::Zone&
 	
 	double res;
 	
-	if(diff <= 0.20){
+	if(diff <= 0.20 || diff_pca <= 0.50){
 		res = (diff + diff_pca) / 2;
 	}
 	else{

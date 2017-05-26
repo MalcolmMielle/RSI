@@ -184,7 +184,10 @@ namespace AASS{
 				
 				std::string text;
 				text = std::to_string(_value);
-				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255));
+				int s_tmp = (_size_classification*100);
+				int p_tmp = (_pca_classification*100);
+				text = text + " sd " + std::to_string(s_tmp) + " pd " + std::to_string(p_tmp);
+				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255));
 				
 			}
 			

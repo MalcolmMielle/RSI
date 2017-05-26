@@ -27,9 +27,9 @@ include_directories(include ${vodigrex_INCLUDE_DIRS} include/hungarian)
 
 add_subdirectory(src)
 
-add_library(RSILIB
-			src/FuzzyOpening.cpp src/ZoneExtractor.cpp src/Kmean.cpp src/GraphZone.cpp src/ZoneCompared.cpp src/Zone.cpp
-			)
+#add_library(RSILIB
+#			src/FuzzyOpening.cpp src/ZoneExtractor.cpp src/Kmean.cpp src/GraphZone.cpp src/ZoneCompared.cpp src/Zone.cpp
+#			)
 
 
 
@@ -60,8 +60,7 @@ FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 FILE(GLOB files_hung "${CMAKE_CURRENT_SOURCE_DIR}/include/hungarian/*.h")
 INSTALL(FILES ${files} DESTINATION include/RSI)
 INSTALL(FILES ${files_hung} DESTINATION include/RSI/hungarian)
-INSTALL(FILES rsi-config.cmake DESTINATION lib/RSI)
-INSTALL(TARGETS RSILIB DESTINATION lib/RSI)
+#INSTALL(FILES rsi-config.cmake DESTINATION lib/RSI)
 
 
 

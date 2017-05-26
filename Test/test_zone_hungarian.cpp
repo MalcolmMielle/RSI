@@ -163,22 +163,19 @@ BOOST_AUTO_TEST_CASE(trying)
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 	std::string file;
-// 	if(argc > 2){
+	if(argc > 1){
 		file = argv[1];
-// 	}
-// 	else{
-// 		file = "../../Test/Saeed/bird4.png";
-// 	}
-	
-		
-	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	}
+	else{
+		file = "../../Test/Saeed/bird4.png";
+	}
 	std::string file2;
-// 	if(argc > 3){
+	if(argc > 2){
 		file2 = argv[2];
-// 	}
-// 	else{
-// 		file2 = "../../Test/Saeed/bird2.png";
-// 	}
+	}
+	else{
+		file2 = "../../Test/Saeed/bird2.png";
+	}
 		
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
@@ -236,6 +233,17 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	assert(graph_slam.zoneUniquenessWasCalculated() == true);
 	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
+
+	/*********** print unique graphs *****************/
+
+	cv::Mat gmatu = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.drawUnique(gmatu);
+	cv::imshow("input unique", gmatu);
+
+	cv::Mat gmat2u = cv::Mat::zeros(slam2.size(), CV_8U);
+	graph_slam2.drawUnique(gmat2u);
+	cv::imshow("model unique", gmat2u);
+	cv::waitKey(0);
 	
 	
 	/********** Hungarian matching of graph onto itself***************/

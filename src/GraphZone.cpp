@@ -104,6 +104,52 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 
 }
 
+void AASS::RSI::GraphZone::drawUnique(cv::Mat& drawmat) const
+{
+	
+	cv::Mat drawmat_old;
+	drawmat.convertTo(drawmat_old, CV_8U);
+	
+	cv::Scalar color;
+	cv::RNG rng(12345);
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		if(drawmat.channels() == 1){
+			color = rng.uniform(0, 230);
+		}
+		else if(drawmat.channels() == 3){
+			color[0] = rng.uniform(0, 230);
+			color[1] = rng.uniform(0, 230);
+			color[2] = rng.uniform(0, 230);
+		}
+		
+		VertexZone v = *vp.first;
+		
+		if((*this)[v].isUnique()){
+// 				if(getNumEdges(v) > 1){
+			
+			draw(drawmat, v, color);
+			
+			EdgeIteratorZone out_i, out_end;
+			EdgeZone e;
+			
+			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+				out_i != out_end; ++out_i) {
+				e = *out_i;
+				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
+				if( (*this)[targ].getZone().size() > 100 ){
+// 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+				}
+			}
+// 
+		}
+		
+	}
+
+}
+
 void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
 {
 // 		std::cout << std::endl;
