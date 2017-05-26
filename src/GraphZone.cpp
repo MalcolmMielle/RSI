@@ -84,21 +84,27 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 // 		if((*this)[v].getZone().size() > 100){
 // 				if(getNumEdges(v) > 1){
 			
-			draw(drawmat, v, color);
-			
-			EdgeIteratorZone out_i, out_end;
-			EdgeZone e;
-			
-			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-				out_i != out_end; ++out_i) {
-				e = *out_i;
-				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
-				if( (*this)[targ].getZone().size() > 100 ){
+		draw(drawmat, v, color);
+		
+		EdgeIteratorZone out_i, out_end;
+		EdgeZone e;
+		
+		for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+			out_i != out_end; ++out_i) {
+			e = *out_i;
+			VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
+			if( (*this)[targ].getZone().size() > 100 ){
 // 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
-				}
 			}
-// 
-// 		}
+		}
+	}
+		
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+
+		VertexZone v = *vp.first;
+		EdgeIteratorZone out_i, out_end;
+		EdgeZone e;
+		(*this)[v].printLabel(drawmat);
 		
 	}
 
@@ -145,7 +151,18 @@ void AASS::RSI::GraphZone::drawUnique(cv::Mat& drawmat) const
 			}
 // 
 		}
+	}
 		
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		VertexZone v = *vp.first;
+		if((*this)[v].isUnique()){
+
+			EdgeIteratorZone out_i, out_end;
+			EdgeZone e;
+			(*this)[v].printLabel(drawmat);
+			
+		}
 	}
 
 }
@@ -960,6 +977,18 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 // 				ZoneCompared zoneout(v, v_target, *this);
 				auto zoneinterface = (*this)[v].compare(target[v_target]);
 				ZoneCompared zoneout(v, v_target, *this, zoneinterface);
+				
+				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+				(*this)[v].draw(graphmat2, cv::Scalar(100));
+				cv::imshow("firstzone", graphmat2);
+				cv::Mat graphmat22 = cv::Mat::zeros(600,600, CV_8U);
+				target[v_target].draw(graphmat22, cv::Scalar(100));
+				cv::imshow("secondzone", graphmat22);
+				
+				std::cout << "RES " << zoneout.getSimilarity() << std::endl;
+				
+				cv::waitKey(0);	
+				
 				
 				//Create the zone comparison element with all values
 // 				ZoneCompared zoneout(v, v_target, similarity);

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <stdexcept>
+#include <sstream>
 
 namespace AASS{
 	
@@ -63,10 +64,10 @@ namespace AASS{
 				std::cout << "pca clasificcation " << _pca_classification << " ";
 			}
 			
-			void setSizeClassification(double size){assert(size <= 1); assert(size >= 0); _size_classification = size;}
+			void setSizeClassification(double size){_size_classification = size;}
 			double getSizeClassification() const {if(_size_classification == -1 ){throw std::runtime_error("Classificatio size not set");} return _size_classification;}
 			
-			void setPCAClassification(double size){assert(size <= 1); assert(size >= 0); _pca_classification = size;}
+			void setPCAClassification(double size){_pca_classification = size;}
 			double getPCAClassification() const {if(_pca_classification == -1 ){throw std::runtime_error("Classificatio pca not set");}return _pca_classification;}
 			
 			void setUniqueness(bool b, double u_score){
@@ -171,8 +172,8 @@ namespace AASS{
 				
 				//Draw PCA
 // 				cv::circle(img, std::get<0>(_pca), 3, CV_RGB(255, 0, 255), 10);
-// 				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
-// 				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
+				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
+				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
 				
 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
 				
@@ -182,13 +183,21 @@ namespace AASS{
 					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
 				}
 				
+				
+				
+			}
+			
+			void printLabel(cv::Mat& img) const{
 				std::string text;
 				text = std::to_string(_value);
-				int s_tmp = (_size_classification*100);
-				int p_tmp = (_pca_classification*100);
-				text = text + " sd " + std::to_string(s_tmp) + " pd " + std::to_string(p_tmp);
+				std::stringstream precisionValue;
+				precisionValue.precision(2);
+				precisionValue << _size_classification << std::endl;
+				std::stringstream precisionValue2;
+				precisionValue2.precision(2);
+				precisionValue2 << _pca_classification << std::endl;
+				text = text + " sd " + precisionValue.str() + " pd " + precisionValue2.str() ;
 				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255));
-				
 			}
 			
 			///Update the contour before giving it to always be up to date
@@ -423,6 +432,8 @@ namespace AASS{
 			 */
 			double getPCADiff() const {
 				auto pca_max_min = getMaxMinPCA();
+				std::cout << "pca max min " << pca_max_min.first << " " << pca_max_min.second << std::endl;
+
 				
 				if(pca_max_min.first > 0){
 					double normalizer_own = 1 / pca_max_min.first;
@@ -431,7 +442,6 @@ namespace AASS{
 				}
 				
 				double pca_diff = pca_max_min.first - pca_max_min.second;
-				std::cout << "pca diff " << pca_diff << std::endl;
 				assert(pca_diff >= 0 && "similarity measure of Zone should not be negative");
 				assert(pca_diff <= 1 && "similarity measure of Zone should not be mopre than one");
 				

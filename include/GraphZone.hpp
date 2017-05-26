@@ -24,6 +24,24 @@ namespace AASS{
 			///@brief -1 if not init
 			int _nb_of_unique;
 			
+			///@brief mean of pca classification
+			double _mean_pca;
+			double _variance_pca;
+			double _sdeviation_pca;
+			
+			///@brief just to make sure it was done.
+			bool _pca_classified;
+			
+			///@brief mean of pca classification
+			double _mean_size;
+			double _variance_size;
+			double _sdeviation_size;
+			
+			///@brief just to make sure it was done.
+			bool _size_classified;
+			
+			int _sd_away_fom_mean_for_uniqueness;
+			
 		public:
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::GraphType GraphZoneType;
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex VertexZone;
@@ -31,10 +49,13 @@ namespace AASS{
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::VertexIterator VertexIteratorZone;
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::EdgeIterator EdgeIteratorZone;
 
-			GraphZone(): _nb_of_unique(-1){};
+			GraphZone(): _nb_of_unique(-1), _pca_classified(false), _sd_away_fom_mean_for_uniqueness(1){};
 			
 			void setNumUnique(int n){_nb_of_unique = n;}
 			double getNumUnique(){if(_nb_of_unique != -1){return _nb_of_unique;}else{return getNumVertices();}}
+			
+			void setSDAwayFromMeanForUniqueness(int i){_sd_away_fom_mean_for_uniqueness = i;}
+			int getSDAwayFromMeanForUniqueness(){return _sd_away_fom_mean_for_uniqueness;}
 			
 			bool zoneUniquenessWasCalculated(){
 				if(_nb_of_unique == -1){
@@ -183,49 +204,174 @@ namespace AASS{
 				setPCAClassification();
 			}
 			
+			/**
+			 * @brief set if every zone is unique or not
+			 * A zone is unique if the size or the pca is at least 1 sd from the mean
+			 * The score is 2 - the sum of pdf of size and pca for each unique attribute or 1 if it's non unique.
+			 * Thus non unique zone have a score of 0
+			 */
+			void updateUnique(){
+				
+				update();
+				if(_pca_classified == false){
+					throw std::runtime_error("PCA wasn't classified before searching for unique zones");
+				}
+				if(_size_classified == false){
+					throw std::runtime_error("Size wasn't classified before searching for unique zones");
+				}
+				
+				int count = 0;
+				
+				boost::math::normal nd_pca(_mean_pca, _sdeviation_pca);
+				boost::math::normal nd_size(_mean_size, _sdeviation_size);
+				auto vp = boost::vertices((*this));
+				for(vp ; vp.first != vp.second; ++vp.first){
+					
+					double res = 2;
+					
+					auto v = *vp.first;
+					double score_pca = (*this)[v].getPCAClassification();
+					double score_size = (*this)[v].getSizeClassification();
+					
+// 					Test PCA TODO
+					if(score_pca <= 0 - (_sd_away_fom_mean_for_uniqueness * 1)){
+						//Calculate the score. It's under the mean so score is already low
+						double prob1 =  boost::math::cdf(nd_pca, score_pca + 0.5);
+						double prob2 =  boost::math::cdf(nd_pca, score_pca - 0.5);
+						assert(prob1 - prob2 > 0);
+						assert(prob1 - prob2 < 1);
+						
+// 						std::cout << res << " prob " << prob1 - prob2 << std::endl;
+						res = res - (prob1 - prob2) ;
+						
+						if(res > 2 || res < 0){
+							throw std::runtime_error("the cdf pca in base proba failed and it's not supposed to EVER");
+						}
+					}
+					else if(score_pca >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
+						//Score is above so we invert curve
+						double prob1 =  1 - boost::math::cdf(nd_pca, score_pca + 0.5);
+						double prob2 =  1 - boost::math::cdf(nd_pca, score_pca - 0.5);
+						assert(prob2 - prob1 > 0);
+						assert(prob2 - prob1 < 1);
+						
+// 						std::cout << res << " prob " << prob2 - prob1 << std::endl;
+						res = res - (prob2 - prob1) ;
+						
+						if(res > 2 || res < 0){
+							throw std::runtime_error("the cdf pca in base proba failed and it's not supposed to EVER");
+						}
+					}
+					else{
+						res = res - 1;
+					}
+					
+					//Test SIZE STANDARDIZED SO mean 0 and sd 1
+					if(score_size <= 0 - (_sd_away_fom_mean_for_uniqueness * 1)){
+						//Calculate the score. It's under the mean so score is already low
+						double prob1 =  boost::math::cdf(nd_size, score_size + 0.5);
+						double prob2 =  boost::math::cdf(nd_size, score_size - 0.5);
+						assert(prob1 - prob2 > 0);
+						assert(prob1 - prob2 < 1);
+						
+						res = res - (prob1 - prob2) ;
+
+// 						std::cout << res << std::endl;
+						if(res > 2 || res < 0){
+							throw std::runtime_error("the cdf size in base proba failed and it's not supposed to EVER");
+						}
+					}
+					else if(score_size >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
+						//Score is above so we invert curve
+						double prob1 =  1 - boost::math::cdf(nd_size, score_size + 0.5);
+						double prob2 =  1 - boost::math::cdf(nd_size, score_size - 0.5);
+						assert(prob2 - prob1 > 0);
+						assert(prob2 - prob1 < 1);
+						
+						res = res - (prob2 - prob1);
+
+// 						std::cout << res << std::endl;
+						if(res > 2 || res < 0){
+							throw std::runtime_error("the cdf size in base proba failed and it's not supposed to EVER");
+						}
+					}
+					else{
+						res = res - 1;
+					}
+					
+					std::cout << "PCA " <<  score_pca << " mean " << _mean_pca << " standar dev " << _sdeviation_pca << " pca " << (*this)[v].getPCADiff() << std::endl;
+					
+					if(res == 0){
+						(*this)[v].setUniqueness(false, res);
+					}
+					else{
+						(*this)[v].setUniqueness(true, res);
+						count++;
+					}
+
+				}
+				
+// 				exit(0);
+								
+				_nb_of_unique = count;
+				
+			}
 			
-			//TODO
+			
+			//TODO 
+			//THAT DOESN*T MAKE SENSE WE DON*T CARE IF THE PCA ARE THE SAME RELATIVE TO OTHER PCA. This could create matching between relatively different pca. PCA is an "exact measure when calculating the difference"
 			///@brief force the value of each zone depending on the uniqueness of the PCA. Normalize it between 0 for the smallest difference and 1 for the largest.
 			void setPCAClassification() {
+				
 				
 				std::cout << "set PCA Classification " << std::endl;
 				std::vector<double> pca_comp;
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
-				double max = -1, min = -1;
+// 				double max = -1, min = -1;
 				auto vp = boost::vertices((*this));
-				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+				for(vp ; vp.first != vp.second; ++vp.first){
 					auto v = *vp.first;
 					double si = (*this)[v].getPCADiff();
 					pca_comp.push_back(si);
-					if(max == -1 || max < si){
-						max = si;
-					}
-					if(min == -1 || min > si){
-						min = si;
-					}
+// 					if(max == -1 || max < si){
+// 						max = si;
+// 					}
+// 					if(min == -1 || min > si){
+// 						min = si;
+// 					}
 				}
 				
-				assert(max != -1);
-				assert(min != -1);
+// 				assert(max != -1);
+// 				assert(min != -1);
 				assert(pca_comp.size() == getNumVertices());
+				_mean_pca = mean(pca_comp);
+				_variance_pca = variance(pca_comp, _mean_pca);
+				_sdeviation_pca = sqrt(_variance_pca);
+				auto standardized = standardization(pca_comp, _mean_pca, _sdeviation_pca);
 				
-				std::cout << "max " << max << " min " << min << std::endl;
-				double div = (max - min);
-				assert(div != 0);
-				std::cout << "div " << div << " min " << min << std::endl;
+// 				std::cout << "max " << max << " min " << min << std::endl;
+// 				double div = (max - min);
+// 				assert(div != 0);
+// 				std::cout << "div " << div << " min " << min << std::endl;
 				
 				std::vector<double> all_scores;
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 // 				int max = -1, min = -1;
 				vp = boost::vertices((*this));
 				int i = 0;
-				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+				for(vp ; vp.first != vp.second; ++vp.first){
 					auto v = *vp.first;
-					double score = (pca_comp[i] - min) / div;
+					
+					assert((*this)[v].getPCADiff() == pca_comp[i]);
+					std::cout << (pca_comp[i] - _mean_pca) / _sdeviation_pca  << " == " << standardized[i] << std::endl;
+					assert(((pca_comp[i] - _mean_pca) / _sdeviation_pca) == standardized[i]);
+					
+					std::cout << "SCORE" << standardized[i] << std::endl;
+					(*this)[v].setPCAClassification(standardized[i]);
 					++i ;
-					std::cout << "SCORE" << score << std::endl;
-					(*this)[v].setPCAClassification(score);
 				}
+				
+				_pca_classified = true;
 				
 				std::cout <<"DONE" << std::endl;
 			}
@@ -234,37 +380,49 @@ namespace AASS{
 			///@brief force the value of each zone depending on the size from biggest zone to smallest. Normalize it between 0 for the smallest zone and 1 for the largest.
 			void setSizesClassification() {
 				
-				std::cout << "setSize Classification " << std::endl;
-				std::vector<int> sizes;
+				std::cout << "set PCA Classification " << std::endl;
+				std::vector<double> size_comp;
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
-				int max = -1, min = -1;
+// 				double max = -1, min = -1;
 				auto vp = boost::vertices((*this));
-				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+				for(vp ; vp.first != vp.second; ++vp.first){
 					auto v = *vp.first;
-					int si = (*this)[v].size();
-					sizes.push_back(si);
-					if(max == -1 || max < si){
-						max = si;
-					}
-					if(min == -1 || min > si){
-						min = si;
-					}
+					double si = (*this)[v].size();
+					size_comp.push_back(si);
+// 					if(max == -1 || max < si){
+// 						max = si;
+// 					}
+// 					if(min == -1 || min > si){
+// 						min = si;
+// 					}
 				}
 				
-				double div = (max - min);
+// 				assert(max != -1);
+// 				assert(min != -1);
+				assert(size_comp.size() == getNumVertices());
+				_mean_size = mean(size_comp);
+				_variance_size = variance(size_comp, _mean_size);
+				_sdeviation_size = sqrt(_variance_size);
+				auto standardized = standardization(size_comp, _mean_size, _sdeviation_size);
+				
+// 				std::cout << "max " << max << " min " << min << std::endl;
+// 				double div = (max - min);
+// 				assert(div != 0);
+// 				std::cout << "div " << div << " min " << min << std::endl;
 				
 				std::vector<double> all_scores;
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 // 				int max = -1, min = -1;
 				vp = boost::vertices((*this));
 				int i = 0;
-				for(vp = boost::vertices((*this)) ; vp.first != vp.second; ++vp.first){
+				for(vp ; vp.first != vp.second; ++vp.first){
 					auto v = *vp.first;
-					double score = (sizes[i] - min) / div;
+					std::cout << "SCORE" << standardized[i] << std::endl;
+					(*this)[v].setSizeClassification(standardized[i]);
 					++i ;
-					std::cout << "SCORE" << score << std::endl;
-					(*this)[v].setSizeClassification(score);
 				}
+				
+				_size_classified = true;
 				
 				std::cout <<"DONE" << std::endl;
 				
@@ -407,6 +565,40 @@ namespace AASS{
 			
 			///@brief Return true of the zone is ripple
 			bool isRipple(const AASS::RSI::GraphZone::VertexZone& base_vertex, const AASS::RSI::GraphZone::VertexZone& might_be_ripple) const;
+			
+			double variance (std::vector<double> input, double mean){
+				double variance = 0 ;
+				auto it = input.begin();
+				for(it ; it != input.end() ; ++it){
+					variance = variance + ( (*it - mean) * (*it - mean) );
+// 					std::cout << "variance " << variance << std::endl;
+				}
+				
+				return variance / (double) input.size();
+			}
+				
+			double mean(std::vector<double> input){
+				double sum = 0;
+				auto it = input.begin();
+				for(it ; it != input.end() ; ++it){
+					sum = sum + (*it);
+				}
+				return sum / (double) input.size();
+			}
+				
+			std::vector<double> standardization (std::vector<double> input, double mean, double sdeviation){
+				std::vector<double> out;
+				auto it = input.begin();
+				for(it; it != input.end() ; ++it){
+					double v_value = (*it - mean) / sdeviation;
+					out.push_back(v_value);
+				}
+				return out;
+			}
+			
+			
+			
+			
 			
 		};
 		

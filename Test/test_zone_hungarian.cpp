@@ -219,22 +219,58 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	/********** Uniqueness *******************************************/
 	
-	AASS::RSI::Uniqueness unique;
+// 	AASS::RSI::Uniqueness unique;
 	
-	std::cout << "FIRST UNIA" << std::endl;
-	
-	auto uni1 = unique.uniqueness(graph_slam);
+// 	std::cout << "FIRST UNIA" << std::endl;
+// 	
+// 	auto uni1 = unique.uniqueness(graph_slam);
 	
 // 	/********** Uniqueness *******************************************/
 // 	
-	std::cout << "SECOND UNIA" << std::endl;
+// 	std::cout << "SECOND UNIA" << std::endl;
 	
-	auto uni2 = unique.uniqueness(graph_slam2);
+// 	auto uni2 = unique.uniqueness(graph_slam2);
+	
+
+	/*********** print unique graphs *****************/
+// 	int sd = 0;
+// 	
+// 	for(sd ; sd <= 20 ; ++sd){
+// 	
+// 		graph_slam.setSDAwayFromMeanForUniqueness(sd);
+// 		graph_slam2.setSDAwayFromMeanForUniqueness(sd);
+// 		
+// 		/********** Uniqueness *******************************************/
+// 		graph_slam.updateUnique();
+// 		graph_slam2.updateUnique();
+// 		
+// 		assert(graph_slam.zoneUniquenessWasCalculated() == true);
+// 		assert(graph_slam2.zoneUniquenessWasCalculated() == true);
+// 
+// 		cv::Mat gmatu = cv::Mat::zeros(slam1.size(), CV_8U);
+// 		graph_slam.drawUnique(gmatu);
+// 		cv::imshow("input unique", gmatu);
+// 
+// 		cv::Mat gmat2u = cv::Mat::zeros(slam2.size(), CV_8U);
+// 		graph_slam2.drawUnique(gmat2u);
+// 		cv::imshow("model unique", gmat2u);
+// 		
+// 		std::cout << "For sd " << sd << std::endl;
+// 		cv::waitKey(0);
+// 	}
+// 	
+// 	exit(0);
+
+
+	graph_slam.setSDAwayFromMeanForUniqueness(1);
+	graph_slam2.setSDAwayFromMeanForUniqueness(1);
+	
+	/********** Uniqueness *******************************************/
+	graph_slam.updateUnique();
+	graph_slam2.updateUnique();
 	
 	assert(graph_slam.zoneUniquenessWasCalculated() == true);
 	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
-
-	/*********** print unique graphs *****************/
 
 	cv::Mat gmatu = cv::Mat::zeros(slam1.size(), CV_8U);
 	graph_slam.drawUnique(gmatu);
