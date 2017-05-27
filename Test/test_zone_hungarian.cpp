@@ -21,6 +21,9 @@
 
 #include "Uniqueness.hpp"
 
+#include <valgrind/callgrind.h>
+
+
 
 
 void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< AASS::RSI::ZoneCompared > matches){
@@ -142,7 +145,12 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "Number of nodes" << graph_slam.getNumVertices() << std::endl;
 	
 	//Watershed Algorithm
+	
+	CALLGRIND_START_INSTRUMENTATION;
+    CALLGRIND_TOGGLE_COLLECT;
 	graph_slam.watershed(0.25);
+	CALLGRIND_TOGGLE_COLLECT;
+    CALLGRIND_STOP_INSTRUMENTATION;
 	
 	int size_to_remove = 100;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);

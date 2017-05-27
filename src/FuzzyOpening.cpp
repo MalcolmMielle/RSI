@@ -104,7 +104,7 @@ void AASS::RSI::FuzzyOpening::fuzzyOpening(const cv::Mat& src, cv::Mat& output, 
 	//Update result 
 	int count = 0;
 	for(int row = pad ; row < distance_image.rows - pad + 1 /*&& count < 15000*/ ; row++){
-		std::cout << "1 row \n";
+		// std::cout << "1 row \n";
 		float* p = distance_image.ptr<float>(row); //point to each row
 		float* p_output = output.ptr<float>(row); //point to each row
 		for(int col = pad ; col < distance_image.cols - pad + 1 /*&& count < 15000*/ ; col++){

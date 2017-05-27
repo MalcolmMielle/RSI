@@ -405,7 +405,8 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, int direction){
+void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, int direction, std::deque<VertexZone>& to_be_removed){
+
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
@@ -437,7 +438,8 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 		
 		VertexZone targ = boost::target(e_second, (*this));
 	
-		//Needed to not consider the new added vertex since they are supposed to be stopping point of the recursion
+		//Needed to not consider the new added vertex since they are supposed to be stopping point of the recursion.
+		//This is a marker for node that are here seen the begining
 		bool is_old = false;
 		for(size_t i = 0; i < listedge.size() ; ++i){
 			if(listedge[i] == e_second)
@@ -445,29 +447,34 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 		}
 		
 		//Do not visit already seen nodes
+		//Mark nodes that are already visited
 		bool is_visited = false;
 		for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
 			if(targ == top_vertex_visited[j]){
-				std::cout << "SEEN " << j << std::endl;
+				// std::cout << "SEEN " << j << std::endl;
 				is_visited = true;
 			}
 		}
 		
 		//Already visited node in this recursion mode. Needed if we don't do a watershed and no direction is kept.
+		//It's simply not go backward in the exploration
 		bool is_visited_tmp = false;
 		for(size_t j = 0 ; j < top_vertex_visited_tmp.size() ; ++j){
 			if(targ == top_vertex_visited_tmp[j]){
-				std::cout << "SEEN " << j << std::endl;
+				// std::cout << "SEEN " << j << std::endl;
 				is_visited_tmp = true;
 			}
 		}
+
+		double targ_value = (*this)[targ].getValue();
+		double first_vertex_value = (*this)[first_vertex].getValue();
 		
 		//Comparison using the biggest space as a reference
-		double max_value = (*this)[first_vertex].getValue();
-		double min_value = (*this)[targ].getValue();
+		double max_value = first_vertex_value;
+		double min_value = targ_value;
 		if(max_value < min_value){
-			max_value = (*this)[targ].getValue();
-			min_value = (*this)[first_vertex].getValue();
+			max_value = targ_value;
+			min_value = first_vertex_value;
 		}
 		
 // 		if(is_visited == true){
@@ -490,12 +497,13 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			min_value <= max_value + ( (double) max_value * threshold) &&
 			is_old == true && is_visited == false && is_visited_tmp == false
 		){
-			
+			double top_vertex_value = (*this)[top_vertex].getValue();
+
 			int direction_tmp;
-			if((*this)[targ].getValue() > (*this)[top_vertex].getValue()){
+			if(targ_value > top_vertex_value){
 				direction_tmp = 1;
 			}
-			else if((*this)[targ].getValue() < (*this)[top_vertex].getValue()){
+			else if(targ_value < top_vertex_value){
 				direction_tmp = -1;
 			}
 			else{
@@ -521,7 +529,7 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			
 			if(good_direction == true){
 // 			std::cout << "REMOVE vertex for edge " << (*this)[targ].getValue() << std::endl;
-				std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
+				// std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
 				
 // 				if(direction_tmp == -2){
 // 					throw("Weird two node with same value next to each other");
@@ -530,20 +538,21 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 // 				assert(direction_tmp <= 0);
 				
 				//Recursion :(
-				std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
-				getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction_tmp);
+				// std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
+				getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction_tmp, to_be_removed);
 				
 	// 			change = true;
-				EdgeIteratorZone out_i_second, out_end_second;
+				// EdgeIteratorZone out_i_second, out_end_second;
 				
-				int vertnum = getNumVertices();
-				int vertedge = getNumEdges(targ);
+				// int vertnum = getNumVertices();
+				// int vertedge = getNumEdges(targ);
 			
-				std::vector<VertexZone> test;
+				// std::vector<VertexZone> test;
 				
 				++out_i;
 				try{
-					removeVertexWhilePreservingEdges(targ, first_vertex);
+					// removeVertexWhilePreservingEdges(targ, first_vertex);
+					to_be_removed.push_back(targ);
 				}
 				catch(std::exception& e){
 					std::cout << "Zone had more than one shape. It's fine at this point in the proccess. Continue" << std::endl;
@@ -576,6 +585,8 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 void AASS::RSI::GraphZone::watershed(double threshold)
 {
 	//Find all "top node"
+
+	bool exit = false;
 	
 	std::cout << "Starting watershed" << std::endl;
 // 	exit(0);
@@ -583,6 +594,14 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 	std::deque<VertexZone> top_vertex_visited;
 	bool done = false;
 	while(done == false){
+
+		// std::cout << "ONE NODE " << std::endl;
+		// if(exit == true){
+		// 	done = true;
+		// }
+		// else{
+		// 	exit = true;
+		// }
 		
 		VertexZone top_vertex;
 		bool init = false;
@@ -622,10 +641,17 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 		top_vertex_visited.push_back(top_vertex);
 	
 		int direction = 0 ;
-		std::cout << "NEW VERTEX.............................:" << std::endl;
+		// std::cout << "NEW VERTEX.............................:" << std::endl;
 		std::deque<VertexZone> top_vertex_visited_tmp;
 		top_vertex_visited_tmp.push_back(top_vertex);
-		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction);
+
+		std::deque<VertexZone> to_be_removed;
+
+		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction, to_be_removed);
+
+		for(auto it = to_be_removed.begin() ; it != to_be_removed.end() ; ++it){
+			removeVertexWhilePreservingEdges(*it, top_vertex);
+		}
 		
 		//Stopping condition
 		if(top_vertex_visited.size() == getNumVertices()){
@@ -641,7 +667,7 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 				
 	}
 	
-// 	std::cout << "DONE" << std::endl;
+	std::cout << "DONE Watershed" << std::endl;
 // 	exit(0);
 	
 
