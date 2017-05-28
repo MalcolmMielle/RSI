@@ -161,7 +161,7 @@ void makeGraphSLAM(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	//Watershed Algorithm
 	graph_slam.watershed(0.25);
 	
-	int size_to_remove = 100;
+	int size_to_remove = 400;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
 	graph_slam.removeLonelyVertices();
 	if(graph_slam.lonelyVertices())
@@ -240,27 +240,29 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 
 BOOST_AUTO_TEST_CASE(trying)
 {
-	
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 	std::string file;
-// 	if(argc > 2){
+	if(argc > 1){
 		file = argv[1];
-// 	}
-// 	else{
-// 		file = "../../Test/Saeed/bird4.png";
-// 	}
+	}
+	else{
+		file = "../../Test/Saeed/bird4.png";
+	}
+	std::string file2;
+	if(argc > 2){
+		file2 = argv[2];
+	}
+	else{
+		file2 = "../../Test/Saeed/bird2.png";
+	}
+		
 	AASS::RSI::GraphZone graph_slam;
 	makeGraphSLAM(file, graph_slam);
-		
+	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-	std::string file2;
-// 	if(argc > 3){
-		file2 = argv[2];
-// 	}
-// 	else{
-// 		file2 = "../../Test/Saeed/bird2.png";
-// 	}
+	
+
 	AASS::RSI::GraphZone graph_slam2;
 	makeGraphSLAM(file2, graph_slam2);
 	
@@ -280,37 +282,91 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	graph_slam2.updateContours();
 	graph_slam2.update();
 	
-// 	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
-	
-	/********** Drawing the graphs *******************************************/
-	
-	cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
-	graph_slam.draw(graphmat);
-	
-	cv::Mat graphmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
-	graph_slam2.draw(graphmat2);
-	
-	cv::imshow("graph1", graphmat);
-	cv::imshow("graph2", graphmat2);
-// 	cv::waitKey(0);
+	std::cout << "Size of graph2" << graph_slam2.getNumVertices() << std::endl;
+
+
+	/*********** print grsahs *****************/
+
+	cv::Mat gmat = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.draw(gmat);
+	cv::imshow("input", gmat);
+
+	cv::Mat gmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
+	graph_slam2.draw(gmat2);
+	cv::imshow("model", gmat2);
+	cv::waitKey(0);
 	
 	
 	/********** Uniqueness *******************************************/
 	
-	AASS::RSI::Uniqueness unique;
+// 	AASS::RSI::Uniqueness unique;
 	
-	std::cout << "FIRST UNIA" << std::endl;
-	
-	auto uni1 = unique.uniqueness(graph_slam);
+// 	std::cout << "FIRST UNIA" << std::endl;
+// 	
+// 	auto uni1 = unique.uniqueness(graph_slam);
 	
 // 	/********** Uniqueness *******************************************/
 // 	
-	std::cout << "SECOND UNIA" << std::endl;
+// 	std::cout << "SECOND UNIA" << std::endl;
 	
-	auto uni2 = unique.uniqueness(graph_slam2);
+// 	auto uni2 = unique.uniqueness(graph_slam2);
 	
+
+	/*********** print unique graphs *****************/
+// 	int sd = 0;
+// 	
+// 	for(sd ; sd <= 20 ; ++sd){
+// 	
+// 		graph_slam.setSDAwayFromMeanForUniqueness(sd);
+// 		graph_slam2.setSDAwayFromMeanForUniqueness(sd);
+// 		
+// 		/********** Uniqueness *******************************************/
+// 		graph_slam.updateUnique();
+// 		graph_slam2.updateUnique();
+// 		
+// 		assert(graph_slam.zoneUniquenessWasCalculated() == true);
+// 		assert(graph_slam2.zoneUniquenessWasCalculated() == true);
+// 
+// 		cv::Mat gmatu = cv::Mat::zeros(slam1.size(), CV_8U);
+// 		graph_slam.drawUnique(gmatu);
+// 		cv::imshow("input unique", gmatu);
+// 
+// 		cv::Mat gmat2u = cv::Mat::zeros(slam2.size(), CV_8U);
+// 		graph_slam2.drawUnique(gmat2u);
+// 		cv::imshow("model unique", gmat2u);
+// 		
+// 		std::cout << "For sd " << sd << std::endl;
+// 		cv::waitKey(0);
+// 	}
+// 	
+// 	exit(0);
+
+
+	graph_slam.setSDAwayFromMeanForUniqueness(1);
+	graph_slam2.setSDAwayFromMeanForUniqueness(1);
+	
+	/********** Uniqueness *******************************************/
+	graph_slam.updateAllUnique();
+	graph_slam2.updateAllUnique();
+	
+	// assert(graph_slam.zoneUniquenessWasCalculated() == true);
+	// assert(graph_slam2.zoneUniquenessWasCalculated() == true);
+
+	// graph_slam.setNumUnique(graph_slam.getNumVertices());
+	// graph_slam2.setNumUnique(graph_slam2.getNumVertices());
+
+
 	assert(graph_slam.zoneUniquenessWasCalculated() == true);
 	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
+
+	cv::Mat gmatu = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.drawUnique(gmatu);
+	cv::imshow("input unique", gmatu);
+
+	cv::Mat gmat2u = cv::Mat::zeros(slam2.size(), CV_8U);
+	graph_slam2.drawUnique(gmat2u);
+	cv::imshow("model unique", gmat2u);
+	cv::waitKey(0);
 	
 	
 	/********** Hungarian matching of graph onto itself***************/
@@ -348,11 +404,8 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 		std::cout << "\nrank " << match[i].getRanking(graph_slam, graph_slam2) << std::endl;
 		
-// 		std::cout << " score " << match[i].getSimilarity() << " diff size " << match[i].size_diff << " pca diff " << match[i].pca_diff << " rank " <<match[i].getRanking(graph_slam, graph_slam2) << " ";
-		
-		std::cout << "Zone  print :" << std::endl;
-		std::cout << std::endl << "zone 1 " ;
-		graph_slam[match[i].source].print(); 
+		std::cout << std::endl << "zone 1 ";
+		graph_slam[match[i].source].print();  
 		std::cout << std::endl << "zone 2 ";
 		graph_slam2[match[i].target].print();
 		
@@ -371,12 +424,12 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << std::endl;
 		
 		cv::waitKey(0);
+	
 	}
 	
 	cv::imshow("TEST", slam1);
 	draw(graph_slam, graph_slam2, slam1, slam2, match);
 	cv::waitKey(0);
-	
 }
 
 
