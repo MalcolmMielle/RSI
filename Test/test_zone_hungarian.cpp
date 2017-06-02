@@ -159,9 +159,11 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 		throw std::runtime_error("Fuck you lonelyness");	
 	
 	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
-	// graph_slam.draw(graphmat2);
-	// std::string s = std::to_string(i);
-	// cv::imshow(s, graphmat2);
+	graph_slam.draw(graphmat2);
+	std::string s = std::to_string(i);
+	cv::resize(graphmat2, graphmat2, cv::Size(graphmat2.cols * 2, graphmat2.rows * 2));
+	cv::imshow(s, graphmat2);
+	cv::waitKey(0);
 }
 
 
@@ -217,10 +219,12 @@ BOOST_AUTO_TEST_CASE(trying)
 
 	cv::Mat gmat = cv::Mat::zeros(slam1.size(), CV_8U);
 	graph_slam.draw(gmat);
+	cv::resize(gmat, gmat, cv::Size(gmat.cols * 2, gmat.rows * 2));
 	cv::imshow("input", gmat);
 
 	cv::Mat gmat2 = cv::Mat::zeros(slam2.size(), CV_8U);
 	graph_slam2.draw(gmat2);
+	cv::resize(gmat2, gmat2, cv::Size(gmat2.cols * 2, gmat2.rows * 2));
 	cv::imshow("model", gmat2);
 	cv::waitKey(0);
 	

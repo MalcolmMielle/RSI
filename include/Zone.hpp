@@ -11,6 +11,17 @@ namespace AASS{
 	
 	namespace RSI{
 		
+		class ZoneHasMoreThanOneContour : public std::runtime_error {
+		public:
+			ZoneHasMoreThanOneContour(const std::string& message) 
+				: std::runtime_error(message) { };
+		};
+		class ZoneHasNoContour : public std::runtime_error {
+		public:
+			ZoneHasNoContour(const std::string& message) 
+				: std::runtime_error(message) { };
+		};
+		
 		class ZoneCompared;
 		class ZoneComparedInterface;
 		

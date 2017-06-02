@@ -125,7 +125,7 @@ void AASS::RSI::Zone::updateContour()
 	//Use a lambda function to sort the contours
 	std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> &pts, std::vector<cv::Point> &pts2){return pts.size() > pts2.size(); } );
 	
-	if(contours.size() < 1)
+	if(contours.size() > 1)
 	{
 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 		draw(graphmat2, cv::Scalar(255));
@@ -142,10 +142,10 @@ void AASS::RSI::Zone::updateContour()
 // 					}
 		cv::waitKey(0);
 		
-		throw std::runtime_error("MORE THAN ONE CONTOUR !");
+		throw ZoneHasMoreThanOneContour("MORE THAN ONE CONTOUR !");
 	}
 	if(contours.size() == 0 ){
-		throw std::runtime_error("NO CONTOUR IN ZONE !");
+		throw ZoneHasNoContour("NO CONTOUR IN ZONE !");
 	}
 	std::cout << "Contour size " << contours.size() << std::endl;
 	_contours = contours[0];

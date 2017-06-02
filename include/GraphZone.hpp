@@ -20,7 +20,13 @@ namespace AASS{
 
 		class GraphZone : public bettergraph::SimpleGraph<Zone, EdgeElement>{
 			
+		private:
+			//TEST
+			int _iteration;
+			
 		protected:
+			
+			
 			///@brief -1 if not init
 			int _nb_of_unique;
 			
@@ -160,14 +166,18 @@ namespace AASS{
 					try{
 						(*this)[v].PCA();
 					}
-					catch(std::exception& e){
-						std::cout << "Here : " << e.what() << std::endl;
-						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-						(*this)[v].draw(graphmat2, cv::Scalar(100));
-						cv::imshow("fused", graphmat2);
-						cv::waitKey(0);	
-						exit(0);
+					catch(ZoneHasNoContour& nocont){
+						//Fuse the zone because no contour
+						removeVertexWhilePreservingEdges(v);
 					}
+// 					catch(std::exception& e){
+// 						std::cout << "Here : " << e.what() << std::endl;
+// 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 						(*this)[v].draw(graphmat2, cv::Scalar(100));
+// 						cv::imshow("fused", graphmat2);
+// 						cv::waitKey(0);	
+// 						exit(0);
+// 					}
 				}
 			}
 			
@@ -211,7 +221,7 @@ namespace AASS{
 			 * Thus non unique zone have a score of 0
 			 */
 			void updateUnique(){
-				
+				std::cout << "Update uniqueness" << std::endl;
 				update();
 				if(_pca_classified == false){
 					throw std::runtime_error("PCA wasn't classified before searching for unique zones");

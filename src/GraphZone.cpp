@@ -104,7 +104,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 		VertexZone v = *vp.first;
 		EdgeIteratorZone out_i, out_end;
 		EdgeZone e;
-		(*this)[v].printLabel(drawmat);
+// 		(*this)[v].printLabel(drawmat);
 		
 	}
 
@@ -411,12 +411,19 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
 	int num_edge = getNumEdges(top_vertex), count = 0;
-// 	std::cout << "Nume edges " << num_edge << std::endl;
-	if(num_edge == 0){
-		std::cout << (*this)[top_vertex] << " num of vert " <<getNumVertices() << std::endl;
-		print();
-		throw std::runtime_error("Node is not linked anymore");
-	}
+// 	std::cout << "Nume eddges " << num_edge << std::endl;
+	
+	
+	//Can be isloated rooms without this condition
+// 	if(num_edge == 0){
+// 		std::cout << (*this)[top_vertex] << " num of vert " <<getNumVertices() << " tieration  " << _iteration << std::endl;
+// 		print();
+// 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 		(*this)[top_vertex].draw(graphmat2, cv::Scalar(100));
+// 		cv::imshow("fused", graphmat2);
+// 		cv::waitKey(0);	
+// 		throw std::runtime_error("Node is not linked anymore");
+// 	}
 	
 	std::deque < EdgeZone > listedge;
 	for (boost::tie(out_i, out_end) = boost::out_edges(top_vertex, (*this)); 
@@ -584,11 +591,12 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 
 void AASS::RSI::GraphZone::watershed(double threshold)
 {
+	_iteration = 0;
 	//Find all "top node"
 
 	bool exit = false;
 	
-	std::cout << "Starting watershed" << std::endl;
+	std::cout << "Starting watershedd" << std::endl;
 // 	exit(0);
 	
 	std::deque<VertexZone> top_vertex_visited;
@@ -647,11 +655,16 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 
 		std::deque<VertexZone> to_be_removed;
 
-		getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction, to_be_removed);
+		int num_edge = getNumEdges(top_vertex), count = 0;
+// 		std::cout << "Nume edges " << num_edge << std::endl;
+		if(num_edge > 0){
+			getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction, to_be_removed);
 
-		for(auto it = to_be_removed.begin() ; it != to_be_removed.end() ; ++it){
-			removeVertexWhilePreservingEdges(*it, top_vertex);
+			for(auto it = to_be_removed.begin() ; it != to_be_removed.end() ; ++it){
+				removeVertexWhilePreservingEdges(*it, top_vertex);
+			}
 		}
+		
 		
 		//Stopping condition
 		if(top_vertex_visited.size() == getNumVertices()){
@@ -664,7 +677,10 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 		else{
 // 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
 		}
-				
+			
+			
+			
+		_iteration++;
 	}
 	
 	std::cout << "DONE Watershed" << std::endl;
@@ -838,11 +854,13 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 	EdgeIteratorZone out_i, out_end;
 	int num_edge = getNumEdges(base_vertex);
 // 	std::cout << "Nume edges " << num_edge << std::endl;
-	if(num_edge == 0){
-		std::cout << (*this)[base_vertex] << " num of vert " <<getNumVertices() << std::endl;
-		print();
-		throw std::runtime_error("Node is not linked anymore");
-	}
+	
+	//Can be isloated rooms without this condition
+// 	if(num_edge == 0){
+// 		std::cout << (*this)[base_vertex] << " num of vert " <<getNumVertices() << std::endl;
+// 		print();
+// 		throw std::runtime_error("Node is not linked anymore");
+// 	}
 	
 	for (boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this)); 
 		out_i != out_end;) {

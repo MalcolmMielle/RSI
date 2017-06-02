@@ -129,7 +129,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	AASS::RSI::ZoneExtractor zone_maker;
 	std::cout << "WHATERSHED SLAM" << std::endl;
-	zone_maker.extract(out_tmp_slam);
+	zone_maker.extract(out_slam);
 	
 	std::cout << "Got the ZONES" << std::endl;
 
@@ -150,7 +150,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	if(graph_slam.lonelyVertices())
 		throw std::runtime_error("Fuck you lonelyness");	
 	
-	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
+	cv::Mat graphmat2 = cv::Mat::zeros(out_slam.size(), CV_8U);
 	graph_slam.draw(graphmat2);
 	std::string s = std::to_string(i);
 	cv::imshow(s, graphmat2);
@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE(trying)
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
-// 	std::string file = argv[1];
-	std::string file = "../../Test/Thermal/cold.jpg";
+	std::string file = argv[1];
+// 	std::string file = "../../Test/Thermal/cold.jpg";
 	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
@@ -174,6 +174,8 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	graph_slam.updatePCA();
 	graph_slam.removeRiplesv2();
+	
+	graph_slam.update();
 
     cv::Mat graphmat;
 	slam1.copyTo(graphmat);
