@@ -749,7 +749,8 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 				
 				if(!same){
 					if(!same_targ){
-						if(up != up_targ){
+						//If different directin and more than 1/4 of biggest as difference
+						if(up != up_targ && std::abs((*this)[v_to_fuse_in].getValue() - (*this)[v].getValue()) >= std::max((*this)[v_to_fuse_in].getValue(), (*this)[v].getValue())/3){
 							ed_el.makeUnbreakable();
 						}
 					}
