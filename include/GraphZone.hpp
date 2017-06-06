@@ -84,7 +84,7 @@ namespace AASS{
 				for (vp = boost::vertices((*this)); vp.first != vp.second;) {
 					VertexZone v = *vp.first; 
 					++vp.first;
-					std::cout << "Value " << (*this)[v].getValue() << std::endl;
+					// std::cout << "Value " << (*this)[v].getValue() << std::endl;
 					if((*this)[v].getValue() == value){
 						std::cout << "Trying to remove" << std::endl;
 						removeVertex(v);
@@ -122,7 +122,7 @@ namespace AASS{
 			bool lonelyVertices(){
 				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
 				//vertices access all the vertix
-				std::cout << "NEW start" << std::endl;
+				std::cout << "NEW start lonely" << std::endl;
 		// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
 				for (vp = boost::vertices(*this); vp.first != vp.second;) {
 		// 			std::cout << "Looking up vertex " << std::endl;
@@ -142,13 +142,18 @@ namespace AASS{
 			void removeLonelyVertices(){
 				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
 				//vertices access all the vertix
-				std::cout << "NEW start" << std::endl;
-		// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
+				// std::cout << "NEW start remove lonely" << std::endl;
+				// std::cout << "num of vertices " << getNumVertices() << std::endl; 
+				int i = 0;
 				for (vp = boost::vertices(*this); vp.first != vp.second;) {
-		// 			std::cout << "Looking up vertex " << std::endl;
+
+					// std::cout << "num of vertices " << getNumVertices() << std::endl; 
+					// std::cout << "Looking up vertex " << i <<std::endl;
+					++i;
 					auto v = *vp.first;
 					++vp.first;
 					if(getNumEdges(v) == 0){
+						// std::cout << "Remove" << std::endl;
 						removeVertex(v);
 					}
 				}
@@ -168,7 +173,7 @@ namespace AASS{
 					}
 					catch(ZoneHasNoContour& nocont){
 						//Fuse the zone because no contour
-						removeVertexWhilePreservingEdges(v);
+						removeVertexWhilePreservingEdges(v, false);
 					}
 // 					catch(std::exception& e){
 // 						std::cout << "Here : " << e.what() << std::endl;
@@ -439,7 +444,7 @@ namespace AASS{
 			}
 			
 			
-			void removeRiplesv2();
+			void removeRiplesv2(int dist = -1);
 
 			//Give all of them score and set all of them to unique
 			void updateAllUnique(){
@@ -635,7 +640,7 @@ namespace AASS{
 									//ATTENTION not sure if I should or not check for highest value and keep that one
 									zone_base.fuse(zoneedge);
 									(*this)[v] = zone_base;
-									removeVertexWhilePreservingEdges(targ);
+									removeVertexWhilePreservingEdges(targ, true);
 								}
 								
 								
@@ -655,6 +660,25 @@ namespace AASS{
 			///@brief return source first and target second
 			std::vector<ZoneCompared> compare(GraphZone& target);
 			
+
+			///Overwrite
+			virtual void removeVertex(Vertex& v){
+				EdgeIteratorZone out_i, out_end;	
+				for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+					out_i != out_end;) {
+					EdgeZone e_second = *out_i;
+					boost::remove_edge(e_second, (*this));
+					boost::tie(out_i, out_end) = boost::out_edges(v, (*this));
+				}
+				boost::remove_vertex(v, (*this));
+				
+			}
+			virtual void removeEdge(Edge& e){
+				if(!(*this)[e].canRemove()){
+					throw std::runtime_error("Can't remove unbreakable edge");
+				}
+				boost::remove_edge(e, (*this));
+			}
 			
 
 			
@@ -668,9 +692,16 @@ namespace AASS{
 			 * @param threshold : Threshold at which the difference between the value of top_vertex and a neighborhood vertex is considered enough for the neighborhood vertex not to be fused and to be considered a new zone. Actually no : fraction the new node must be partt of to not be fyused
 			 */
 			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, int direction, std::deque<VertexZone>& to_be_removed);
-			void getAllNodeRemovedRipples(AASS::RSI::GraphZone::VertexZone& base_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited);
-			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v);
-			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in);
+
+			/**
+			* @brief get all ripples
+			* base_vertex is the vertex to fuse in
+			* top_vertex_visited is all the vertext visited since the beginning
+			* dist is the maximum distance between the base and a ripple to be fused
+			*/
+			void getAllNodeRemovedRipples(AASS::RSI::GraphZone::VertexZone& base_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, int dist = -1);
+			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, bool createUnBreakableLinks);
+			void removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in, bool createUnBreakableLinks);
 			
 			///@brief Return true of the zone is ripple
 			bool isRipple(const AASS::RSI::GraphZone::VertexZone& base_vertex, const AASS::RSI::GraphZone::VertexZone& might_be_ripple) const;

@@ -96,6 +96,9 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 			if( (*this)[targ].getZone().size() > 100 ){
 // 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 			}
+			if( (*this)[e].canRemove() == false ){
+					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+			}
 		}
 	}
 		
@@ -239,7 +242,7 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 // 					}
 					
 					try{
-						removeVertexWhilePreservingEdges(v);
+						removeVertexWhilePreservingEdges(v, false);
 					}
 					catch(std::exception& e){
 						std::cout << "Here : " << __LINE__ << " " << __FILE__ << " " << e.what() << std::endl;
@@ -442,146 +445,152 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 		
 		++count;
 		EdgeZone e_second = *out_i;
-		
-		VertexZone targ = boost::target(e_second, (*this));
-	
-		//Needed to not consider the new added vertex since they are supposed to be stopping point of the recursion.
-		//This is a marker for node that are here seen the begining
-		bool is_old = false;
-		for(size_t i = 0; i < listedge.size() ; ++i){
-			if(listedge[i] == e_second)
-				is_old = true;
-		}
-		
-		//Do not visit already seen nodes
-		//Mark nodes that are already visited
-		bool is_visited = false;
-		for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
-			if(targ == top_vertex_visited[j]){
-				// std::cout << "SEEN " << j << std::endl;
-				is_visited = true;
-			}
-		}
-		
-		//Already visited node in this recursion mode. Needed if we don't do a watershed and no direction is kept.
-		//It's simply not go backward in the exploration
-		bool is_visited_tmp = false;
-		for(size_t j = 0 ; j < top_vertex_visited_tmp.size() ; ++j){
-			if(targ == top_vertex_visited_tmp[j]){
-				// std::cout << "SEEN " << j << std::endl;
-				is_visited_tmp = true;
-			}
-		}
 
-		double targ_value = (*this)[targ].getValue();
-		double first_vertex_value = (*this)[first_vertex].getValue();
+		if((*this)[e_second].canRemove()){
 		
-		//Comparison using the biggest space as a reference
-		double max_value = first_vertex_value;
-		double min_value = targ_value;
-		if(max_value < min_value){
-			max_value = targ_value;
-			min_value = first_vertex_value;
-		}
+			VertexZone targ = boost::target(e_second, (*this));
 		
-// 		if(is_visited == true){
-// 			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
-// 			throw std::runtime_error("WE ARE REMOVING A TOP");
-// 		}
-	
-// 		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
-	
-		//REMOVE TARG
-		if( 
-// 			( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
-// 			Decided to remove that line since testing the difference between the very first one and next one is not very significant. Indeed if it progressively go down for them going up again, the K-mean wil create a new zone if it gets small enough and then watershed will not be able to go up again after ! So the corridor will be indeed separated in two even without this condition which is super abitrary
-			
-// 			(*this)[targ].getValue() < (*this)[first_vertex].getValue() &&
-			//Condition for going down the watershed
-// 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
-			//Condition of threshold up and down
-			min_value >= max_value - ( (double) max_value * threshold) &&
-			min_value <= max_value + ( (double) max_value * threshold) &&
-			is_old == true && is_visited == false && is_visited_tmp == false
-		){
-			double top_vertex_value = (*this)[top_vertex].getValue();
-
-			int direction_tmp;
-			if(targ_value > top_vertex_value){
-				direction_tmp = 1;
-			}
-			else if(targ_value < top_vertex_value){
-				direction_tmp = -1;
-			}
-			else{
-				//Same value next to it
-				direction_tmp = -2;
+			//Needed to not consider the new added vertex since they are supposed to be stopping point of the recursion.
+			//This is a marker for node that are here seen the begining
+			bool is_old = false;
+			for(size_t i = 0; i < listedge.size() ; ++i){
+				if(listedge[i] == e_second)
+					is_old = true;
 			}
 			
-// 			assert(direction_tmp <= 0);
-			
-			bool good_direction = true;
-			if(direction != 0){
-				if(direction_tmp != direction){
-					good_direction = false;
+			//Do not visit already seen nodes
+			//Mark nodes that are already visited
+			bool is_visited = false;
+			for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
+				if(targ == top_vertex_visited[j]){
+					// std::cout << "SEEN " << j << std::endl;
+					is_visited = true;
 				}
 			}
-			if(direction_tmp == -2){
+			
+			//Already visited node in this recursion mode. Needed if we don't do a watershed and no direction is kept.
+			//It's simply not go backward in the exploration
+			bool is_visited_tmp = false;
+			for(size_t j = 0 ; j < top_vertex_visited_tmp.size() ; ++j){
+				if(targ == top_vertex_visited_tmp[j]){
+					// std::cout << "SEEN " << j << std::endl;
+					is_visited_tmp = true;
+				}
+			}
+
+			double targ_value = (*this)[targ].getValue();
+			double first_vertex_value = (*this)[first_vertex].getValue();
+			
+			//Comparison using the biggest space as a reference
+			double max_value = first_vertex_value;
+			double min_value = targ_value;
+			if(max_value < min_value){
+				max_value = targ_value;
+				min_value = first_vertex_value;
+			}
+			
+	// 		if(is_visited == true){
+	// 			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
+	// 			throw std::runtime_error("WE ARE REMOVING A TOP");
+	// 		}
+		
+	// 		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
+		
+			//REMOVE TARG
+			if( 
+	// 			( (int) (*this)[targ].getValue() ) >= ((int)(*this)[first_vertex].getValue()) - threshold && 
+	// 			Decided to remove that line since testing the difference between the very first one and next one is not very significant. Indeed if it progressively go down for them going up again, the K-mean wil create a new zone if it gets small enough and then watershed will not be able to go up again after ! So the corridor will be indeed separated in two even without this condition which is super abitrary
+				
+	// 			(*this)[targ].getValue() < (*this)[first_vertex].getValue() &&
+				//Condition for going down the watershed
+	// 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
+				//Condition of threshold up and down
+				min_value >= max_value - ( (double) max_value * threshold) &&
+				min_value <= max_value + ( (double) max_value * threshold) &&
+				is_old == true && is_visited == false && is_visited_tmp == false
+			){
+				double top_vertex_value = (*this)[top_vertex].getValue();
+
+				int direction_tmp;
+				if(targ_value > top_vertex_value){
+					direction_tmp = 1;
+				}
+				else if(targ_value < top_vertex_value){
+					direction_tmp = -1;
+				}
+				else{
+					//Same value next to it
+					direction_tmp = -2;
+				}
+				
+	// 			assert(direction_tmp <= 0);
+				
+				bool good_direction = true;
+				if(direction != 0){
+					if(direction_tmp != direction){
+						good_direction = false;
+					}
+				}
+				if(direction_tmp == -2){
+					good_direction = true;
+				}
+				
+				//TEST : REMOVE THIS LINE TO MAKE IT A WATERSHED AGAIN ATTENTION ATTENTION TODO TODO
 				good_direction = true;
-			}
-			
-			//TEST : REMOVE THIS LINE TO MAKE IT A WATERSHED AGAIN ATTENTION ATTENTION TODO TODO
-			good_direction = true;
-			/*******************************/
-			
-			if(good_direction == true){
-// 			std::cout << "REMOVE vertex for edge " << (*this)[targ].getValue() << std::endl;
-				// std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
+				/*******************************/
 				
-// 				if(direction_tmp == -2){
-// 					throw("Weird two node with same value next to each other");
-// 				}
+				if(good_direction == true){
+	// 			std::cout << "REMOVE vertex for edge " << (*this)[targ].getValue() << std::endl;
+					// std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
+					
+	// 				if(direction_tmp == -2){
+	// 					throw("Weird two node with same value next to each other");
+	// 				}
+					
+	// 				assert(direction_tmp <= 0);
+					
+					//Recursion :(
+					// std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
+					getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction_tmp, to_be_removed);
+					
+		// 			change = true;
+					// EdgeIteratorZone out_i_second, out_end_second;
+					
+					// int vertnum = getNumVertices();
+					// int vertedge = getNumEdges(targ);
 				
-// 				assert(direction_tmp <= 0);
-				
-				//Recursion :(
-				// std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
-				getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction_tmp, to_be_removed);
-				
-	// 			change = true;
-				// EdgeIteratorZone out_i_second, out_end_second;
-				
-				// int vertnum = getNumVertices();
-				// int vertedge = getNumEdges(targ);
-			
-				// std::vector<VertexZone> test;
-				
-				++out_i;
-				try{
-					// removeVertexWhilePreservingEdges(targ, first_vertex);
-					to_be_removed.push_back(targ);
+					// std::vector<VertexZone> test;
+					
+					++out_i;
+					try{
+						// removeVertexWhilePreservingEdges(targ, first_vertex);
+						to_be_removed.push_back(targ);
+					}
+					catch(std::exception& e){
+						std::cout << "Zone had more than one shape. It's fine at this point in the proccess. Continue" << std::endl;
+						//Catch the error that PCA stopped because of 
+					}
+					
 				}
-				catch(std::exception& e){
-					std::cout << "Zone had more than one shape. It's fine at this point in the proccess. Continue" << std::endl;
-					//Catch the error that PCA stopped because of 
+				else{
+					++out_i;
+					std::cout << "Not to be removed " << std::endl;
+					std::cout << "    not sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
+					
+		// 			cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
+		// 			(*this)[first_vertex].draw(graphmat2, cv::Scalar(255));
+		// 			(*this)[targ].draw(graphmat2, cv::Scalar(155));
+		// 			cv::imshow("stop", graphmat2);
+		// 			cv::waitKey(0);
+					
 				}
-				
 			}
 			else{
-				++out_i;
-				std::cout << "Not to be removed " << std::endl;
-				std::cout << "    not sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
-				
-	// 			cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
-	// 			(*this)[first_vertex].draw(graphmat2, cv::Scalar(255));
-	// 			(*this)[targ].draw(graphmat2, cv::Scalar(155));
-	// 			cv::imshow("stop", graphmat2);
-	// 			cv::waitKey(0);
-				
+				++out_i;	
 			}
 		}
 		else{
-			++out_i;	
+			++out_i;
 		}
 	}
 	
@@ -661,7 +670,7 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 			getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction, to_be_removed);
 
 			for(auto it = to_be_removed.begin() ; it != to_be_removed.end() ; ++it){
-				removeVertexWhilePreservingEdges(*it, top_vertex);
+				removeVertexWhilePreservingEdges(*it, top_vertex, false);
 			}
 		}
 		
@@ -690,11 +699,24 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 }
 
 
-void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in)
+void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, AASS::RSI::GraphZone::VertexZone& v_to_fuse_in, bool createUnBreakableLinks)
 {
 	assert(v != v_to_fuse_in);
 	
 	EdgeIteratorZone out_i, out_end;
+
+	std::cout << "Getting the value" << std::endl;
+
+	int diff = (*this)[v_to_fuse_in].getValue() - (*this)[v].getValue();
+	bool up = true;
+	bool same = false;
+	if (diff < 0){
+		up = false;
+	}
+	else if (diff == 0){
+		same = true;
+	}
+
 	//Since we fuse the old zone in biggest we only need to link them to biggest
 	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
 		out_i != out_end; out_i = ++out_i) {
@@ -710,18 +732,41 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		
 	
 		if(v_to_fuse_in != targ){
+
 			EdgeZone edz;
-			addEdge(edz, targ, v_to_fuse_in);
+			EdgeElement ed_el;
+			if(createUnBreakableLinks){
+				int diff_targ = (*this)[v].getValue() - (*this)[targ].getValue();
+				bool up_targ = true;
+				bool same_targ = false;
+				if (diff_targ < 0){
+					up_targ = false;
+				}
+				else if (diff_targ == 0){
+					same_targ = true;
+				}
+
+				
+				if(!same){
+					if(!same_targ){
+						if(up != up_targ){
+							ed_el.makeUnbreakable();
+						}
+					}
+				}
+			}
+
+			addEdge(edz, targ, v_to_fuse_in, ed_el);
 		}
 	}
 	
-// 	std::cout << "Removing and fusing" << std::endl;
-// 	std::cout << "Printing both vertex fsed" << std::endl;
-// 	std::cout << "Node 1 " << (*this)[v_to_fuse_in] << std::endl;
-// 	std::cout << "Node 2 " << (*this)[v] << std::endl;
+	// std::cout << "RemoDving and fusing" << std::endl;
+	// std::cout << "Printing both vertex fsed" << std::endl;
+	// std::cout << "Node 1 " << (*this)[v_to_fuse_in] << std::endl;
+	// std::cout << "Node 2 " << (*this)[v] << std::endl;
 	
 	(*this)[v_to_fuse_in].fuse((*this)[v]);
-// 	std::cout << (*this)[v] <<std::endl;
+	std::cout << (*this)[v] <<std::endl;
 	removeVertex(v);
 	
 // 	(*this)[v_to_fuse_in].PCA();
@@ -730,7 +775,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 
 
 
-void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v)
+void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone::VertexZone& v, bool createUnBreakableLinks)
 {
 // 	if(getNumEdges(v) == 0){
 // 		cv::Mat graphmat = cv::Mat::zeros(500, 500, CV_8U);
@@ -772,11 +817,11 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	
 	}
 	
-	removeVertexWhilePreservingEdges(v, closest);
+	removeVertexWhilePreservingEdges(v, closest, createUnBreakableLinks);
 }
 
 
-void AASS::RSI::GraphZone::removeRiplesv2()
+void AASS::RSI::GraphZone::removeRiplesv2(int dist)
 {
 	std::cout << "Starting watershed" << std::endl;
 // 	exit(0);
@@ -822,7 +867,7 @@ void AASS::RSI::GraphZone::removeRiplesv2()
 		
 		//Remove all ripples
 		
-		getAllNodeRemovedRipples(top_vertex, top_vertex_visited);
+		getAllNodeRemovedRipples(top_vertex, top_vertex_visited, dist);
 		
 		
 		
@@ -848,7 +893,7 @@ void AASS::RSI::GraphZone::removeRiplesv2()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, const std::deque<VertexZone>& top_vertex_visited){
+void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, const std::deque<VertexZone>& top_vertex_visited, int dist){
 	
 // 	std::cout << "Recursive function" <<std::endl;
 	EdgeIteratorZone out_i, out_end;
@@ -866,55 +911,65 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 		out_i != out_end;) {
 		
 		EdgeZone e_second = *out_i;
-		VertexZone targ = boost::target(e_second, (*this));
-			
-		
-		if(isRipple(base_vertex, targ) == true){
-			
-			bool is_visited = false;
-			for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
-				if(targ == top_vertex_visited[j]){
-					is_visited = true;
+		if((*this)[e_second].canRemove()){
+			VertexZone targ = boost::target(e_second, (*this));
+				
+			std::cout << "Top vs " << top_vertex_visited.size() << std::endl;
+			if(isRipple(base_vertex, targ) == true){
+				
+				bool is_visited = false;
+				for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
+					if(targ == top_vertex_visited[j]){
+						is_visited = true;
+					}
 				}
-			}
-			if(is_visited == true){
-				std::cout << (*this)[targ].getValue() << " " << (*this)[base_vertex].getValue() << std::endl;
+				// if(is_visited == true){
+				// 	std::cout << (*this)[targ].getValue() << " " << (*this)[base_vertex].getValue() << std::endl;
 
-				// throw std::runtime_error("WE ARE REMOVING A TOP");
-				std::cout << "Here : " <<  std::endl;
-				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-				(*this)[targ].draw(graphmat2, cv::Scalar(100));
-				cv::imshow("fused", graphmat2);
+				// 	// ATTENTION uncomment this
+				// 	// throw std::runtime_error("WE ARE REMOVING A TOP");
+				// 	std::cout << "Here : " <<  std::endl;
+				// 	cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+				// 	(*this)[targ].draw(graphmat2, cv::Scalar(100));
+				// 	cv::imshow("fused", graphmat2);
 
-				cv::Mat graphmat22 = cv::Mat::zeros(600,600, CV_8U);
-				(*this)[base_vertex].draw(graphmat22, cv::Scalar(100));
-				cv::imshow("fused base", graphmat22);
+				// 	cv::Mat graphmat22 = cv::Mat::zeros(600,600, CV_8U);
+				// 	(*this)[base_vertex].draw(graphmat22, cv::Scalar(100));
+				// 	cv::imshow("fused base", graphmat22);
 
-				cv::waitKey(0);	
+				// 	cv::waitKey(0);	
+				// }
+				// else{
+				
+					//Removing the ripple
+					// (*this)[base_vertex].fuse((*this)[targ]);
+					
+					try{
+						removeVertexWhilePreservingEdges(targ, base_vertex, true);
+					}
+					catch(std::exception& e){
+						std::cout << "Here : " << e.what() << std::endl;
+						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+						(*this)[targ].draw(graphmat2, cv::Scalar(100));
+						cv::imshow("fused 222", graphmat2);
+						cv::waitKey(0);	
+						exit(0);
+					}
+					(*this)[base_vertex].PCA();
+					(*this)[base_vertex].updateContour();
+				
+					boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this));
+				// }
+				
+	// 			cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+	// 			draw(graphmat2);
+	// 			cv::imshow("fina", graphmat2);
+	// 			cv::waitKey(0);
+				
 			}
-			
-			
-			//Removing the ripple
-			(*this)[base_vertex].fuse((*this)[targ]);
-			try{
-				removeVertexWhilePreservingEdges(targ);
+			else{
+				++out_i;
 			}
-			catch(std::exception& e){
-				std::cout << "Here : " << e.what() << std::endl;
-				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-				(*this)[targ].draw(graphmat2, cv::Scalar(100));
-				cv::imshow("fused 222", graphmat2);
-				cv::waitKey(0);	
-				exit(0);
-			}
-			
-			boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this));
-			
-// 			cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-// 			draw(graphmat2);
-// 			cv::imshow("fina", graphmat2);
-// 			cv::waitKey(0);
-			
 		}
 		else{
 			++out_i;

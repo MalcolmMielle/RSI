@@ -124,6 +124,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+	
 	cv::imshow("REDUCED", out_tmp_slam);
 	cv::waitKey(0);
 	
@@ -139,6 +140,31 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	graph_slam = zone_maker.getGraph();
 	graph_slam.removeVertexValue(0);
 
+	int size_to_remove2 = 10;
+	graph_slam.removeVertexUnderSize(size_to_remove2, true);
+
+	graph_slam.updatePCA();
+	graph_slam.updateContours();
+
+	cv::Mat graphmat2 = cv::Mat::zeros(out_slam.size(), CV_8U);
+	graph_slam.draw(graphmat2);
+	std::string s = std::to_string(i);
+	cv::imshow(s, graphmat2);
+	cv::waitKey(0);
+
+	graph_slam.removeRiplesv2();
+	graph_slam.updatePCA();
+	graph_slam.updateContours();
+
+	cv::Mat graphmat3 = cv::Mat::zeros(out_slam.size(), CV_8U);
+	graph_slam.draw(graphmat3);
+	std::string ss = std::to_string(i+1);
+	cv::imshow(ss, graphmat3);
+	cv::waitKey(0);
+
+
+	
+
 	std::cout << "Number of nodes" << graph_slam.getNumVertices() << std::endl;
 	
 	//Watershed Algorithm
@@ -150,10 +176,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	if(graph_slam.lonelyVertices())
 		throw std::runtime_error("Fuck you lonelyness");	
 	
-	cv::Mat graphmat2 = cv::Mat::zeros(out_slam.size(), CV_8U);
-	graph_slam.draw(graphmat2);
-	std::string s = std::to_string(i);
-	cv::imshow(s, graphmat2);
+	
 }
 
 

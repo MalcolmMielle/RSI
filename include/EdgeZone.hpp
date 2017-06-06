@@ -11,14 +11,17 @@ namespace AASS{
 		
 		class EdgeElement{
 		protected:
-			double _diff ;
+			double _diff;
+			bool _breakable;
 			
 		public:
-			EdgeElement() : _diff(0){};
+			EdgeElement() : _diff(0), _breakable(true){};
 			
 			double getDiff(){return _diff;}
 			double getDiff() const {return _diff;}
 			void setDiff(double diff){_diff = diff;}
+			void makeUnbreakable(){_breakable = false;}
+			bool canRemove() const {return _breakable;}
 						
 		};
 		
