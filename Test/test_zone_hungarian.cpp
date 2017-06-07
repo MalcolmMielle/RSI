@@ -116,8 +116,8 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	fuzzy_slam.fast(false);
 	
 	cv::Mat out_slam;
-// 	cv::imshow("SLAM", slam);
-// 	cv::waitKey(0);
+ 	cv::imshow("SLAM", slam);
+	cv::waitKey(0);
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
 	std::cout << "Done opening " << std::endl;
 	out_slam.convertTo(out_slam, CV_8U);
@@ -127,12 +127,13 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam);
-// 	cv::imshow("REDUCED", out_tmp_slam);
-// 	cv::waitKey(0);
+	
+	cv::imshow("REDUCED", out_tmp_slam);
+	cv::waitKey(0);
 	
 	AASS::RSI::ZoneExtractor zone_maker;
 	std::cout << "WHATERSHED SLAM" << std::endl;
-	zone_maker.extract(out_tmp_slam);
+	zone_maker.extract(out_slam);
 	
 	std::cout << "Got the ZONES" << std::endl;
 
@@ -142,28 +143,41 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	graph_slam = zone_maker.getGraph();
 	graph_slam.removeVertexValue(0);
 
+	int size_to_remove2 = 10;
+	graph_slam.removeVertexUnderSize(size_to_remove2, true);
+
+	graph_slam.updatePCA();
+	graph_slam.updateContours();
+
+	cv::Mat graphmat2 = cv::Mat::zeros(out_slam.size(), CV_8U);
+	graph_slam.draw(graphmat2);
+	std::string s = std::to_string(i);
+	cv::imshow(s, graphmat2);
+	cv::waitKey(0);
+
+	graph_slam.removeRiplesv2();
+	graph_slam.updatePCA();
+	graph_slam.updateContours();
+
+	cv::Mat graphmat3 = cv::Mat::zeros(out_slam.size(), CV_8U);
+	graph_slam.draw(graphmat3);
+	std::string ss = std::to_string(i+1);
+	cv::imshow(ss, graphmat3);
+	cv::waitKey(0);
+
+
+	
+
 	std::cout << "Number of nodes" << graph_slam.getNumVertices() << std::endl;
 	
 	//Watershed Algorithm
-	
-	CALLGRIND_START_INSTRUMENTATION;
-    CALLGRIND_TOGGLE_COLLECT;
 	graph_slam.watershed(0.25);
-	CALLGRIND_TOGGLE_COLLECT;
-    CALLGRIND_STOP_INSTRUMENTATION;
 	
 	int size_to_remove = 100;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
 	graph_slam.removeLonelyVertices();
 	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness");	
-	
-	cv::Mat graphmat2 = cv::Mat::zeros(out_tmp_slam.size(), CV_8U);
-	graph_slam.draw(graphmat2);
-	std::string s = std::to_string(i);
-	cv::resize(graphmat2, graphmat2, cv::Size(graphmat2.cols * 2, graphmat2.rows * 2));
-	cv::imshow(s, graphmat2);
-	cv::waitKey(0);
+		throw std::runtime_error("Fuck you lonelyness");
 }
 
 
