@@ -207,7 +207,7 @@ namespace AASS{
 				std::stringstream precisionValue2;
 				precisionValue2.precision(2);
 				precisionValue2 << _pca_classification << std::endl;
-				text = text + " sd " + precisionValue.str() + " pd " + precisionValue2.str() ;
+// 				text = text + " sd " + precisionValue.str() + " pd " + precisionValue2.str() ;
 				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255));
 			}
 			
@@ -294,7 +294,7 @@ namespace AASS{
 				std::cout << "Next PCA " << std::endl << std::endl;
 			}
 			
-			//Return the number of contact points in percent compared to size of contour
+			//Return the number of contact points in percent compared to size of contour. DO NOT need an update from PCA() or updateContours.
 			int contactPoint(const Zone& zone){
 				int whitepix = 0 ;
 				int final_size = 0;

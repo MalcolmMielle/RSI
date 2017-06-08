@@ -97,7 +97,10 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 // 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 			}
 			if( (*this)[e].canRemove() == false ){
-					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+// 				cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255), 3);
+			}
+			else{
+				cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(200));
 			}
 		}
 	}
@@ -183,6 +186,8 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 	(*this)[v].draw(m, color);
 // 	std::cout << "VALUIE " << std::endl;
 	(*this)[v].printPCA();
+	
+// 	(*this)[v].printLabel(m);
 // 	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
 	
 // 			cv::Mat draw_tmp = cv::Mat::zeros(m.rows, m.cols, CV_8U);
@@ -206,7 +211,7 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
 		VertexZone v = *vp.first;
 		++vp.first;
-		std::cout << "Size " << (*this)[v].size() << std::endl;
+		std::cout << "Remove under size. Size " << (*this)[v].size() << std::endl;
 		if((*this)[v].size() < size){
 			
 			if(preserveEdgeConnectic == true){
@@ -506,7 +511,9 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 	// 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
 				//Condition of threshold up and down
 				min_value >= max_value - ( (double) max_value * threshold) &&
-				min_value <= max_value + ( (double) max_value * threshold) &&
+				
+				//Min always less than max so should not influence
+// 				min_value <= max_value + ( (double) max_value * threshold) &&
 				is_old == true && is_visited == false && is_visited_tmp == false
 			){
 				double top_vertex_value = (*this)[top_vertex].getValue();
@@ -704,6 +711,23 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	assert(v != v_to_fuse_in);
 	
 	EdgeIteratorZone out_i, out_end;
+// 	for (boost::tie(out_i, out_end) = boost::out_edges(v_to_fuse_in, (*this)); 
+// 		out_i != out_end; out_i = ++out_i) {
+// 		EdgeZone e_second = *out_i;
+// 		VertexZone targ = boost::target(e_second, (*this));
+// 		(*this)[e_second].setOldScore(v_to_fuse_in, targ, (*this)[v_to_fuse_in].getValue());
+// 	}
+	
+// 	try{
+// 		EdgeZone edgezone_tmp;
+// 		this->getEdge(v, v_to_fuse_in, edgezone_tmp);
+// 		assert((*this)[edgezone_tmp].canRemove() == true);
+// 	}
+// 	catch(std::exception& e){
+// 		std::cerr << "Edge didn't exist" << std::endl;
+// 		std::cout << "Here : " << __LINE__ << " " << __FILE__ << " " << e.what() << std::endl;
+// 	}
+	
 
 	std::cout << "Getting the value" << std::endl;
 
@@ -724,38 +748,89 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		
 		EdgeZone e_second = *out_i;
 		VertexZone targ = boost::target(e_second, (*this));
-// 				std::cout << "Printing both vertex" << std::endl;
-// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+				std::cout << "Printing both vertex" << std::endl;
+				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
 // 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 		
-	
 		if(v_to_fuse_in != targ){
-
 			EdgeZone edz;
-			EdgeElement ed_el;
-			if(createUnBreakableLinks){
-				int diff_targ = (*this)[v].getValue() - (*this)[targ].getValue();
-				bool up_targ = true;
-				bool same_targ = false;
-				if (diff_targ < 0){
-					up_targ = false;
+			EdgeElement ed_el((*this)[e_second]);
+			
+			double min_val = (*this)[v].getValue();
+			if(min_val <= (*this)[e_second].min_toward){
+				min_val = (*this)[e_second].min_toward;
+			}
+			
+			//Keep the best minimum score in edge
+			if(boost::edge(v_to_fuse_in, targ, (*this)).second == true){
+				EdgeZone edz_tmp;
+				EdgeElement ed_el_tmp;
+				(*this).getEdge(v_to_fuse_in, targ, edz_tmp);
+				ed_el_tmp = (*this)[edz_tmp];
+				double min_val_tmp = ed_el_tmp.min_toward;
+				if(min_val_tmp == -2){
+					min_val = min_val_tmp;
 				}
-				else if (diff_targ == 0){
-					same_targ = true;
-				}
-
-				
-				if(!same){
-					if(!same_targ){
-						//If different directin and more than 1/4 of biggest as difference
-						if(up != up_targ && std::abs((*this)[v_to_fuse_in].getValue() - (*this)[v].getValue()) >= std::max((*this)[v_to_fuse_in].getValue(), (*this)[v].getValue())/3){
-							ed_el.makeUnbreakable();
-						}
-					}
+				else if(min_val_tmp >= min_val){
+					min_val = min_val_tmp;
 				}
 			}
+			ed_el.min_toward = min_val;
+
+				
+			assert(ed_el.size() == (*this)[e_second].size());
+			ed_el.setOldScore(v_to_fuse_in, targ, (*this)[v].getValue());
+			
+			if((*this)[e_second].canRemove() == false){
+				ed_el.makeUnbreakable();
+			}
+			
+// 				if(createUnBreakableLinks){
+// 					int diff_targ = (*this)[v].getValue() - (*this)[targ].getValue();
+// 					bool up_targ = true;
+// 					bool same_targ = false;
+// 					if (diff_targ < 0){
+// 						up_targ = false;
+// 					}
+// 					else if (diff_targ == 0){
+// 						same_targ = true;
+// 					}
+// 
+// 					
+// 					if(!same){
+// 						if(!same_targ){
+// 							//If different directin and more than 1/4 of biggest as difference
+// 							
+// 							
+// 							double value_fuse_in;
+// 							double value_out;
+// 							if((*this)[e_second].getOldScore(v_to_fuse_in) == -1){
+// 								value_fuse_in = (double)(*this)[v_to_fuse_in].getValue();
+// 							}
+// 							else{
+// 								value_fuse_in = (double)(*this)[e_second].getOldScore(v_to_fuse_in);
+// 							}
+// 							if((*this)[e_second].getOldScore(v) == -1){
+// 								value_out = (double)(*this)[v].getValue();
+// 							}
+// 							else{
+// 								value_out = (double)(*this)[e_second].getOldScore(v);
+// 							}
+// 							double max = std::max(value_fuse_in, value_out);
+// 							//Min is either the edge variable OR the direct value
+// 							double min = std::min(value_fuse_in, value_out);
+// 							
+// 							if(up != up_targ 
+// 								//Guilty line
+// 	// 							&& min >= max - (max * _threshold) 
+// 								){
+// 	// 							ed_el.makeUnbreakable();
+// 							}
+// 						}
+// 					}
+// 				}
 
 			addEdge(edz, targ, v_to_fuse_in, ed_el);
 		}
@@ -788,6 +863,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 		cv::waitKey(0);
 // 		throw std::runtime_error("Fuck you lonelyness");
 // 	}
+	std::cout << "Yop"<<std::endl;
 	assert(getNumEdges(v) > 0 && "Node without edges Oo");
 	//Find Closest valued neighbor vertex for fusion of zone
 	VertexZone closest;
@@ -799,18 +875,18 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		
 		EdgeZone e_second = *out_i;
 		VertexZone targ = boost::target(e_second, (*this));
-// 				std::cout << "Printing both vertex" << std::endl;
-// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+				std::cout << "Printing both vertex" << std::endl;
+				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
-// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 		if(init == true){
 // 			std::cout << "INIT" << std::endl;
 			closest = targ;
 			init = false;
 		}
 		else{
-// 			std::cout << "COMPARING SIZES " << std::endl;
+			std::cout << "COMPARING SIZES " << std::endl;
 			if( std::abs((*this)[closest].getValue() - (*this)[v].getValue() ) > std::abs( (*this)[targ].getValue() - (*this)[v].getValue()) ){
 				closest = targ;
 			}
@@ -824,6 +900,8 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 
 void AASS::RSI::GraphZone::removeRiplesv2(int dist)
 {
+	
+	updateAllEdges();
 	std::cout << "Starting watershed" << std::endl;
 // 	exit(0);
 	
@@ -867,20 +945,35 @@ void AASS::RSI::GraphZone::removeRiplesv2(int dist)
 		}
 		
 		//Remove all ripples
+		std::cout << "Value " << (*this)[top_vertex].getValue() << std::endl;
+		auto tmp_test_value = (*this)[top_vertex].getValue();
+		
+// 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 		(*this)[top_vertex].draw(graphmat2, cv::Scalar(100));
+// 		(*this)[top_vertex].printLabel(graphmat2);
+// 		cv::imshow("fused 222", graphmat2);
+// 		cv::waitKey(0);	
 		
 		getAllNodeRemovedRipples(top_vertex, top_vertex_visited, dist);
 		
+		auto tmp_test_value2 = (*this)[top_vertex].getValue();
+		assert(tmp_test_value == tmp_test_value2);
 		
+// 		graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 		(*this)[top_vertex].draw(graphmat2, cv::Scalar(100));
+// 		(*this)[top_vertex].printLabel(graphmat2);
+// 		cv::imshow("fused 222", graphmat2);
+// 		cv::waitKey(0);	
 		
 		//End condition
 		top_vertex_visited.push_back(top_vertex);
 		//Stopping condition
-		if(top_vertex_visited.size() == getNumVertices()){
+		if(top_vertex_visited.size() >= getNumVertices()){
 			done = true; 
 		}
 		else if (top_vertex_visited.size() > getNumVertices()){
 // 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-			throw std::runtime_error("over shoot in the water shed");
+			throw std::runtime_error("over shoot in the remove ripples");
 		}
 		else{
 // 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
@@ -912,11 +1005,48 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 		out_i != out_end;) {
 		
 		EdgeZone e_second = *out_i;
+	
+		++out_i;
+	
 		if((*this)[e_second].canRemove()){
 			VertexZone targ = boost::target(e_second, (*this));
-				
-			std::cout << "Top vs " << top_vertex_visited.size() << std::endl;
-			if(isRipple(base_vertex, targ) == true){
+			
+// 			int upp;
+// 			
+// 			double max;
+// 			//Min is either the edge variable OR the direct value
+// 			double min;
+// 			if((*this)[e_second].getOldScore(base_vertex) == -1){
+// 				max = std::max( (double)(*this)[base_vertex].getValue(), (double)(*this)[targ].getValue());
+// 				min = std::min( (double)(*this)[base_vertex].getValue(), (double)(*this)[targ].getValue());
+// 				upp = (double)(*this)[base_vertex].getValue() - (double)(*this)[targ].getValue();
+// 			}
+// 			else{
+// 				max = std::max( (double)(*this)[e_second].getOldScore(base_vertex), (double)(*this)[targ].getValue());
+// 				min = std::min( (double)(*this)[e_second].getOldScore(base_vertex), (double)(*this)[targ].getValue());
+// 				upp = (double)(*this)[e_second].getOldScore(base_vertex) - (double)(*this)[targ].getValue();
+// 			}
+// 			
+// // 			assert(max <= std::max( (double)(*this)[base_vertex].getValue(), (double)(*this)[targ].getValue()) );
+// // 			assert(min <= std::min( (double)(*this)[base_vertex].getValue(), (double)(*this)[targ].getValue()) );
+// 				
+// 			std::cout << "Top vs " << top_vertex_visited.size() << std::endl;
+// 			std::cout << "NEED Values " << isRipple(base_vertex, targ) << " is " << true << " or( " << min  << " >= " << max - (max * _threshold)<< " && " << upp << " >= " << 0 << ") max and min" << max << " " << min << std::endl;
+// 			
+// 			std::cout << "Here : " <<  std::endl;
+// 			cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 			(*this)[targ].draw(graphmat2, cv::Scalar(100));
+// 			cv::imshow("fused", graphmat2);
+// 
+// 			cv::Mat graphmat22 = cv::Mat::zeros(600,600, CV_8U);
+// 			(*this)[base_vertex].draw(graphmat22, cv::Scalar(100));
+// 			cv::imshow("fused base", graphmat22);
+// 
+// 			cv::waitKey(0);
+			
+			
+			
+			if(isRipple(base_vertex, targ) == true /*|| ( min >= max - (max * _threshold) && upp >= 0 )*/){
 				
 				bool is_visited = false;
 				for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
@@ -959,24 +1089,63 @@ void AASS::RSI::GraphZone::getAllNodeRemovedRipples(VertexZone& base_vertex, con
 					(*this)[base_vertex].PCA();
 					(*this)[base_vertex].updateContour();
 				
-					boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this));
+// 					boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this));
+					out_end = boost::out_edges(base_vertex, (*this)).second;
 				// }
 				
-	// 			cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-	// 			draw(graphmat2);
-	// 			cv::imshow("fina", graphmat2);
-	// 			cv::waitKey(0);
+// 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 				draw(graphmat2, base_vertex, cv::Scalar(100));
+// 				cv::imshow("fina", graphmat2);
+// 				cv::waitKey(0);
 				
 			}
-			else{
-				++out_i;
-			}
+// 			else{
+// 				++out_i;
+// 			}
 		}
-		else{
-			++out_i;
-		}
+// 		else{
+// 			++out_i;
+// 		}
 	}
 	
+	makeAllUnbreakableEdges(base_vertex);
+	
+	
+}
+
+void AASS::RSI::GraphZone::makeAllUnbreakableEdges(VertexZone& base_vertex){
+	EdgeIteratorZone out_i, out_end;
+//Make unbreakable edges
+	
+	for (boost::tie(out_i, out_end) = boost::out_edges(base_vertex, (*this)); 
+		out_i != out_end;) {
+		
+		EdgeZone e_second = *out_i;
+		VertexZone targ = boost::target(e_second, (*this));
+		++out_i;
+	
+		double val_base = (*this)[base_vertex].getValue();
+		double val_targ = (*this)[targ].getValue();
+	
+		double min_value =  std::min(val_base, val_targ);
+		double max_value =  std::max(val_base, val_targ);
+	
+		if((*this)[e_second].wasRipple()){
+			if(min_value >= max_value - ( (double) max_value * _threshold)){
+				if((*this)[e_second].shouldBeUnbreakable((*this)[base_vertex].getValue(), base_vertex, (*this)[targ].getValue(), targ, _threshold)){
+					(*this)[e_second].makeUnbreakable();
+					double val_base = (*this)[base_vertex].getValue();
+					double val_targ = (*this)[targ].getValue();
+	// 					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+	// 					draw(graphmat2, base_vertex, cv::Scalar(100));
+	// 					cv::imshow("fina", graphmat2);
+	// 					cv::waitKey(0);
+				}
+			}
+		}
+		
+		
+	}
 }
 
 

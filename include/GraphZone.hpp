@@ -48,6 +48,9 @@ namespace AASS{
 			
 			int _sd_away_fom_mean_for_uniqueness;
 			
+			 ///@param[in] threshold : fraction representing the fraction of the biggest value of cluster until a new cluster must created. If init node got value 100 and threshold = 1/10 then if the new node as 90 or less, it is not fused.
+			double _threshold;
+			
 		public:
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::GraphType GraphZoneType;
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex VertexZone;
@@ -55,7 +58,9 @@ namespace AASS{
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::VertexIterator VertexIteratorZone;
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::EdgeIterator EdgeIteratorZone;
 
-			GraphZone(): _nb_of_unique(-1), _pca_classified(false), _sd_away_fom_mean_for_uniqueness(1){};
+			GraphZone(): _nb_of_unique(-1), _pca_classified(false), _sd_away_fom_mean_for_uniqueness(1), _threshold(0.25){};
+			
+			void setThreshold(double t){if(t >= 0 && t<= 1){_threshold = t;}else{throw std::runtime_error("Threhsold needs to be between 0 and 1");}}
 			
 			void setNumUnique(int n){_nb_of_unique = n;}
 			double getNumUnique(){if(_nb_of_unique != -1){return _nb_of_unique;}else{return getNumVertices();}}
@@ -111,9 +116,13 @@ namespace AASS{
 			
 			bool asVerticesWithNoEdges();
 			
+			/**
+			 * @brief watershed.
+			 */
+			void watershed(){watershed(_threshold);}
 			
 			/**
-			 * @brief watershed
+			 * @brief watershed. DO NOT USE DIRECTLY. Indeed, the parameter thrshold is also used by the ripple removal so it should be the same. One should use watershed()
 			 * @param[in] threshold : fraction representing the fraction of the biggest value of cluster until a new cluster must created. If init node got value 100 and threshold = 1/10 then if the new node as 90 or less, it is not fused.
 			 */
 			void watershed(double threshold);
@@ -445,6 +454,22 @@ namespace AASS{
 			
 			
 			void removeRiplesv2(int dist = -1);
+			
+			void updateAllEdges(){
+				auto vp = boost::vertices((*this));
+				for(vp ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					EdgeIteratorZone out_i, out_end;
+					//Since we fuse the old zone in biggest we only need to link them to biggest
+					for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+						out_i != out_end; out_i = ++out_i) {
+						EdgeZone e_second = *out_i;
+						VertexZone targ = boost::target(e_second, (*this));
+						(*this)[e_second].setOldScore(v, targ, -2);
+						(*this)[e_second].min_toward = -2;
+					}
+				}
+			}
 
 			//Give all of them score and set all of them to unique
 			void updateAllUnique(){
@@ -737,7 +762,7 @@ namespace AASS{
 			}
 			
 			
-			
+			void makeAllUnbreakableEdges(VertexZone& base_vertex);
 			
 			
 		};
