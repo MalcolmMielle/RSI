@@ -123,14 +123,14 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
-	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 1);
+	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 2);
 	
 	cv::imshow("REDUCED", out_tmp_slam);
 	cv::waitKey(0);
 	
 	AASS::RSI::ZoneExtractor zone_maker;
 	std::cout << "WHATERSHED SLAM" << std::endl;
-	zone_maker.extract(out_slam);
+	zone_maker.extract(out_tmp_slam);
 	
 	std::cout << "Got the ZONES" << std::endl;
 

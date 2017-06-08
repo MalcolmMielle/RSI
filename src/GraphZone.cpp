@@ -759,7 +759,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 			EdgeElement ed_el((*this)[e_second]);
 			
 			double min_val = (*this)[v].getValue();
-			if(min_val <= (*this)[e_second].min_toward){
+			if(min_val >= (*this)[e_second].min_toward && (*this)[e_second].min_toward != -2){
 				min_val = (*this)[e_second].min_toward;
 			}
 			
