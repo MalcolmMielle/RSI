@@ -97,10 +97,10 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 // 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 			}
 			if( (*this)[e].canRemove() == false ){
-// 				cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255), 3);
+				// cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255), 1);
 			}
 			else{
-				cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(200));
+				// cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(200));
 			}
 		}
 	}

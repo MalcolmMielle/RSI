@@ -201,9 +201,9 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	graph_slam.update();
 
-    cv::Mat graphmat;
-	slam1.copyTo(graphmat);
+    cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
     graph_slam.draw(graphmat);
+	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 	cv::imshow("GRAPH", graphmat);
 	
 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
