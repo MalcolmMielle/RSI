@@ -58,6 +58,40 @@ void AASS::RSI::GraphZone::drawPartial(cv::Mat& drawmat) const
 
 }
 
+void AASS::RSI::GraphZone::drawEvaluation(cv::Mat& drawmat) const
+{
+	cv::Mat drawmat_old;
+	drawmat.convertTo(drawmat_old, CV_8U);
+	
+	cv::Scalar color;
+	cv::RNG rng(12345);
+	int nb_zones = this->getNumVertices();
+	int color_step = 249 / nb_zones;
+	int count = 1;
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		if(drawmat.channels() == 1){
+			color = count;
+		}
+		else if(drawmat.channels() == 3){
+			color[0] = count;
+			color[1] = count;
+			color[2] = count;
+		}
+		count++;
+		
+		VertexZone v = *vp.first;
+		
+// 		if((*this)[v].getZone().size() > 100){
+// 				if(getNumEdges(v) > 1){
+			
+		drawEvaluation(drawmat, v, color);
+	}
+}
+
+
 void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 {
 	
@@ -66,18 +100,22 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 	
 	cv::Scalar color;
 	cv::RNG rng(12345);
+	int nb_zones = this->getNumVertices();
+	int color_step = 249 / nb_zones;
+	int count = 1;
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 	//vertices access all the vertix
 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
 		
 		if(drawmat.channels() == 1){
-			color = rng.uniform(0, 230);
+			color = color_step * count;
 		}
 		else if(drawmat.channels() == 3){
-			color[0] = rng.uniform(0, 230);
-			color[1] = rng.uniform(0, 230);
-			color[2] = rng.uniform(0, 230);
+			color[0] = color_step * count;
+			color[1] = color_step * count;
+			color[2] = color_step * count;
 		}
+		count++;
 		
 		VertexZone v = *vp.first;
 		
@@ -97,10 +135,10 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 // 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
 			}
 			if( (*this)[e].canRemove() == false ){
-				// cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255), 1);
+				cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255), 5);
 			}
 			else{
-				// cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(200));
+				cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(150));
 			}
 		}
 	}
@@ -110,7 +148,7 @@ void AASS::RSI::GraphZone::draw(cv::Mat& drawmat) const
 		VertexZone v = *vp.first;
 		EdgeIteratorZone out_i, out_end;
 		EdgeZone e;
-// 		(*this)[v].printLabel(drawmat);
+		(*this)[v].printLabel(drawmat);
 		
 	}
 
@@ -172,6 +210,39 @@ void AASS::RSI::GraphZone::drawUnique(cv::Mat& drawmat) const
 	}
 
 }
+
+
+void AASS::RSI::GraphZone::drawEvaluation(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
+{
+// 		std::cout << std::endl;
+// 			for(size_t i = 0 ; i < (*this)[v].landmarks.size() ; i++){
+// 				cv::Point2i point;
+// 				point.x = (*this)[v].landmarks[i].first.getX();
+// 				point.y = (*this)[v].landmarks[i].first.getY();
+// 				cv::circle(m, point, 10, color, 3);
+// 			}
+// 			cv::drawContours( m, std::vector<std::vector<cv::Point> >(1,(*this)[v].contour), -1, color, 2, 8);
+	(*this)[v].drawEvaluation(m, color);
+// 	std::cout << "VALUIE " << std::endl;
+// 	(*this)[v].printPCA();
+	
+// 	(*this)[v].printLabel(m);
+// 	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
+	
+// 			cv::Mat draw_tmp = cv::Mat::zeros(m.rows, m.cols, CV_8U);
+// 			for(size_t j = 0 ; j < (*this)[v].getZone().size() ; ++j){
+// 				draw_tmp.at<uchar>((*this)[v].getZone()[j].x, (*this)[v].getZone()[j].y) = 150;
+// 			}
+// 			
+// 			cv::circle(draw_tmp, (*this)[v].getCentroid(), 10, 255, -1);
+// 			
+// 			std::cout << "CENTROID " << (*this)[v].getCentroid() << "image size "<<  m.size() << std::endl;
+// 			
+// 			cv::imshow("Zones " , draw_tmp);
+// 			cv::waitKey(0);
+		
+}
+
 
 void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
 {
@@ -484,7 +555,8 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 			}
 
 			double targ_value = (*this)[targ].getValue();
-			double first_vertex_value = (*this)[first_vertex].getValue();
+			double first_vertex_value = (*this)[top_vertex].getValue();
+// 			double first_vertex_value = (*this)[first_vertex].getValue();
 			
 			//Comparison using the biggest space as a reference
 			double max_value = first_vertex_value;

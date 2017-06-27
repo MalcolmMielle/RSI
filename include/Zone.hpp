@@ -167,6 +167,35 @@ namespace AASS{
 // 				PCA();
 			}
 			
+			void drawEvaluation(cv::Mat& img, const cv::Scalar& color) const{
+				img.convertTo(img, CV_8U);
+				for(int row = 0 ; row < img.rows  ; row++){
+// 					uchar* p = img.ptr<uchar>(row); //point to each row
+// 					uchar* pz = _zone_mat.ptr<uchar>(row); //point to each row
+					for(int col = 0 ; col < img.cols; col++){
+						if(_zone_mat.at<uchar>(row, col) == 255){
+							uchar colllo = color[0];
+							img.at<uchar>(row, col) = colllo;
+						}
+					}
+				}
+				
+				//Draw PCA
+// 				cv::circle(img, std::get<0>(_pca), 3, CV_RGB(255, 0, 255), 10);
+// 				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
+// 				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
+// 				
+// 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
+// 				
+// 				
+// 				for (int i = 0; i < _contours.size(); ++i)
+// 				{
+// 					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
+// 				}
+				
+				
+				
+			}
 			
 			void draw(cv::Mat& img, const cv::Scalar& color) const{
 				img.convertTo(img, CV_8U);
@@ -185,10 +214,10 @@ namespace AASS{
 // 				cv::circle(img, std::get<0>(_pca), 3, CV_RGB(255, 0, 255), 10);
 				cv::line(img, std::get<0>(_pca), std::get<1>(_pca) , cv::Scalar(255), 2);
 				cv::line(img, std::get<0>(_pca), std::get<2>(_pca) , cv::Scalar(155), 2);	
-				
-				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
-				
-				
+// 				
+// 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
+// 				
+// 				
 				for (int i = 0; i < _contours.size(); ++i)
 				{
 					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;

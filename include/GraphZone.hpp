@@ -81,6 +81,8 @@ namespace AASS{
 			void drawPartial(cv::Mat& drawmat) const;
 			void draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
 			void drawUnique(cv::Mat& drawmat) const;
+			void drawEvaluation(cv::Mat& drawmat) const;
+			void drawEvaluation(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
 			
 			///@brief Remove all vertex with Value value. Do not preserve edges or zones
 			void removeVertexValue(int value){
