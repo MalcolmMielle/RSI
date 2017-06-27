@@ -258,7 +258,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	std::cout << "/************ FUZZY OPENING*************/ \n";
 	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.fast(false);
+	fuzzy_slam.fast(true);
 	
 	cv::Mat out_slam;
 //  	cv::imshow("SLAM", slam);
