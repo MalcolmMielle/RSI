@@ -153,13 +153,14 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	cv::imshow(s, graphmat2);
 	cv::waitKey(0);
 
-	graph_slam.removeRiplesv2();
+	graph_slam.removeRiplesv3();
 	graph_slam.updatePCA();
 	graph_slam.updateContours();
 
 	cv::Mat graphmat3 = cv::Mat::zeros(out_slam.size(), CV_8U);
 	graph_slam.draw(graphmat3);
 	std::string ss = std::to_string(i+1);
+	cv::resize(graphmat3, graphmat3, cv::Size(graphmat3.cols * 2, graphmat3.rows * 2));
 	cv::imshow("RIPPLE", graphmat3);
 	cv::waitKey(0);
 
@@ -202,7 +203,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	graph_slam.update();
 
     cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
-    graph_slam.draw(graphmat);
+    graph_slam.drawSimple(graphmat);
 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 	cv::imshow("GRAPH", graphmat);
 	

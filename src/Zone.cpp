@@ -128,7 +128,8 @@ void AASS::RSI::Zone::updateContour()
 	if(contours.size() > 1)
 	{
 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-		draw(graphmat2, cv::Scalar(255));
+		drawZone(graphmat2, cv::Scalar(255));
+		drawContour(graphmat2, cv::Scalar(255));
 // 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
 // 					if(contours[0].size() < contours[1].size()){
 // 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);

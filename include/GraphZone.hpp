@@ -77,10 +77,16 @@ namespace AASS{
 				}
 			}
 			
+			///@brief draw a simple image with no annotations.
+			void drawSimple(cv::Mat& drawmat) const;
+			void drawSimple(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
+			///@brief draw map with all info on image
 			void draw(cv::Mat& drawmat) const;
-			void drawPartial(cv::Mat& drawmat) const;
 			void draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
+			///@brief draw the zone one by one.
+			void drawPartial(cv::Mat& drawmat) const;
 			void drawUnique(cv::Mat& drawmat) const;
+			///@brief drawing function to compare the maps to the dataset of Bromman.
 			void drawEvaluation(cv::Mat& drawmat) const;
 			void drawEvaluation(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const;
 			
@@ -128,6 +134,8 @@ namespace AASS{
 			 * @param[in] threshold : fraction representing the fraction of the biggest value of cluster until a new cluster must created. If init node got value 100 and threshold = 1/10 then if the new node as 90 or less, it is not fused.
 			 */
 			void watershed(double threshold);
+			
+			void watershedFast(double threshold);
 			
 			
 			bool lonelyVertices(){
@@ -212,7 +220,8 @@ namespace AASS{
 					catch(std::exception& e){
 						std::cout << "Here : " << e.what() << std::endl;
 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-						(*this)[v].draw(graphmat2, cv::Scalar(100));
+						(*this)[v].drawZone(graphmat2, cv::Scalar(100));
+						(*this)[v].drawContour(graphmat2, cv::Scalar(100));
 						cv::imshow("fused", graphmat2);
 						cv::waitKey(0);	
 						exit(0);
@@ -456,7 +465,8 @@ namespace AASS{
 			
 			
 			void removeRiplesv2(int dist = -1);
-			
+			void removeRiplesv3(int dist = -1);
+				
 			void updateAllEdges(){
 				auto vp = boost::vertices((*this));
 				for(vp ; vp.first != vp.second; ++vp.first){
@@ -732,6 +742,9 @@ namespace AASS{
 			
 			///@brief Return true of the zone is ripple
 			bool isRipple(const AASS::RSI::GraphZone::VertexZone& base_vertex, const AASS::RSI::GraphZone::VertexZone& might_be_ripple) const;
+			
+			///@brief Check if the zone is a ripple of a neighborhood and removes it
+			bool checkAndReplaceRipple(AASS::RSI::GraphZone::VertexZone& might_be_ripple, AASS::RSI::GraphZone::VertexZone& to_fuse_in);
 			
 			double variance (std::vector<double> input, double mean){
 				double variance = 0 ;
