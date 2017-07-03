@@ -610,6 +610,18 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				min_value = first_vertex_value;
 			}
 			
+// 			if((*this)[top_vertex].getValue()==50){
+// 				cv::Mat graphmat2 = cv::Mat::zeros(1200, 1200, CV_8U);
+// 				(*this)[top_vertex].drawZone(graphmat2, cv::Scalar(100));
+// 				(*this)[top_vertex].printLabel(graphmat2);
+// 				(*this)[targ].drawZone(graphmat2, cv::Scalar(100));
+// 				(*this)[targ].printLabel(graphmat2);
+// 				cv::imshow("FUSE", graphmat2);
+// 				std::cout << min_value << " >= " << max_value - ( (double) max_value * threshold) << " && " <<
+// 				is_old << " == " << true << " && " << is_visited << " == " << false << " && " << is_visited_tmp << " == " << false << "with true " << true << std::endl;
+// 				cv::waitKey(0);	
+// 			}
+			
 	// 		if(is_visited == true){
 	// 			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
 	// 			throw std::runtime_error("WE ARE REMOVING A TOP");
@@ -719,93 +731,6 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 	
 }
 
-void AASS::RSI::GraphZone::watershedFast(double threshold)
-{
-	std::deque<VertexZone> top_vertex_visited;
-	bool done = false;
-	while(done == false){
-		// std::cout << "ONE NODE " << std::endl;
-		// if(exit == true){
-		// 	done = true;
-		// }
-		// else{
-		// 	exit = true;
-		// }
-		
-		VertexZone top_vertex;
-		bool init = false;
-		
-		//Find the highest not visited vertex
-		std::pair<VertexIteratorZone, VertexIteratorZone> vp;
-		//vertices access all the vertix
-// 		std::cout << "NEW start" << std::endl;
-// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
-		for (vp = boost::vertices((*this)); vp.first != vp.second;) {
-// 			std::cout << "Looking up vertex " << std::endl;
-			VertexZone v = *vp.first;
-			++vp.first;
-// 			std::cout << "assind vertex " <<(*this)[v]<< std::endl;
-			bool is_visited = false;
-			for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
-				if(v == top_vertex_visited[j]){
-					is_visited = true;
-				}
-			}
-// 			std::cout << "checked visit " << is_visited << std::endl;
-			if(is_visited == false){
-// 				std::cout << "Is it init : "<< init << std::endl;
-				if(init == false){
-// 					std::cout << "assigned init" << std::endl;
-					top_vertex = v;
-					init = true;
-				}
-// 				else if( (*this)[top_vertex].getValue() < (*this)[v].getValue() ){
-				else if( (*this)[top_vertex].size() < (*this)[v].size() ){
-// 					std::cout << "assigned other" << std::endl;
-					top_vertex = v;
-				}
-			}
-		}
-		
-		top_vertex_visited.push_back(top_vertex);
-	
-		int direction = 0 ;
-		// std::cout << "NEW VERTEX.............................:" << std::endl;
-		std::deque<VertexZone> top_vertex_visited_tmp;
-		top_vertex_visited_tmp.push_back(top_vertex);
-
-		std::deque<VertexZone> to_be_removed;
-
-		int num_edge = getNumEdges(top_vertex), count = 0;
-// 		std::cout << "Nume edges " << num_edge << std::endl;
-		if(num_edge > 0){
-			getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction, to_be_removed);
-
-			for(auto it = to_be_removed.begin() ; it != to_be_removed.end() ; ++it){
-				removeVertexWhilePreservingEdges(*it, top_vertex, false);
-			}
-		}
-		
-		
-		//Stopping condition
-		if(top_vertex_visited.size() == getNumVertices()){
-			done = true; 
-		}
-		else if (top_vertex_visited.size() > getNumVertices()){
-// 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-			throw std::runtime_error("over shoot in the water shed");
-		}
-		else{
-// 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-		}
-			
-			
-			
-	}
-	
-	std::cout << "DONE Watershed FAST" << std::endl;
-// 	exit(0);
-}
 
 
 void AASS::RSI::GraphZone::watershed(double threshold)
@@ -865,6 +790,14 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 			}
 		}
 		
+// 		if((*this)[top_vertex].getValue()==50){
+// 			cv::Mat graphmat2 = cv::Mat::zeros(1200, 1200, CV_8U);
+// 			(*this)[top_vertex].drawZone(graphmat2, cv::Scalar(100));
+// 			(*this)[top_vertex].printLabel(graphmat2);
+// 			cv::imshow("TOP", graphmat2);
+// 			cv::waitKey(0);
+// 		}
+		
 		top_vertex_visited.push_back(top_vertex);
 	
 		int direction = 0 ;
@@ -884,6 +817,13 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 			}
 		}
 		
+// 		if((*this)[top_vertex].getValue()==50){
+// 			cv::Mat graphmat2 = cv::Mat::zeros(1200, 1200, CV_8U);
+// 			(*this)[top_vertex].drawZone(graphmat2, cv::Scalar(100));
+// 			(*this)[top_vertex].printLabel(graphmat2);
+// 			cv::imshow("TOP AFTER", graphmat2);
+// 			cv::waitKey(0);	
+// 		}
 		
 		//Stopping condition
 		if(top_vertex_visited.size() == getNumVertices()){

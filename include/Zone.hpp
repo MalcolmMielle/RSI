@@ -206,6 +206,8 @@ namespace AASS{
 			void printLabel(cv::Mat& img) const{
 				std::string text;
 				text = std::to_string(_value);
+				std::string textsi;
+				textsi = std::to_string(size());
 				std::stringstream precisionValue;
 				precisionValue.precision(2);
 				precisionValue << _size_classification << std::endl;
@@ -213,6 +215,7 @@ namespace AASS{
 				precisionValue2.precision(2);
 				precisionValue2 << _pca_classification << std::endl;
 // 				text = text + " sd " + precisionValue.str() + " pd " + precisionValue2.str() ;
+				text = text + ":s:" + textsi;
 				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255));
 			}
 			
