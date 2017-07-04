@@ -155,7 +155,7 @@ namespace AASS{
 // 				return false;
 // 				
 				double max = std::max(max_start, max_end);
-				std::cout << " GOOD max " << max << " min " << min_toward << std::endl;
+// 				std::cout << " GOOD max " << max << " min " << min_toward << std::endl;
 				if(min_toward == -2){
 					return false;
 				}

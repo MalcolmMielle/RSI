@@ -99,9 +99,9 @@ namespace AASS{
 					++vp.first;
 					// std::cout << "Value " << (*this)[v].getValue() << std::endl;
 					if((*this)[v].getValue() == value){
-						std::cout << "Trying to remove" << std::endl;
+// 						std::cout << "Trying to remove" << std::endl;
 						removeVertex(v);
-						std::cout << "Removed" << std::endl;
+// 						std::cout << "Removed" << std::endl;
 					}
 				}
 				removeLonelyVertices();
@@ -138,7 +138,7 @@ namespace AASS{
 			bool lonelyVertices(){
 				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
 				//vertices access all the vertix
-				std::cout << "NEW start lonely" << std::endl;
+// 				std::cout << "NEW start lonely" << std::endl;
 		// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
 				for (vp = boost::vertices(*this); vp.first != vp.second;) {
 		// 			std::cout << "Looking up vertex " << std::endl;
@@ -179,7 +179,7 @@ namespace AASS{
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 				auto vp = boost::vertices((*this));
 				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
-					std::cout <<"Updating PCA "<< std::endl;
+// 					std::cout <<"Updating PCA "<< std::endl;
 					auto v = *vp.first;
 					++vp.first;
 					
@@ -206,7 +206,7 @@ namespace AASS{
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 				auto vp = boost::vertices((*this));
 				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
-					std::cout <<"Updating Contours "<< std::endl;
+// 					std::cout <<"Updating Contours "<< std::endl;
 					auto v = *vp.first;
 					++vp.first;
 					
@@ -229,7 +229,7 @@ namespace AASS{
 			///@brief update all zones and element of the graph: update PCA, remove Ripples, update countours, clasify shapes, clssify PCA
 			void update(){
 				updatePCA();
-				removeRiplesv2();
+// 				removeRiplesv2();
 				updateContours();
 				updatePCA();
 				setSizesClassification();
@@ -356,7 +356,7 @@ namespace AASS{
 			void setPCAClassification() {
 				
 				
-				std::cout << "set PCA Classification " << std::endl;
+// 				std::cout << "set PCA Classification " << std::endl;
 				std::vector<double> pca_comp;
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 // 				double max = -1, min = -1;
@@ -398,21 +398,21 @@ namespace AASS{
 					std::cout << (pca_comp[i] - _mean_pca) / _sdeviation_pca  << " == " << standardized[i] << std::endl;
 					assert(((pca_comp[i] - _mean_pca) / _sdeviation_pca) == standardized[i]);
 					
-					std::cout << "SCORE" << standardized[i] << std::endl;
+// 					std::cout << "SCORE" << standardized[i] << std::endl;
 					(*this)[v].setPCAClassification(standardized[i]);
 					++i ;
 				}
 				
 				_pca_classified = true;
 				
-				std::cout <<"DONE" << std::endl;
+// 				std::cout <<"DONE" << std::endl;
 			}
 			
 			
 			///@brief force the value of each zone depending on the size from biggest zone to smallest. Normalize it between 0 for the smallest zone and 1 for the largest.
 			void setSizesClassification() {
 				
-				std::cout << "set PCA Classification " << std::endl;
+// 				std::cout << "set PCA Classification " << std::endl;
 				std::vector<double> size_comp;
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 // 				double max = -1, min = -1;
@@ -449,14 +449,14 @@ namespace AASS{
 				int i = 0;
 				for(vp ; vp.first != vp.second; ++vp.first){
 					auto v = *vp.first;
-					std::cout << "SCORE" << standardized[i] << std::endl;
+// 					std::cout << "SCORE" << standardized[i] << std::endl;
 					(*this)[v].setSizeClassification(standardized[i]);
 					++i ;
 				}
 				
 				_size_classified = true;
 				
-				std::cout <<"DONE" << std::endl;
+// 				std::cout <<"DONE" << std::endl;
 				
 			}
 			
@@ -570,7 +570,7 @@ namespace AASS{
 						res = res - 1;
 					}
 					
-					std::cout << "PCA " <<  score_pca << " mean " << _mean_pca << " standar dev " << _sdeviation_pca << " pca " << (*this)[v].getPCADiff() << std::endl;
+// 					std::cout << "PCA " <<  score_pca << " mean " << _mean_pca << " standar dev " << _sdeviation_pca << " pca " << (*this)[v].getPCADiff() << std::endl;
 					
 					(*this)[v].setUniqueness(true, res);
 					count++;
@@ -587,6 +587,9 @@ namespace AASS{
 			 * 
 			 */
 			std::vector<int> removeRiples(){
+				
+				assert(true == false && "NOT USED FUNCTION IT IS STUPID");
+				
 				updatePCA();
 				auto vp = boost::vertices((*this));
 				
@@ -615,7 +618,7 @@ namespace AASS{
 					seen.push_back(v);
 					
 					auto zone_base = (*this)[v];
-					std::cout << "Testing vertex " << std::endl;
+// 					std::cout << "Testing vertex " << std::endl;
 					EdgeIteratorZone out_i, out_end;
 					for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
 						out_i != out_end; ) {
@@ -657,19 +660,19 @@ namespace AASS{
 								min = length1;
 							}
 							
-							std::cout << " max and 5 min " << max << " " << min * 5 << std::endl;
+// 							std::cout << " max and 5 min " << max << " " << min * 5 << std::endl;
 							
 							//ATTENTION magic number
 							if(max > (min * 5)){
 							
 								// Might be a riple
 								// SECOND IDEA check how much the zone is glued to the first one
-								std::cout << "test to remove a ripple" << std::endl;
+// 								std::cout << "test to remove a ripple" << std::endl;
 								auto zoneedge = (*this)[targ];
 								auto percentage = zone_base.contactPoint(zoneedge);
 								
 								if(percentage > 25){
-									std::cout << "Removing a ripple because percentage is " << percentage << std::endl;
+// 									std::cout << "Removing a ripple because percentage is " << percentage << std::endl;
 									//It's a ripple !
 									//ATTENTION not sure if I should or not check for highest value and keep that one
 									zone_base.fuse(zoneedge);

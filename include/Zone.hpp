@@ -215,7 +215,7 @@ namespace AASS{
 				precisionValue2.precision(2);
 				precisionValue2 << _pca_classification << std::endl;
 // 				text = text + " sd " + precisionValue.str() + " pd " + precisionValue2.str() ;
-				text = text + ":s:" + textsi;
+// 				text = text + ":s:" + textsi;
 				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255));
 			}
 			
@@ -237,7 +237,7 @@ namespace AASS{
 				
 				_flag_PCA = true;
 				
-				std::cout << "PCA" << std::endl;
+// 				std::cout << "PCA" << std::endl;
 // 				find countour
 				updateContour();
 				
@@ -285,10 +285,10 @@ namespace AASS{
 				getOrientation(_contours);
 
 				
-				std::cout << "PCAAAAA" << std::endl;
-				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
-				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<2>(_pca) << std::endl;
-				std::cout << "Next PCA " << std::endl << std::endl;
+// 				std::cout << "PCAAAAA" << std::endl;
+// 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<1>(_pca) << std::endl;
+// 				std::cout << "One line " << std::get<0>(_pca) << " " << std::get<2>(_pca) << std::endl;
+// 				std::cout << "Next PCA " << std::endl << std::endl;
 // 				cv::imshow("Bobafter", _zone_mat);
 // 				cv::imshow("Bob", copy_tmp);
 // 				cv::waitKey(0);
@@ -545,7 +545,7 @@ namespace AASS{
 				auto pos = cv::Point(pca_analysis.mean.at<double>(0, 0),
 								pca_analysis.mean.at<double>(0, 1));
 				
-				std::cout << "ytuple " << pos << std::endl;
+// 				std::cout << "ytuple " << pos << std::endl;
 			
 				//Store the eigenvalues and eigenvectors
 				std::vector<cv::Point2d> eigen_vecs(2);
@@ -557,18 +557,18 @@ namespace AASS{
 				
 				for (int i = 0; i < 2; ++i)
 				{
-					std::cout << "Prints " << pca_analysis.eigenvectors.at<double>(i, 0);
-					std::cout << " " << pca_analysis.eigenvectors.at<double>(i, 1);
-					std::cout << " " << pca_analysis.eigenvalues.at<double>(0, i) << std::endl;
+// 					std::cout << "Prints " << pca_analysis.eigenvectors.at<double>(i, 0);
+// 					std::cout << " " << pca_analysis.eigenvectors.at<double>(i, 1);
+// 					std::cout << " " << pca_analysis.eigenvalues.at<double>(0, i) << std::endl;
 					eigen_vecs[i] = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0),
 											pca_analysis.eigenvectors.at<double>(i, 1));
 			
 					eigen_val[i] = pca_analysis.eigenvalues.at<double>(0, i);
 					
-					std::cout << "DONE" << std::endl;
+// 					std::cout << "DONE" << std::endl;
 				}
 				
-				std::cout << "ytuple " << pos << " " << pos + 0.02 * cv::Point(eigen_vecs[0].x * eigen_val[0], eigen_vecs[0].y * eigen_val[0]) <<  " " << pos + 0.02 * cv::Point(eigen_vecs[1].x * eigen_val[1], eigen_vecs[1].y * eigen_val[1]) << std::endl;
+// 				std::cout << "ytuple " << pos << " " << pos + 0.02 * cv::Point(eigen_vecs[0].x * eigen_val[0], eigen_vecs[0].y * eigen_val[0]) <<  " " << pos + 0.02 * cv::Point(eigen_vecs[1].x * eigen_val[1], eigen_vecs[1].y * eigen_val[1]) << std::endl;
 				
 				_pca = std::tuple<cv::Point2i, cv::Point2i, cv::Point2i>(pos, pos + 0.02 * cv::Point(eigen_vecs[0].x * eigen_val[0], eigen_vecs[0].y * eigen_val[0]), pos + 0.02 * cv::Point(eigen_vecs[1].x * eigen_val[1], eigen_vecs[1].y * eigen_val[1]));
 			

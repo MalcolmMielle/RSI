@@ -148,10 +148,11 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	graph_slam.updateContours();
 
 	cv::Mat graphmat2 = cv::Mat::zeros(out_slam.size(), CV_8U);
-	graph_slam.draw(graphmat2);
+	graph_slam.drawSimple(graphmat2);
 	std::string s = std::to_string(i);
 	cv::imshow(s, graphmat2);
 	cv::waitKey(0);
+	std::cout << "CLICKED" << std::endl;
 
 	graph_slam.removeRiplesv3();
 	graph_slam.updatePCA();
@@ -163,7 +164,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	cv::resize(graphmat3, graphmat3, cv::Size(graphmat3.cols * 2, graphmat3.rows * 2));
 	cv::imshow("RIPPLE", graphmat3);
 	cv::waitKey(0);
-
+	std::cout << "CLICKED" << std::endl;
 
 	
 
@@ -197,10 +198,8 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	
-	graph_slam.updatePCA();
-	graph_slam.removeRiplesv2();
-	
-	graph_slam.update();
+// 	graph_slam.updatePCA();	
+	graph_slam.updateContours();
 
     cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
     graph_slam.drawSimple(graphmat);

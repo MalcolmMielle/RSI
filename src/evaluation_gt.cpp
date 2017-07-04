@@ -8,6 +8,9 @@
 #include <fstream>
 #include <ctime> 
 #include <sys/time.h>
+#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iterator/filter_iterator.hpp>
@@ -21,6 +24,14 @@
 #include "HungarianMatcher.hpp"
 
 #include "Uniqueness.hpp"
+
+
+inline bool exists_test3 (const std::string& name) {
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
+}
+
+
 
 struct results{
 	double time;
@@ -242,29 +253,20 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 
 
 
-int i = 0;
 
 void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
-	
-	++i ;
-	
+		
 	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-// 	
-// 	cv::imshow("input", slam);
-// 	cv::waitKey(0);
 	
 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
 	
 	std::cout << "/************ FUZZY OPENING*************/ \n";
 	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.fast(true);
+	fuzzy_slam.fast(false);
 	
 	cv::Mat out_slam;
-//  	cv::imshow("SLAM", slam);
-// 	cv::waitKey(0);
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
-	std::cout << "Done opening " << std::endl;
 	out_slam.convertTo(out_slam, CV_8U);
 	
 // 	std::cout << out << std::endl;
@@ -273,49 +275,20 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	cv::Mat out_tmp_slam;
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 2);
 	
-// 	cv::imshow("REDUCED", out_tmp_slam);
-// 	cv::waitKey(0);
-	
 	AASS::RSI::ZoneExtractor zone_maker;
-	std::cout << "WHATERSHED SLAM" << std::endl;
 	zone_maker.extract(out_tmp_slam);
 	
-	std::cout << "Got the ZONES" << std::endl;
-
 	// 	std::cout << "Getting the graph" << std::endl;
 	
 	std::cout << "/*********** MAKING AND TRIMMING THE GRAPH ***************/\n";
 	graph_slam = zone_maker.getGraph();
-	graph_slam.setThreshold(0.25);
+	graph_slam.setThreshold(0.30);
 	graph_slam.removeVertexValue(0);
 
 	int size_to_remove2 = 10;
 	graph_slam.removeVertexUnderSize(size_to_remove2, true);
 
-	graph_slam.updatePCA();
-	graph_slam.updateContours();
-
-// 	cv::Mat graphmat2 = cv::Mat::zeros(out_slam.size(), CV_8U);
-// 	graph_slam.draw(graphmat2);
-// 	std::string s = std::to_string(i);
-// 	cv::imshow(s, graphmat2);
-// 	cv::waitKey(0);
-
-	graph_slam.removeRiplesv2();
-	graph_slam.updatePCA();
-	graph_slam.updateContours();
-
-	cv::Mat graphmat3 = cv::Mat::zeros(out_slam.size(), CV_8U);
-	graph_slam.draw(graphmat3);
-	std::string ss = std::to_string(i+1);
-	cv::imshow("RIPPLE", graphmat3);
-	cv::waitKey(0);
-
-
-	
-
-	std::cout << "Number of nodes" << graph_slam.getNumVertices() << std::endl;
-	
+	graph_slam.removeRiplesv3();
 	//Watershed Algorithm
 	graph_slam.watershed();
 	
@@ -323,7 +296,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
 	graph_slam.removeLonelyVertices();
 	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness");	
+		throw std::runtime_error("Fuck you lonelyness");
 	
 	
 }
@@ -343,14 +316,10 @@ BOOST_AUTO_TEST_CASE(trying)
 	double begin_process, end_process, decompose_time;
 	begin_process = getTime();	
 	makeGraph(file, graph_slam);
+	end_process = getTime();	decompose_time = end_process - begin_process;
 			
 	/********** PCA of all zones in Graph and removing the ripples **********/
-	
-	graph_slam.updatePCA();
-	graph_slam.removeRiplesv2();
 	graph_slam.update();
-	
-	end_process = getTime();	decompose_time = end_process - begin_process;
 
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
     cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
@@ -396,5 +365,24 @@ BOOST_AUTO_TEST_CASE(trying)
 			
 	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
 	
+	boost::filesystem::path p(file);
+	std::string name = p.filename().stem().string();
+	
+	std::string result_file = "result.txt";
+	std::ofstream myfile;
+	if(!exists_test3(result_file)){
+		myfile.open (result_file);
+		myfile << "Name precision recall time labels size\n";
+	}
+	else{
+		myfile.open (result_file, std::ios::out | std::ios::app);
+	}
+	
+	if (myfile.is_open())
+	{
+		myfile << name << " " << Regions.precision << " " << Regions.recall << " " << Regions.time << " " << max << " " << proper_size << "\n";
+		myfile.close();
+	}
+	else std::cout << "Unable to open file";
 
 }

@@ -326,7 +326,7 @@ void AASS::RSI::GraphZone::removeVertexUnderSize(int size, bool preserveEdgeConn
 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
 		VertexZone v = *vp.first;
 		++vp.first;
-		std::cout << "Remove under size. Size " << (*this)[v].size() << std::endl;
+// 		std::cout << "Remove under size. Size " << (*this)[v].size() << std::endl;
 		if((*this)[v].size() < size){
 			
 			if(preserveEdgeConnectic == true){
@@ -402,7 +402,7 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
 		VertexZone v = *vp.first;
 		++vp.first;
-		std::cout << "Edge num " << this->getNumEdges(v) << std::endl;
+// 		std::cout << "Edge num " << this->getNumEdges(v) << std::endl;
 		if(this->getNumEdges(v) == 0){
 			return true;
 		}
@@ -709,8 +709,8 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				}
 				else{
 					++out_i;
-					std::cout << "Not to be removed " << std::endl;
-					std::cout << "    not sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
+// 					std::cout << "Not to be removed " << std::endl;
+// 					std::cout << "    not sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
 					
 		// 			cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
 		// 			(*this)[first_vertex].draw(graphmat2, cv::Scalar(255));
@@ -872,7 +872,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 	}
 	
 
-	std::cout << "Getting the value" << std::endl;
+// 	std::cout << "Getting the value" << std::endl;
 
 	int diff = (*this)[v_to_fuse_in].getValue() - (*this)[v].getValue();
 	bool up = true;
@@ -891,8 +891,8 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		
 		EdgeZone e_second = *out_i;
 		VertexZone targ = boost::target(e_second, (*this));
-				std::cout << "Printing both vertex" << std::endl;
-				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 				std::cout << "Printing both vertex" << std::endl;
+// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
 // 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
@@ -985,7 +985,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	// std::cout << "Node 2 " << (*this)[v] << std::endl;
 	
 	(*this)[v_to_fuse_in].fuse((*this)[v]);
-	std::cout << (*this)[v] <<std::endl;
+// 	std::cout << (*this)[v] <<std::endl;
 	removeVertex(v);
 	
 // 	(*this)[v_to_fuse_in].PCA();
@@ -1006,7 +1006,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 // 		cv::waitKey(0);
 // 		throw std::runtime_error("Fuck you lonelyness");
 // 	}
-	std::cout << "Yop"<<std::endl;
+// 	std::cout << "Yop"<<std::endl;
 	assert(getNumEdges(v) > 0 && "Node without edges Oo");
 	//Find Closest valued neighbor vertex for fusion of zone
 	VertexZone closest;
@@ -1018,18 +1018,18 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 		
 		EdgeZone e_second = *out_i;
 		VertexZone targ = boost::target(e_second, (*this));
-				std::cout << "Printing both vertex" << std::endl;
-				std::cout << "Node 1 " << (*this)[targ] << std::endl;
+// 				std::cout << "Printing both vertex" << std::endl;
+// 				std::cout << "Node 1 " << (*this)[targ] << std::endl;
 		
 		EdgeIteratorZone out_i_second;
-		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
+// 		std::cout << "Number of edges " << getNumEdges(targ) << std::endl;
 		if(init == true){
 // 			std::cout << "INIT" << std::endl;
 			closest = targ;
 			init = false;
 		}
 		else{
-			std::cout << "COMPARING SIZES " << std::endl;
+// 			std::cout << "COMPARING SIZES " << std::endl;
 			if( std::abs((*this)[closest].getValue() - (*this)[v].getValue() ) > std::abs( (*this)[targ].getValue() - (*this)[v].getValue()) ){
 				closest = targ;
 			}
@@ -1055,9 +1055,14 @@ void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 		all_vertex.push_back(v);
 	}
 	
+	//Sort by smallest to biggest and hightes tpixel value to smallest if size are equal
 	std::sort(all_vertex.begin(), all_vertex.end(), [this](VertexZone a, VertexZone b)
     {
-      return (*this)[a].size() < (*this)[b].size();
+		if((*this)[a].size() == (*this)[b].size()){
+			//Return biggest value when equal
+			return (*this)[a].getValue() > (*this)[b].getValue();
+		}
+		return (*this)[a].size() < (*this)[b].size();
     });
 
 	for(auto it = all_vertex.begin() ; it != all_vertex.end() ; ++it){
@@ -1155,6 +1160,8 @@ bool AASS::RSI::GraphZone::checkAndReplaceRipple(AASS::RSI::GraphZone::VertexZon
 void AASS::RSI::GraphZone::removeRiplesv2(int dist)
 {
 	
+// 	assert(true == false && "do not use. Old bug version");
+	
 	updateAllEdges();
 	std::cout << "Starting watershed" << std::endl;
 // 	exit(0);
@@ -1199,7 +1206,7 @@ void AASS::RSI::GraphZone::removeRiplesv2(int dist)
 		}
 		
 		//Remove all ripples
-		std::cout << "Value " << (*this)[top_vertex].getValue() << std::endl;
+// 		std::cout << "Value " << (*this)[top_vertex].getValue() << std::endl;
 		auto tmp_test_value = (*this)[top_vertex].getValue();
 		
 // 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
@@ -1430,17 +1437,17 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 	//ATTENTION Second magic number
 	int nb_contact = z_ripple.contactPoint(z_base);
 	
-	std::cout << "Contact percent " << nb_contact << std::endl;
+// 	std::cout << "Contact percent " << nb_contact << std::endl;
 	//BEST FOR SKETCHMAPS
 	//Check that the object is not enterely circled by the zone. i.e a windows or a object in the room
 	if(nb_contact >= 40){
-		std::cout << "it is a ripple: PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
+// 		std::cout << "it is a ripple: PERCENT " << z_ripple.contactPoint(z_base) << std::endl;
 		return true;
 	}
 
 		//It might be a contained object so we need to check pca now
 	else if(nb_contact >= 60){
-		std::cout << "NO :(. We have something with more than 60percent contact. Press any key and enter to continue" << std::endl;
+// 		std::cout << "NO :(. We have something with more than 60percent contact. Press any key and enter to continue" << std::endl;
 		int tmp_a;
 		std::cin >> tmp_a;
 
@@ -1468,7 +1475,7 @@ bool AASS::RSI::GraphZone::isRipple(const VertexZone& base_vertex, const VertexZ
 			min = length1;
 		}
 		
-		std::cout << " max and 5 min " << max << " " << min * 10 << std::endl;
+// 		std::cout << " max and 5 min " << max << " " << min * 10 << std::endl;
 		//if it is very alongated
 		if(max > (min * 10)){
 			return true;
@@ -1502,7 +1509,7 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZone::compare(GraphZone& ta
 			//Compare only if both zone are not non unique
 			if((*this)[v].isUnique() == true && target[v_target].isUnique() == true){
 			
-				std::cout << "source " << v << std::endl;
+// 				std::cout << "source " << v << std::endl;
 				double diff_size;
 				double pca_diff;
 // 				ZoneCompared zoneout(v, v_target, *this);

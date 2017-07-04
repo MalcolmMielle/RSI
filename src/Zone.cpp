@@ -28,7 +28,7 @@ AASS::RSI::ZoneComparedInterface AASS::RSI::Zone::compare(const AASS::RSI::Zone&
 	//PCA within 1 sd
 	//Each attribute can remove half of the res. Since the max distance between then is 1, it should not go under 0 
 	
-	std::cout << "score_pca " << score_pca << " score_size " << score_size << " score_pca_target " << score_pca_target << " score_size_target " << score_size_target << std::endl;
+// 	std::cout << "score_pca " << score_pca << " score_size " << score_size << " score_pca_target " << score_pca_target << " score_size_target " << score_size_target << std::endl;
 	
 	
 	if(score_size <= score_size_target + 1 && score_size >= score_size_target - 1){
@@ -148,7 +148,7 @@ void AASS::RSI::Zone::updateContour()
 	if(contours.size() == 0 ){
 		throw ZoneHasNoContour("NO CONTOUR IN ZONE !");
 	}
-	std::cout << "Contour size " << contours.size() << std::endl;
+// 	std::cout << "Contour size " << contours.size() << std::endl;
 	_contours = contours[0];
 }
 
