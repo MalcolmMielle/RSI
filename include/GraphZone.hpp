@@ -60,6 +60,7 @@ namespace AASS{
 
 			GraphZone(): _nb_of_unique(-1), _pca_classified(false), _sd_away_fom_mean_for_uniqueness(1), _threshold(0.25){};
 			
+			
 			void setThreshold(double t){if(t >= 0 && t<= 1){_threshold = t;}else{throw std::runtime_error("Threhsold needs to be between 0 and 1");}}
 			
 			void setNumUnique(int n){_nb_of_unique = n;}
@@ -175,6 +176,17 @@ namespace AASS{
 				}
 			}
 			
+			void useCvMat(bool should_we_use){
+				auto vp = boost::vertices((*this));
+				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
+					std::cout <<"Updating Mat "<< std::endl;
+					auto v = *vp.first;
+					++vp.first;
+					(*this)[v].useCvMat(should_we_use);
+				}
+			}
+			
+			
 			void updatePCA(){
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 				auto vp = boost::vertices((*this));
@@ -209,8 +221,6 @@ namespace AASS{
 // 					std::cout <<"Updating Contours "<< std::endl;
 					auto v = *vp.first;
 					++vp.first;
-					
-// 					(*this)[v].PCA();
 					try{
 						(*this)[v].updateContour();
 					}

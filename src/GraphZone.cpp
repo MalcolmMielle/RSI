@@ -854,23 +854,6 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 	assert(v != v_to_fuse_in);
 	
 	EdgeIteratorZone out_i, out_end;
-// 	for (boost::tie(out_i, out_end) = boost::out_edges(v_to_fuse_in, (*this)); 
-// 		out_i != out_end; out_i = ++out_i) {
-// 		EdgeZone e_second = *out_i;
-// 		VertexZone targ = boost::target(e_second, (*this));
-// 		(*this)[e_second].setOldScore(v_to_fuse_in, targ, (*this)[v_to_fuse_in].getValue());
-// 	}
-	
-// 	try{
-// 		EdgeZone edgezone_tmp;
-// 		this->getEdge(v, v_to_fuse_in, edgezone_tmp);
-// 		assert((*this)[edgezone_tmp].canRemove() == true);
-// 	}
-// 	catch(std::exception& e){
-// 		std::cerr << "Edge didn't exist" << std::endl;
-// 		std::cout << "Here : " << __LINE__ << " " << __FILE__ << " " << e.what() << std::endl;
-// 	}
-	
 
 // 	std::cout << "Getting the value" << std::endl;
 
@@ -929,60 +912,10 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 			if((*this)[e_second].canRemove() == false){
 				ed_el.makeUnbreakable();
 			}
-			
-// 				if(createUnBreakableLinks){
-// 					int diff_targ = (*this)[v].getValue() - (*this)[targ].getValue();
-// 					bool up_targ = true;
-// 					bool same_targ = false;
-// 					if (diff_targ < 0){
-// 						up_targ = false;
-// 					}
-// 					else if (diff_targ == 0){
-// 						same_targ = true;
-// 					}
-// 
-// 					
-// 					if(!same){
-// 						if(!same_targ){
-// 							//If different directin and more than 1/4 of biggest as difference
-// 							
-// 							
-// 							double value_fuse_in;
-// 							double value_out;
-// 							if((*this)[e_second].getOldScore(v_to_fuse_in) == -1){
-// 								value_fuse_in = (double)(*this)[v_to_fuse_in].getValue();
-// 							}
-// 							else{
-// 								value_fuse_in = (double)(*this)[e_second].getOldScore(v_to_fuse_in);
-// 							}
-// 							if((*this)[e_second].getOldScore(v) == -1){
-// 								value_out = (double)(*this)[v].getValue();
-// 							}
-// 							else{
-// 								value_out = (double)(*this)[e_second].getOldScore(v);
-// 							}
-// 							double max = std::max(value_fuse_in, value_out);
-// 							//Min is either the edge variable OR the direct value
-// 							double min = std::min(value_fuse_in, value_out);
-// 							
-// 							if(up != up_targ 
-// 								//Guilty line
-// 	// 							&& min >= max - (max * _threshold) 
-// 								){
-// 	// 							ed_el.makeUnbreakable();
-// 							}
-// 						}
-// 					}
-// 				}
 
 			addEdge(edz, targ, v_to_fuse_in, ed_el);
 		}
 	}
-	
-	// std::cout << "RemoDving and fusing" << std::endl;
-	// std::cout << "Printing both vertex fsed" << std::endl;
-	// std::cout << "Node 1 " << (*this)[v_to_fuse_in] << std::endl;
-	// std::cout << "Node 2 " << (*this)[v] << std::endl;
 	
 	(*this)[v_to_fuse_in].fuse((*this)[v]);
 // 	std::cout << (*this)[v] <<std::endl;

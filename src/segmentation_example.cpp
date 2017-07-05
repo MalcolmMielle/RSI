@@ -19,7 +19,7 @@
 
 int i = 0;
 
-void makeGraph(const std::string& file, AASS::RSI::GraphZoneLight& graph_slam){
+void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	++i ;
 	
@@ -49,7 +49,9 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZoneLight& graph_slam){
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 2);
 	
 	cv::imshow("REDUCED", out_tmp_slam);
+	std::cout << "CLICK now" << std::endl;
 	cv::waitKey(0);
+	std::cout << "CLICKed" << std::endl;
 	
 	AASS::RSI::ZoneExtractor zone_maker;
 	std::cout << "WHATERSHED SLAM" << std::endl;
@@ -67,6 +69,9 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZoneLight& graph_slam){
 	int size_to_remove2 = 10;
 	graph_slam.removeVertexUnderSize(size_to_remove2, true);
 
+	std::cout << "Init the maps" << std::endl;
+	graph_slam.useCvMat(true);
+	std::cout << "Done " << std::endl;
 	graph_slam.updatePCA();
 	graph_slam.updateContours();
 
@@ -74,11 +79,15 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZoneLight& graph_slam){
 	graph_slam.drawSimple(graphmat2);
 	std::string s = std::to_string(i);
 	cv::imshow(s, graphmat2);
+	std::cout << "CLICK now" << std::endl;
 	cv::waitKey(0);
 	std::cout << "CLICKED" << std::endl;
 
+	std::cout << "Remove ripples" << std::endl;
 	graph_slam.removeRiplesv3();
+	std::cout << "update pca" << std::endl;
 	graph_slam.updatePCA();
+	std::cout << "update contour" << std::endl;
 	graph_slam.updateContours();
 
 	cv::Mat graphmat3 = cv::Mat::zeros(out_slam.size(), CV_8U);
@@ -114,7 +123,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		
 	std::string file = argv[1];
 // 	std::string file = "../../Test/Thermal/cold.jpg";
-	AASS::RSI::GraphZoneLight graph_slam;
+	AASS::RSI::GraphZone graph_slam;
 	makeGraph(file, graph_slam);
 	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);

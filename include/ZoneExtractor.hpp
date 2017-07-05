@@ -1,9 +1,9 @@
 #ifndef RSI_WATERSHED_17052016
 #define RSI_WATERSHED_17052016
 
-#include "ZoneLight.hpp"
+#include "Zone.hpp"
 #include "Utils.hpp"
-#include "GraphZoneLight.hpp"
+#include "GraphZone.hpp"
 #include "bettergraph/SimpleGraph.hpp"
 
 namespace AASS{
@@ -18,19 +18,19 @@ namespace AASS{
 			
 		protected :
 			
-			typedef typename GraphZoneLight::GraphType GraphZoneType;
-			typedef typename GraphZoneLight::VertexIterator VertexZoneIterator;
-			typedef typename GraphZoneLight::Vertex VertexZone;
-			typedef typename GraphZoneLight::Edge EdgeZone;
-			typedef typename GraphZoneLight::EdgeIterator EdgeZoneIterator;	
+			typedef typename GraphZone::GraphType GraphZoneType;
+			typedef typename GraphZone::VertexIterator VertexZoneIterator;
+			typedef typename GraphZone::Vertex VertexZone;
+			typedef typename GraphZone::Edge EdgeZone;
+			typedef typename GraphZone::EdgeIterator EdgeZoneIterator;	
 			
 			std::vector < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after;
 			std::map<size_t, size_t> _mapping;
 			std::map<size_t, int> _mapping_of_node_alive;
-			std::deque< ZoneLight > _zones;
+			std::deque< Zone > _zones;
 			//int as edge because we don't care aboput edge 
 			std::vector < std::pair < size_t, size_t > > _index_of_edges;
-			GraphZoneLight _graph;
+			GraphZone _graph;
 			
 		public:
 			ZoneExtractor(){
@@ -39,7 +39,7 @@ namespace AASS{
 			}
 			
 			size_t size(){return _zones.size();}
-			GraphZoneLight& getGraph(){return _graph;}
+			GraphZone& getGraph(){return _graph;}
 			size_t getNumEdge(){return _index_of_edges.size();}
 			/**
 			* @brief Main algorithm : extract all zone of same value from Matrix and store them in _zones

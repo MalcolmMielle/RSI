@@ -1112,9 +1112,9 @@ void AASS::RSI::GraphZoneLight::removeRiplesv3(int dist)
 				}
 				
 				try{
-// 					std::cout << "remobing" << std::endl;
+					std::cout << "remobing" << std::endl;
 					removeVertexWhilePreservingEdges(*it, to_fuse_in, true);
-// 					std::cout << "remobing done" << std::endl;
+					std::cout << "remobing done" << std::endl;
 					//update contour of the modified zone
 // 					(*this)[to_fuse_in].updateContour();
 					all_vertex.erase(it);

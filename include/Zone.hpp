@@ -41,12 +41,15 @@ namespace AASS{
 			bool _uniqueness_calculated;
 			
 		protected:
+			bool _use_cvMat;
+			
 			size_t _value;
 			std::deque <cv::Point2i> _zone;
 			///@brief sum of all value of x and y of all point in zone. For fast update and get of centroid
 			cv::Point2i _sum_of_x_and_y;
 			///@brief Zone drawn on the Mat
 			cv::Mat _zone_mat;
+			cv::Size _img_size;
 			
 			std::tuple<cv::Point, cv::Point, cv::Point> _pca;
 			double _pca_orientation;
@@ -64,23 +67,36 @@ namespace AASS{
 			
 			
 		public:
-			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1) {};
-			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-				_zone_mat = cv::Mat::zeros(size, CV_8U);
+			Zone() : _use_cvMat(false), _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1) {};
+			Zone(const cv::Size& size) : _use_cvMat(false), _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1), _img_size(size){
 			};
-			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
+			Zone(int rows, int cols) : _use_cvMat(false), _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1), _img_size(rows, cols){
 			};
 			
 			
-			Zone(const ZoneLight& zonel) : _flag_PCA(false), _uniqueness_calculated(false), _value(zonel.getValue()), _zone(zonel.getZone()), _sum_of_x_and_y(zonel.getSumOfXAndY()), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-				_zone_mat = cv::Mat::zeros(zonel.getSizeImage(), CV_8U);
-				zonel.drawZone(_zone_mat, cv::Scalar(255));
+			Zone(const ZoneLight& zonel) : _use_cvMat(false), _flag_PCA(false), _uniqueness_calculated(false), _value(zonel.getValue()), _zone(zonel.getZone()), _sum_of_x_and_y(zonel.getSumOfXAndY()), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
 			};
 			
 			void print() const {
 				std::cout << "Size classification " <<  _size_classification << " " ;
 				std::cout << "pca clasificcation " << _pca_classification << " ";
+			}
+			
+			void useCvMat(bool should_use){
+				if(_use_cvMat == false && should_use == true){
+					//Init the mat
+					_zone_mat = cv::Mat::zeros(_img_size, CV_8U);
+					for(int i = 0; i < _zone.size() ; ++i){
+						_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 255;
+					}
+					
+				}
+				if(_use_cvMat == true && should_use == false){
+					//Deallocate the mat
+					_zone_mat = cv::Mat();
+				}
+				_use_cvMat = should_use;
+				
 			}
 			
 			void setSizeClassification(double size){_size_classification = size;}
@@ -121,14 +137,14 @@ namespace AASS{
 			
 			bool isEmpty(){return (0 == _zone.size());}
 			int size(){return _zone.size();}
-			void setImageSize(const cv::Mat& in){_zone_mat = cv::Mat::zeros(in.size(), CV_8U);};
+			void setImageSize(const cv::Size& in){_img_size = in;}
 			
 			size_t size() const {return _zone.size();}
 			
 			void clear(){
 				_zone.clear(); 
 				_value = 0; _sum_of_x_and_y.x = 0 ; _sum_of_x_and_y.y = 0; 
-				_zone_mat = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+				_zone_mat = cv::Mat();
 			}
 			
 			cv::Point2i& operator[](int i){return _zone[i];};
@@ -164,7 +180,11 @@ namespace AASS{
 			void fuse(const Zone& input){
 // 				assert(input.getValue() < _value);
 				for(size_t i = 0 ; i < input.size() ; ++i){
+					
 					this->push_back(input.getZone()[i]);
+					if(_use_cvMat){
+						_zone_mat.at<uchar>(input.getZone()[i].x, input.getZone()[i].y) = 255;
+					}
 				}
 // 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 // 				draw(graphmat2, cv::Scalar(100));
@@ -175,19 +195,23 @@ namespace AASS{
 // 				PCA();
 			}
 			
+// 			void initMat(){
+// 				_zone_mat = cv::Mat::zeros(_img_size, CV_8U);
+// 				for(int i = 0; i < _zone.size() ; ++i){
+// 					_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 255;
+// 				}
+// 				
+// // 				cv::imshow("Vertex ", _zone_mat);
+// // 				cv::waitKey(0);
+// 				
+// 			}
+			
 			void drawZone(cv::Mat& img, const cv::Scalar& color) const{
 				img.convertTo(img, CV_8U);
-				for(int row = 0 ; row < img.rows  ; row++){
-// 					uchar* p = img.ptr<uchar>(row); //point to each row
-// 					uchar* pz = _zone_mat.ptr<uchar>(row); //point to each row
-					for(int col = 0 ; col < img.cols; col++){
-						if(_zone_mat.at<uchar>(row, col) == 255){
-							uchar colllo = color[0];
-							img.at<uchar>(row, col) = colllo;
-						}
-					}
-				}			
-				
+				uchar colllo = color[0];
+				for(int i = 0; i < _zone.size() ; ++i){
+					img.at<uchar>(_zone[i].x, _zone[i].y) = colllo;
+				}					
 			}
 			
 			///@brief simply draw the map
@@ -312,6 +336,9 @@ namespace AASS{
 			
 			//Return the number of contact points in percent compared to size of contour. DO NOT need an update from PCA() or updateContours.
 			int contactPoint(const Zone& zone){
+				
+				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
+				
 				int whitepix = 0 ;
 				int final_size = 0;
 				int test_size = 0 ;
@@ -356,9 +383,9 @@ namespace AASS{
 					
 					std::vector<std::pair<int, int > > seen;
 					
-					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+// 					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
 					for(auto it = contour.begin() ; it != contour.end() ; ++it ){
-						matcon.at<uchar>(it->y, it->x) = 255;
+// 						matcon.at<uchar>(it->y, it->x) = 255;
 // 						std::cout << "LAMBDAS" << std::endl;
 						bool asbeenseeen = false;
 						for(size_t i = 0 ; i < seen.size() ; ++i){
@@ -527,13 +554,11 @@ namespace AASS{
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x + p.x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y + p.y;
 				//TODO drawing function of new point
-				_zone_mat.at<uchar>(p.x, p.y) = 255;
 			}
 			void removePoint(int i){
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x - _zone[i].x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y - _zone[i].y;
 				//TODO un-drawing function of new point
-				_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 0;
 			}
 			
 			void getOrientation(std::vector<cv::Point> &pts){
