@@ -1,16 +1,16 @@
 #ifndef RSI_WATERSHED_17052016
 #define RSI_WATERSHED_17052016
 
-#include "Zone.hpp"
+#include "ZoneLight.hpp"
 #include "Utils.hpp"
-#include "GraphZone.hpp"
+#include "GraphZoneLight.hpp"
 #include "bettergraph/SimpleGraph.hpp"
 
 namespace AASS{
 	namespace RSI{
 		
 		inline bool sortFunction(std::pair < size_t, size_t > i, std::pair < size_t, size_t > j){return (i.second > j.second); }
-		inline bool sortZone(Zone i, Zone j){return (i.size() > j.size  ()); }
+		inline bool sortZone(ZoneLight i, ZoneLight j){return (i.size() > j.size  ()); }
 
 		//TODO convert Mat to Eigen !
 
@@ -18,19 +18,19 @@ namespace AASS{
 			
 		protected :
 			
-			typedef typename GraphZone::GraphType GraphZoneType;
-			typedef typename GraphZone::VertexIterator VertexZoneIterator;
-			typedef typename GraphZone::Vertex VertexZone;
-			typedef typename GraphZone::Edge EdgeZone;
-			typedef typename GraphZone::EdgeIterator EdgeZoneIterator;	
+			typedef typename GraphZoneLight::GraphType GraphZoneType;
+			typedef typename GraphZoneLight::VertexIterator VertexZoneIterator;
+			typedef typename GraphZoneLight::Vertex VertexZone;
+			typedef typename GraphZoneLight::Edge EdgeZone;
+			typedef typename GraphZoneLight::EdgeIterator EdgeZoneIterator;	
 			
 			std::vector < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after;
 			std::map<size_t, size_t> _mapping;
 			std::map<size_t, int> _mapping_of_node_alive;
-			std::deque< Zone > _zones;
+			std::deque< ZoneLight > _zones;
 			//int as edge because we don't care aboput edge 
 			std::vector < std::pair < size_t, size_t > > _index_of_edges;
-			GraphZone _graph;
+			GraphZoneLight _graph;
 			
 		public:
 			ZoneExtractor(){
@@ -39,7 +39,7 @@ namespace AASS{
 			}
 			
 			size_t size(){return _zones.size();}
-			GraphZone& getGraph(){return _graph;}
+			GraphZoneLight& getGraph(){return _graph;}
 			size_t getNumEdge(){return _index_of_edges.size();}
 			/**
 			* @brief Main algorithm : extract all zone of same value from Matrix and store them in _zones

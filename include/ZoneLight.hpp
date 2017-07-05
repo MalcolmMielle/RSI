@@ -1,5 +1,5 @@
-#ifndef RSI_ZONE_17052016
-#define RSI_ZONE_17052016
+#ifndef RSI_ZONELIGHT_05072016
+#define RSI_ZONELIGHT_05072016
 
 #include <iostream>
 #include <stdio.h>
@@ -7,32 +7,28 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "ZoneLight.hpp"
-
 namespace AASS{
 	
 	namespace RSI{
 		
-// 		class ZoneHasMoreThanOneContour : public std::runtime_error {
-// 		public:
-// 			ZoneHasMoreThanOneContour(const std::string& message) 
-// 				: std::runtime_error(message) { };
-// 		};
-// 		class ZoneHasNoContour : public std::runtime_error {
-// 		public:
-// 			ZoneHasNoContour(const std::string& message) 
-// 				: std::runtime_error(message) { };
-// 		};
+		class ZoneHasMoreThanOneContour : public std::runtime_error {
+		public:
+			ZoneHasMoreThanOneContour(const std::string& message) 
+				: std::runtime_error(message) { };
+		};
+		class ZoneHasNoContour : public std::runtime_error {
+		public:
+			ZoneHasNoContour(const std::string& message) 
+				: std::runtime_error(message) { };
+		};
 		
-		class ZoneCompared;
-		class ZoneComparedInterface;
+		class ZoneComparedLight;
+		class ZoneComparedInterfaceLight;
 		
 		/**
-		 * bool _isUnique: true if the zone is unique, false otherwise. It is initialised as true, so that every new zone is considered ofr comparison unless setUniqueness as been explicitely called before.
-		 * 
-		 * bool _uniqueness_calculated: flag to check if the zone was initialised or not.
+		 * Zone class with no opencv image to be light in memory. This is to be used in the ZoneExtractor where a lot of zones are created. It used to blow my memory usage out of the zindow otherwise.
 		 */
-		class Zone{
+		class ZoneLight{
 			
 			
 			
@@ -41,12 +37,13 @@ namespace AASS{
 			bool _uniqueness_calculated;
 			
 		protected:
+			cv::Size _img_size;
 			size_t _value;
 			std::deque <cv::Point2i> _zone;
 			///@brief sum of all value of x and y of all point in zone. For fast update and get of centroid
 			cv::Point2i _sum_of_x_and_y;
 			///@brief Zone drawn on the Mat
-			cv::Mat _zone_mat;
+// 			cv::Mat _zone_mat;
 			
 			std::tuple<cv::Point, cv::Point, cv::Point> _pca;
 			double _pca_orientation;
@@ -64,24 +61,21 @@ namespace AASS{
 			
 			
 		public:
-			Zone() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1) {};
-			Zone(const cv::Size& size) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-				_zone_mat = cv::Mat::zeros(size, CV_8U);
+			ZoneLight() : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1) {};
+			ZoneLight(const cv::Size& size) : _img_size(size), _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
+// 				_zone_mat = cv::Mat::zeros(size, CV_8U);
 			};
-			Zone(int rows, int cols) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
-			};
-			
-			
-			Zone(const ZoneLight& zonel) : _flag_PCA(false), _uniqueness_calculated(false), _value(zonel.getValue()), _zone(zonel.getZone()), _sum_of_x_and_y(zonel.getSumOfXAndY()), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-				_zone_mat = cv::Mat::zeros(zonel.getSizeImage(), CV_8U);
-				zonel.drawZone(_zone_mat, cv::Scalar(255));
+			ZoneLight(int rows, int cols) : _img_size(rows, cols), _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
+// 				_zone_mat = cv::Mat::zeros(rows, cols, CV_8U);
 			};
 			
 			void print() const {
 				std::cout << "Size classification " <<  _size_classification << " " ;
 				std::cout << "pca clasificcation " << _pca_classification << " ";
 			}
+			
+			cv::Point2i getSumOfXAndY() const {return _sum_of_x_and_y;}
+			cv::Size getSizeImage() const {return _img_size;}
 			
 			void setSizeClassification(double size){_size_classification = size;}
 			double getSizeClassification() const {if(_size_classification == -1 ){throw std::runtime_error("Classificatio size not set");} return _size_classification;}
@@ -121,14 +115,14 @@ namespace AASS{
 			
 			bool isEmpty(){return (0 == _zone.size());}
 			int size(){return _zone.size();}
-			void setImageSize(const cv::Mat& in){_zone_mat = cv::Mat::zeros(in.size(), CV_8U);};
+// 			void setImageSize(const cv::Mat& in){_zone_mat = cv::Mat::zeros(in.size(), CV_8U);};
 			
 			size_t size() const {return _zone.size();}
 			
 			void clear(){
 				_zone.clear(); 
 				_value = 0; _sum_of_x_and_y.x = 0 ; _sum_of_x_and_y.y = 0; 
-				_zone_mat = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+// 				_zone_mat = cv::Mat::zeros(_zone_mat.size(), CV_8U);
 			}
 			
 			cv::Point2i& operator[](int i){return _zone[i];};
@@ -139,7 +133,7 @@ namespace AASS{
 			size_t getValue() const {return _value;}
 			const std::deque <cv::Point2i >& getZone() const {return _zone;}
 		// 	std::deque <cv::Point2i >& getZone(){return _zone;}
-			const cv::Mat& getZoneMat() const {return _zone_mat;}
+// 			const cv::Mat& getZoneMat() const {return _zone_mat;}
 			std::tuple<cv::Point, cv::Point, cv::Point> getPCA(){return _pca;}
 			const std::tuple<cv::Point, cv::Point, cv::Point>& getPCA() const {return _pca;}
 			double getPCAOrientation(){return _pca_orientation;}
@@ -161,11 +155,49 @@ namespace AASS{
 			}
 			
 			
-			void fuse(const Zone& input){
+			void fuse(const ZoneLight& input){
+// 				std::cout << "Fuse " << std::endl;
 // 				assert(input.getValue() < _value);
 				for(size_t i = 0 ; i < input.size() ; ++i){
 					this->push_back(input.getZone()[i]);
 				}
+				
+				//Fuse the perimeters
+				auto contact = [](cv::Point2i pt, const std::vector<cv::Point2i>& points) -> bool{
+					int count = 0;
+					auto it = points.begin();
+					for( ; it != points.end() ; ++it){
+						if(pt.x + 1 >= it->x && pt.x -1 <= it->x){
+							if(pt.y + 1 >= it->y && pt.y -  1 <= it->y){
+								++count;
+							}
+						}
+					}
+					if(count == 3){
+						return true;
+					}
+					return false;
+				};
+				
+				std::vector<cv::Point> new_perim;
+				auto inputC = input.getContourNoUpdate();
+				for(auto it = _contours.begin() ; it != _contours.end() ; ++it){
+// 					Keep all point not in contact
+					if( !contact(*it, inputC) ){
+						new_perim.push_back(*it);
+					}
+				}
+				for(auto it = inputC.begin() ; it != inputC.end() ; ++it){
+// 					Keep all point not in contact
+					if( !contact(*it, _contours) ){
+						new_perim.push_back(*it);
+					}
+				}
+				
+				_contours = new_perim;
+				
+// 				std::cout << "Fuse DONE " << std::endl;
+				
 // 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 // 				draw(graphmat2, cv::Scalar(100));
 // 				cv::imshow("fused", graphmat2);
@@ -177,24 +209,17 @@ namespace AASS{
 			
 			void drawZone(cv::Mat& img, const cv::Scalar& color) const{
 				img.convertTo(img, CV_8U);
-				for(int row = 0 ; row < img.rows  ; row++){
-// 					uchar* p = img.ptr<uchar>(row); //point to each row
-// 					uchar* pz = _zone_mat.ptr<uchar>(row); //point to each row
-					for(int col = 0 ; col < img.cols; col++){
-						if(_zone_mat.at<uchar>(row, col) == 255){
-							uchar colllo = color[0];
-							img.at<uchar>(row, col) = colllo;
-						}
-					}
-				}			
-				
+				uchar colllo = color[0];
+				for(int i = 0; i < _zone.size() ; ++i){
+					img.at<uchar>(_zone[i].x, _zone[i].y) = colllo;
+				}				
 			}
 			
 			///@brief simply draw the map
 			void drawContour(cv::Mat& img, const cv::Scalar& color) const{				
 				for (int i = 0; i < _contours.size(); ++i)
 				{
-					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
+					img.at<uchar>(_contours[i].x, _contours[i].y) = 255;
 				}
 			}
 			
@@ -230,6 +255,10 @@ namespace AASS{
 			///Update the contour before giving it to always be up to date
 			std::vector< cv::Point > getContour(){
 				updateContour();
+				return _contours;
+			}
+			
+			std::vector< cv::Point > getContourNoUpdate() const {
 				return _contours;
 			}
 			
@@ -310,110 +339,120 @@ namespace AASS{
 				std::cout << "Next PCA " << std::endl << std::endl;
 			}
 			
-			//Return the number of contact points in percent compared to size of contour. DO NOT need an update from PCA() or updateContours.
-			int contactPoint(const Zone& zone){
+			
+			//Recursive border function. We check the point, if its a border we add to the border add check all neighbor
+			void isBorder (cv::Point2i pt, const std::deque<cv::Point2i>& points, std::vector<cv::Point2i>& border, std::vector<cv::Point2i>& seen)const {
+				
+				assert(border.size() <= points.size());
+// 				std::cout << "In with perim of " << border.size() << std::endl;
+				std::vector<cv::Point2i> neigh;
+				auto it = points.begin();
+				for( ; it != points.end() ; ++it){
+					if(pt.x + 1 >= it->x && pt.x -1 <= it->x){
+						if(pt.y + 1 >= it->y && pt.y -  1 <= it->y){
+							neigh.push_back(*it);
+						}
+					}
+				}
+				if(neigh.size()!=9){
+					border.push_back(pt);
+					auto it = neigh.begin();
+					for( ; it != neigh.end() ; ++it){
+						auto seen_it = seen.begin();
+						bool seen_flag = false;
+						for( ; seen_it != seen.end() ; ++seen_it){
+							if(*seen_it == *it){
+								seen_flag = true;
+							}
+						}
+						if(seen_flag == false){
+							seen.push_back(*it);
+							isBorder(*it, points, border, seen);
+						}
+						
+					}
+				}
+			}
+			
+			///@brief return all points that are part of the perimeter
+			std::vector<cv::Point2i> getPerimeter() const {
+
+				assert(_zone.size() > 0);
+				std::vector<cv::Point2i> perim;
+				std::vector<cv::Point2i> to_explore;
+// 				std::cout << "Getting perim " <<_zone.size() << std::endl;
+				//Find one 
+				for(auto it = _zone.begin() ; it != _zone.end() ; ++it){
+					int nb_neighb = 0;
+					for(auto it2 = _zone.begin() ; it2 != _zone.end() ; ++it2){
+						if(it2->x + 1 >= it->x && it2->x -1 <= it->x){
+							if(it2->y + 1 >= it->y && it2->y - 1 <= it->y){
+// 								std::cout << it2->x << " " << it2->y << " and " << it->x << " " << it->y <<std::endl;
+								nb_neighb++;
+							}
+						}
+					}
+// 					std::cout << "Nd_neighb " << nb_neighb << std::endl;
+					assert (nb_neighb <= 9);
+					assert (nb_neighb > 0);
+					if(nb_neighb != 9){
+						to_explore.push_back(*it);
+						it = _zone.end() - 1 ;
+					}
+				}
+				
+				assert(to_explore.size() >= 1);
+// 				std::cout << "start the recursion" << std::endl;
+				isBorder(to_explore[0], _zone, perim, to_explore);
+				
+				if(perim.size() == 0){
+					std::cout << "WEHAT " << std::endl;
+					for(auto it = _zone.begin() ; it != _zone.end() ; ++it){
+						std::cout << *it << std::endl;
+					}
+				}
+// 				std::cout << "end fg perim" << std::endl;
+				return perim;
+			}
+			
+			///@brief Return the number of contact points in percent compared to size of contour. NEED AN updated contour beforehand !!!!.
+			int contactPoint(ZoneLight& zone, bool updateContour = true){
 				int whitepix = 0 ;
 				int final_size = 0;
 				int test_size = 0 ;
 
-				cv::Mat copyTest;
-				zone.getZoneMat().copyTo(copyTest);
+// 				std::cout << "contact" << std::endl;
 				
-// 				cv::imshow("i",zone.getZoneMat());
-// 				cv::imshow("b",_zone_mat);
-				cv::Mat copy_tmp;
-				_zone_mat.copyTo(copy_tmp);
-				
-				std::vector< std::vector< cv::Point> > contours;
-				std::vector<cv::Vec4i> hierarchy;
-				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-								
-				//Do for all contour and add percentage
-				// Calculate the area of each contour
-
-				
-				auto lambda = [](int x, int y, const cv::Mat& mat) -> bool{
+				auto contact = [](cv::Point2i pt, const std::vector<cv::Point2i>& points) -> bool{
 					
-					int xx;
-					for( xx = x - 1 ; xx < x + 2 ; ++xx ){
-						int yy;
-						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
-// 							std::cout << " x y " << xx << " " << yy << std::endl;
-							if(mat.at<uchar>(yy, xx) == 255){
+					auto it = points.begin();
+					for( ; it != points.end() ; ++it){
+						if(pt.x + 1 >= it->x && pt.x -1 <= it->x){
+							if(pt.y + 1 >= it->y && pt.y -  1 <= it->y){
 								return true;
 							}
 						}
 					}
 					return false;
-
 				};
 				
-// 				std::cout << "NUMBER OF CONTOUR " << contours.size() << " with " << contours[0].size() << std::endl;
-				for(size_t i = 0 ; i < contours.size() ; i++){
-					auto contour = contours[i];
-					
-// 					final_size = final_size + contour.size();
-					
-					std::vector<std::pair<int, int > > seen;
-					
-					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
-					for(auto it = contour.begin() ; it != contour.end() ; ++it ){
-						matcon.at<uchar>(it->y, it->x) = 255;
-// 						std::cout << "LAMBDAS" << std::endl;
-						bool asbeenseeen = false;
-						for(size_t i = 0 ; i < seen.size() ; ++i){
-							if(seen[i].first == it->x && seen[i].second == it->y){
-								asbeenseeen = true;
-							}
-						}
-						seen.push_back(std::pair<int, int>(it->x, it->y));
-						if(!asbeenseeen){
-							if(lambda(it->x, it->y, copyTest)){
-								whitepix++;
-							}
-							final_size++;
-						}
-
-					}
-// 					cv::imshow("3", matcon);
-// 					cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
-// 		/// Apply the specified morphology operation
-// 					cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
-// 					cv::Mat diff = matcon - copyTest;
-// 					cv::Mat diff2 = copyTest - matcon;
-// 					cv::Mat fin;
-// 					matcon.copyTo(fin);
-// 					fin = fin - diff;
-// 					fin = fin - diff2;
-// 					
-// 					for(int row = 0; row < fin.rows; ++row) {
-// 						uchar* p = matcon.ptr(row);
-// 						for(int col = 0; col < fin.cols; ++col) {
-// 							if(p[col] != 0){
-// 								test_size++;
-// 							}
-// 						}
-// 					}
-// 					
-// 					
-// 					for(int row = 0; row < fin.rows; ++row) {
-// 						uchar* p = fin.ptr(row);
-// 						for(int col = 0; col < fin.cols; ++col) {
-// 							if(p[col] != 0){
-// 								++whitepix;
-// 							}
-// 						}
-// 					}
+				if(updateContour==true){
+					std::cout << "Update countour" << std::endl;
+					this->updateContour();
+					std::cout << "Update countour2" << std::endl;
+					zone.updateContour();
 				}
-// 				std::cout << "WHITEPIX " << whitepix << std::endl;
-// 				std::cout << "TESTING " << test_size << std::endl;
-// 				std::cout << "FinalSize " << final_size << std::endl;
-// 				std::cout << "PRINT FIN" << std::endl;
-// 				cv::imshow("FIIIn", fin);
+				for(auto it = _contours.begin() ; it != _contours.end() ; ++it){
+					
+// 					std::cout << "getval" << std::endl;
+					if( contact(*it, zone.getContourNoUpdate()) ){
+						whitepix++;
+					}
+					
+				}
+// 				std::cout << "Out" << std::endl;
+				final_size = _contours.size();
 				
-// 				cv::imshow("1", diff);
-// 				cv::imshow("2", diff2);
-// 				cv::waitKey(0);
 				auto percent = whitepix * 100 / final_size;
 // 				std::cout << "Percent " << percent << std::endl;
 // 				assert(percent < 50 && "Percentage can't be more than 50% because that means the shape is flat");
@@ -481,7 +520,7 @@ namespace AASS{
 			 * 
 			 * It normalize the PCA values using the max of each set of values and compare the difference between the max and min of each set.
 			 */
-			double comparePCA(const Zone& zone_in) const {
+			double comparePCA(const ZoneLight& zone_in) const {
 				
 // 				auto pca_max_min = getMaxMinPCA();
 // 				auto pca_max_min_input = zone_in.getMaxMinPCA();
@@ -518,7 +557,7 @@ namespace AASS{
 			/** @brief comparison this is where I choose to use PCA or not. The lowest the score, the better the matching. Result is between 0 and 1
 			 */
 			
-			ZoneComparedInterface compare(const AASS::RSI::Zone& zone_in) const;
+			ZoneComparedInterfaceLight compare(const AASS::RSI::ZoneLight& zone_in) const;
 			
 			void updateContour();
 			
@@ -527,13 +566,13 @@ namespace AASS{
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x + p.x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y + p.y;
 				//TODO drawing function of new point
-				_zone_mat.at<uchar>(p.x, p.y) = 255;
+// 				_zone_mat.at<uchar>(p.x, p.y) = 255;
 			}
 			void removePoint(int i){
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x - _zone[i].x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y - _zone[i].y;
 				//TODO un-drawing function of new point
-				_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 0;
+// 				_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 0;
 			}
 			
 			void getOrientation(std::vector<cv::Point> &pts){
@@ -591,7 +630,7 @@ namespace AASS{
 		};
 		
 		
-		inline std::ostream& operator<<(std::ostream& in, const Zone &p){
+		inline std::ostream& operator<<(std::ostream& in, const ZoneLight &p){
 			
 			in << "v " << p.getValue() << " s " << p.size();
 
@@ -599,7 +638,7 @@ namespace AASS{
 			
 		}
 		
-		inline std::istream& operator>>(std::istream& in, Zone &p){
+		inline std::istream& operator>>(std::istream& in, ZoneLight &p){
 			char tmp;
 			in >> tmp;
 			std::cout << "v " << tmp << std::endl;

@@ -48,6 +48,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	graph_map.draw(draw);
 	cv::imshow("Map", draw);
 	cv::waitKey(0);
+	std::cout << "CLICKED" << std::endl;
 	
 	BOOST_CHECK_EQUAL(graph_map.getNumVertices(), 2);
 	BOOST_CHECK_EQUAL(graph_slam.getNumVertices(), 2);
@@ -65,7 +66,7 @@ BOOST_AUTO_TEST_CASE(trying)
 			
 	}
 	
-	BOOST_CHECK_EQUAL(count, 37);
+	BOOST_CHECK_EQUAL(count, 35);
 	
 	
 }

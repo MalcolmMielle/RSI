@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat graphmat;
 	out_tmp_slam.copyTo(graphmat);
 	
-	AASS::RSI::GraphZone graph_slam;
+	AASS::RSI::GraphZoneLight graph_slam;
 	std::cout << "Getting the graph" << std::endl;
 	graph_slam = wzoneextract.getGraph();
 	

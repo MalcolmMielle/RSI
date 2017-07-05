@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		if(vp.first != vp.second){
 			auto v2 = *vp.first;
 			
-			AASS::RSI::ZoneCompared zcomp(v, v2, graph_slam);
+			AASS::RSI::ZoneComparedLight zcomp(v, v2, graph_slam);
 			auto zoneslam2 = graph_slam[v2];
 			auto zoneslam = graph_slam[v];
 			double p, h;
