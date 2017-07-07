@@ -991,11 +991,11 @@ void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 	//Sort by smallest to biggest and hightes tpixel value to smallest if size are equal
 	std::sort(all_vertex.begin(), all_vertex.end(), [this](VertexZone a, VertexZone b)
     {
-		if((*this)[a].size() == (*this)[b].size()){
+		if((*this)[a].getValue() == (*this)[b].getValue()){
 			//Return biggest value when equal
-			return (*this)[a].getValue() > (*this)[b].getValue();
+			return (*this)[a].size() < (*this)[b].size();
 		}
-		return (*this)[a].size() < (*this)[b].size();
+		return (*this)[a].getValue() > (*this)[b].getValue();
     });
 
 	for(auto it = all_vertex.begin() ; it != all_vertex.end() ; ++it){
