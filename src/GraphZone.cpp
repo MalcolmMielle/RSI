@@ -299,8 +299,8 @@ void AASS::RSI::GraphZone::draw(cv::Mat& m, const bettergraph::SimpleGraph<Zone,
 // 			cv::drawContours( m, std::vector<std::vector<cv::Point> >(1,(*this)[v].contour), -1, color, 2, 8);
 	(*this)[v].drawZone(m, color);
 	(*this)[v].drawContour(m, color);
-	(*this)[v].drawPCA(m, color);
-	(*this)[v].printPCA();
+// 	(*this)[v].drawPCA(m, color);
+// 	(*this)[v].printPCA();
 	
 // 	(*this)[v].printLabel(m);
 // 	cv::circle(m, (*this)[v].getCentroid(), 2, 255, -1);
@@ -528,7 +528,7 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 
 //TODO : would crash on self loop ?
 ///Recurisve function to find all node to be fused to the original node by the watershed !
-void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, int direction, std::deque<VertexZone>& to_be_removed){
+void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, std::deque<VertexZone>& to_be_removed){
 
 	
 // 	std::cout << "Recursive function" <<std::endl;
@@ -610,24 +610,10 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				min_value = first_vertex_value;
 			}
 			
-// 			if((*this)[top_vertex].getValue()==50){
-// 				cv::Mat graphmat2 = cv::Mat::zeros(1200, 1200, CV_8U);
-// 				(*this)[top_vertex].drawZone(graphmat2, cv::Scalar(100));
-// 				(*this)[top_vertex].printLabel(graphmat2);
-// 				(*this)[targ].drawZone(graphmat2, cv::Scalar(100));
-// 				(*this)[targ].printLabel(graphmat2);
-// 				cv::imshow("FUSE", graphmat2);
-// 				std::cout << min_value << " >= " << max_value - ( (double) max_value * threshold) << " && " <<
-// 				is_old << " == " << true << " && " << is_visited << " == " << false << " && " << is_visited_tmp << " == " << false << "with true " << true << std::endl;
-// 				cv::waitKey(0);	
-// 			}
-			
-	// 		if(is_visited == true){
-	// 			std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << threshold << std::endl;
-	// 			throw std::runtime_error("WE ARE REMOVING A TOP");
-	// 		}
-		
-	// 		std::cout << "                     On this vertex for edge " << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" first " << (*this)[first_vertex].getValue() << " " << threshold << std::endl;
+			if(first_vertex_value == 36 || targ_value == 36){
+				std::cout << "Max " << max_value << " min " << min_value << " thre " << threshold << " margin " << _margin_factor << std::endl;
+				std::cout << min_value << " >= " << max_value - ( (double) max_value * (threshold + _margin_factor)) << std::endl;
+			}
 		
 			//REMOVE TARG
 			if( 
@@ -638,65 +624,17 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 				//Condition for going down the watershed
 	// 			(*this)[targ].getValue() < (*this)[top_vertex].getValue() &&
 				//Condition of threshold up and down
-				min_value >= max_value - ( (double) max_value * threshold) &&
+				min_value >= max_value - ( (double) max_value * (threshold + _margin_factor)) &&
 				
 				//Min always less than max so should not influence
 // 				min_value <= max_value + ( (double) max_value * threshold) &&
 				is_old == true && is_visited == false && is_visited_tmp == false
 			){
-				double top_vertex_value = (*this)[top_vertex].getValue();
-
-				int direction_tmp;
-				if(targ_value > top_vertex_value){
-					direction_tmp = 1;
-				}
-				else if(targ_value < top_vertex_value){
-					direction_tmp = -1;
-				}
-				else{
-					//Same value next to it
-					direction_tmp = -2;
-				}
 				
-	// 			assert(direction_tmp <= 0);
-				
-				bool good_direction = true;
-				if(direction != 0){
-					if(direction_tmp != direction){
-						good_direction = false;
-					}
-				}
-				if(direction_tmp == -2){
-					good_direction = true;
-				}
-				
-				//TEST : REMOVE THIS LINE TO MAKE IT A WATERSHED AGAIN ATTENTION ATTENTION TODO TODO
-				good_direction = true;
-				/*******************************/
-				
-				if(good_direction == true){
-	// 			std::cout << "REMOVE vertex for edge " << (*this)[targ].getValue() << std::endl;
-					// std::cout << (*this)[targ].getValue() << " " << (*this)[top_vertex].getValue() <<" " << direction << std::endl;
-					
-	// 				if(direction_tmp == -2){
-	// 					throw("Weird two node with same value next to each other");
-	// 				}
-					
-	// 				assert(direction_tmp <= 0);
-					
-					//Recursion :(
-					// std::cout << "     sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
-					getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction_tmp, to_be_removed);
-					
-		// 			change = true;
-					// EdgeIteratorZone out_i_second, out_end_second;
-					
-					// int vertnum = getNumVertices();
-					// int vertedge = getNumEdges(targ);
-				
-					// std::vector<VertexZone> test;
-					
-					++out_i;
+				//Clearly the same
+				if(min_value >= max_value - ( (double) max_value * threshold)){
+					getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, to_be_removed);
+						
 					try{
 						// removeVertexWhilePreservingEdges(targ, first_vertex);
 						to_be_removed.push_back(targ);
@@ -705,20 +643,67 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 						std::cout << "Zone had more than one shape. It's fine at this point in the proccess. Continue" << std::endl;
 						//Catch the error that PCA stopped because of 
 					}
-					
 				}
+				//It's close but not close enough for us to be sure so we look at the neighbors of the target to see if one is close to the top_vertex
 				else{
-					++out_i;
-// 					std::cout << "Not to be removed " << std::endl;
-// 					std::cout << "    not sending recur " << (*this)[targ].getValue() << ">=" << (*this)[first_vertex].getValue() - ( (double) (*this)[first_vertex].getValue() * threshold) << "gotten from " << (*this)[first_vertex].getValue() << std::endl;
 					
-		// 			cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
-		// 			(*this)[first_vertex].draw(graphmat2, cv::Scalar(255));
-		// 			(*this)[targ].draw(graphmat2, cv::Scalar(155));
-		// 			cv::imshow("stop", graphmat2);
-		// 			cv::waitKey(0);
+					std::cout << "Close but not enough" << std::endl;
+					
+					//Check if targ as neighbor close to top
+					auto closeNeigh = [this, threshold](const VertexZone& top, const VertexZone& targ) -> bool{
+							
+						double f_v_value = (*this)[top].getValue();
+						
+						EdgeIteratorZone out_i_tmp, out_end_tmp;
+						for (boost::tie(out_i_tmp, out_end_tmp) = boost::out_edges(targ, (*this)); out_i_tmp != out_end_tmp; ++out_i_tmp) {
+							EdgeZone e_second_tmp = *out_i_tmp;
+							
+							//Only check neighbor with breakable links
+							if((*this)[e_second_tmp].canRemove()){
+								VertexZone targ_second_wave = boost::target(e_second_tmp, (*this));
+								
+								//As long as it's not the original we check for closeness
+								if(targ_second_wave != top){
+									double targ_sw_value = (*this)[targ_second_wave].getValue();								
+									double max_sw = std::max(targ_sw_value, f_v_value);
+									double min_sw = std::min(targ_sw_value, f_v_value);
+									
+									if(min_sw >= max_sw - ( (double) max_sw * threshold)){
+										std::cout << "Close nieghbor" << std::endl;
+										return true;
+									}
+								}
+							}
+						}
+						return false;
+					};
+					
+					bool close_value_neighb = closeNeigh(top_vertex, targ);
+					if(close_value_neighb == false){
+						close_value_neighb = closeNeigh(targ, top_vertex);
+					}
+					
+					
+					//If they were indeed close, they we remove it
+					if(close_value_neighb){
+						getAllNodeRemovedWatershed(targ, first_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, to_be_removed);
+						
+						try{
+							// removeVertexWhilePreservingEdges(targ, first_vertex);
+							to_be_removed.push_back(targ);
+						}
+						catch(std::exception& e){
+							std::cout << "Zone had more than one shape. It's fine at this point in the proccess. Continue" << std::endl;
+							//Catch the error that PCA stopped because of 
+						}
+					}
+					else{
+						std::cout << "Not good " << first_vertex_value << " " << targ_value << std::endl;
+						++out_i;
+					}
 					
 				}
+					
 			}
 			else{
 				++out_i;	
@@ -735,111 +720,61 @@ void AASS::RSI::GraphZone::getAllNodeRemovedWatershed(AASS::RSI::GraphZone::Vert
 
 void AASS::RSI::GraphZone::watershed(double threshold)
 {
-	_iteration = 0;
-	//Find all "top node"
-
-	bool exit = false;
-	
 	std::cout << "Starting watershedd" << std::endl;
-// 	exit(0);
 	
+	_iteration = 0;
+	std::vector<std::pair<std::deque<VertexZone>, VertexZone > > all_to_remove_and_in_what;
 	std::deque<VertexZone> top_vertex_visited;
-	bool done = false;
-	while(done == false){
-
-		// std::cout << "ONE NODE " << std::endl;
-		// if(exit == true){
-		// 	done = true;
-		// }
-		// else{
-		// 	exit = true;
-		// }
-		
-		VertexZone top_vertex;
-		bool init = false;
-		
-		//Find the highest not visited vertex
-		std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//Find all "top node"
+	
+	std::list<VertexZone> all_vertex;
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 		//vertices access all the vertix
 // 		std::cout << "NEW start" << std::endl;
 // 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
-		for (vp = boost::vertices((*this)); vp.first != vp.second;) {
-// 			std::cout << "Looking up vertex " << std::endl;
-			VertexZone v = *vp.first;
-			++vp.first;
-// 			std::cout << "assind vertex " <<(*this)[v]<< std::endl;
-			bool is_visited = false;
-			for(size_t j = 0 ; j < top_vertex_visited.size() ; ++j){
-				if(v == top_vertex_visited[j]){
-					is_visited = true;
-				}
-			}
-// 			std::cout << "checked visit " << is_visited << std::endl;
-			if(is_visited == false){
-// 				std::cout << "Is it init : "<< init << std::endl;
-				if(init == false){
-// 					std::cout << "assigned init" << std::endl;
-					top_vertex = v;
-					init = true;
-				}
-// 				else if( (*this)[top_vertex].getValue() < (*this)[v].getValue() ){
-				else if( (*this)[top_vertex].size() < (*this)[v].size() ){
-// 					std::cout << "assigned other" << std::endl;
-					top_vertex = v;
-				}
-			}
-		}
-		
-// 		if((*this)[top_vertex].getValue()==50){
-// 			cv::Mat graphmat2 = cv::Mat::zeros(1200, 1200, CV_8U);
-// 			(*this)[top_vertex].drawZone(graphmat2, cv::Scalar(100));
-// 			(*this)[top_vertex].printLabel(graphmat2);
-// 			cv::imshow("TOP", graphmat2);
-// 			cv::waitKey(0);
-// 		}
-		
-		top_vertex_visited.push_back(top_vertex);
+	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+		VertexZone v = *vp.first;
+		++vp.first;
+		all_vertex.push_front(v);
+	}
 	
-		int direction = 0 ;
+	//Sort by smallest to biggest and hightes tpixel value to smallest if size are equal
+	all_vertex.sort([this](VertexZone a, VertexZone b)
+    {
+		if((*this)[a].getValue() == (*this)[b].getValue()){
+			//Return biggest value when equal
+			return (*this)[a].size() > (*this)[b].size();
+		}
+		return (*this)[a].getValue() > (*this)[b].getValue();
+    });
+
+	for(auto it = all_vertex.begin() ; it != all_vertex.end() ; ++it){
+		
+		top_vertex_visited.push_back(*it);
+	
 		// std::cout << "NEW VERTEX.............................:" << std::endl;
 		std::deque<VertexZone> top_vertex_visited_tmp;
-		top_vertex_visited_tmp.push_back(top_vertex);
+		top_vertex_visited_tmp.push_back(*it);
 
 		std::deque<VertexZone> to_be_removed;
 
-		int num_edge = getNumEdges(top_vertex), count = 0;
+		int num_edge = getNumEdges(*it), count = 0;
 // 		std::cout << "Nume edges " << num_edge << std::endl;
 		if(num_edge > 0){
-			getAllNodeRemovedWatershed(top_vertex, top_vertex, top_vertex_visited, top_vertex_visited_tmp, threshold, direction, to_be_removed);
-
-			for(auto it = to_be_removed.begin() ; it != to_be_removed.end() ; ++it){
-				removeVertexWhilePreservingEdges(*it, top_vertex, false);
+			getAllNodeRemovedWatershed(*it, *it, top_vertex_visited, top_vertex_visited_tmp, threshold, to_be_removed);
+			all_to_remove_and_in_what.push_back(std::pair<std::deque<VertexZone>, VertexZone >(to_be_removed, *it));
+			
+			//Remove vertex to be remove from inspection
+			for(auto it_rem = to_be_removed.begin(); it_rem != to_be_removed.end() ; ++it_rem){	
+				all_vertex.remove(*it_rem);
 			}
 		}
-		
-// 		if((*this)[top_vertex].getValue()==50){
-// 			cv::Mat graphmat2 = cv::Mat::zeros(1200, 1200, CV_8U);
-// 			(*this)[top_vertex].drawZone(graphmat2, cv::Scalar(100));
-// 			(*this)[top_vertex].printLabel(graphmat2);
-// 			cv::imshow("TOP AFTER", graphmat2);
-// 			cv::waitKey(0);	
-// 		}
-		
-		//Stopping condition
-		if(top_vertex_visited.size() == getNumVertices()){
-			done = true; 
+	}
+	
+	for(auto it_rem = all_to_remove_and_in_what.begin() ; it_rem != all_to_remove_and_in_what.end() ; ++it_rem){
+		for(auto it = it_rem->first.begin() ; it != it_rem->first.end() ; ++it){
+			removeVertexWhilePreservingEdges(*it, it_rem->second, false);
 		}
-		else if (top_vertex_visited.size() > getNumVertices()){
-// 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-			throw std::runtime_error("over shoot in the water shed");
-		}
-		else{
-// 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-		}
-			
-			
-			
-		_iteration++;
 	}
 	
 	std::cout << "DONE Watershed" << std::endl;
@@ -897,9 +832,9 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 				ed_el_tmp = (*this)[edz_tmp];
 				double min_val_tmp = ed_el_tmp.min_toward;
 				if(min_val_tmp == -2){
-					min_val = min_val_tmp;
+// 					min_val = min_val_tmp;
 				}
-				else if(min_val_tmp >= min_val){
+				else if(min_val_tmp <= min_val){
 					min_val = min_val_tmp;
 				}
 			}
@@ -977,7 +912,22 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 {
 	updateAllEdges();
-	std::deque<VertexZone> all_vertex;
+	
+	std::list<VertexZone> all_vertex;
+// 	std::vector<VertexZone> removed_vertices;
+	
+// 	auto wasRemoved = [](const VertexZone& v, const std::vector<VertexZone>& removed) -> bool{
+// 		auto it = removed.begin();
+// 		for( ; it != removed.end() ; ++it){
+// 			if(v == *it){
+// 				std::cout << "Removed " << std::endl;
+// 				return true;
+// 			}
+// 		}
+// 		return false;
+// 	};
+	
+	
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 		//vertices access all the vertix
 // 		std::cout << "NEW start" << std::endl;
@@ -985,11 +935,11 @@ void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
 		VertexZone v = *vp.first;
 		++vp.first;
-		all_vertex.push_back(v);
+		all_vertex.push_front(v);
 	}
 	
 	//Sort by smallest to biggest and hightes tpixel value to smallest if size are equal
-	std::sort(all_vertex.begin(), all_vertex.end(), [this](VertexZone a, VertexZone b)
+	all_vertex.sort([this](VertexZone a, VertexZone b)
     {
 		if((*this)[a].getValue() == (*this)[b].getValue()){
 			//Return biggest value when equal
@@ -998,57 +948,54 @@ void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 		return (*this)[a].getValue() > (*this)[b].getValue();
     });
 
-	for(auto it = all_vertex.begin() ; it != all_vertex.end() ; ++it){
+	for(auto it = all_vertex.begin() ; it != all_vertex.end() ;){
+		
+// 		std::cout << "Step " << std::distance(all_vertex.begin(), it) << " size " << std::distance(all_vertex.begin(), all_vertex.end()) << std::endl;
 		//Remove all ripples
-		
-// 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-// 		(*this)[top_vertex].draw(graphmat2, cv::Scalar(100));
-// 		(*this)[top_vertex].printLabel(graphmat2);
-// 		cv::imshow("fused 222", graphmat2);
-// 		cv::waitKey(0);	
-		
-		VertexZone to_fuse_in;
-		if(checkAndReplaceRipple(*it, to_fuse_in)){
-			try{
+// 		if(wasRemoved(*it, removed_vertices) == false){
+// 			std::cout << " Go " << std::endl;
+			VertexZone to_fuse_in;
+			if(checkAndReplaceRipple(*it, to_fuse_in)){
+				try{
+					std::deque<VertexZone> to_check;
+					this->getAllVertexLinked(*it, to_check);
+// 					removed_vertices.push_back(*it);
+					
+					int add=0;
+					//Check the neighbor for ripples so we add right after in the list
+					for(int i = 0; i < to_check.size() ; ++i){
+						all_vertex.push_back(to_check[i]);
+						++add;
+					}
+// 					std::cout << "Added " << add << std::endl;
+	// 				all_vertex.erase(it);
+	// 				it = all_vertex.begin();
+				}
+				catch(std::exception& e){
+					std::cout << "Here : " << e.what() << std::endl;
+					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+					(*this)[*it].drawZone(graphmat2, cv::Scalar(100));
+					(*this)[*it].drawContour(graphmat2, cv::Scalar(100));
+					cv::imshow("fused 222", graphmat2);
+					cv::waitKey(0);	
+					exit(0);
+				}
+				
 				removeVertexWhilePreservingEdges(*it, to_fuse_in, true);
-				all_vertex.erase(it);
-				it = all_vertex.begin();
+				(*this)[to_fuse_in].updateContour();
+				
+				auto it_cpy = it;
+				while(*it_cpy == *it){
+					++it;
+				}
+				all_vertex.remove(*it_cpy);
 			}
-			catch(std::exception& e){
-				std::cout << "Here : " << e.what() << std::endl;
-				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-				(*this)[*it].drawZone(graphmat2, cv::Scalar(100));
-				(*this)[*it].drawContour(graphmat2, cv::Scalar(100));
-				cv::imshow("fused 222", graphmat2);
-				cv::waitKey(0);	
-				exit(0);
+			else{
+// 				std::cout << "Not a ripple" << std::endl;
+				++it;
 			}
-			(*this)[to_fuse_in].PCA();
-			(*this)[to_fuse_in].updateContour();
-			
-		}
-		
-		
-		
-// 		graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-// 		(*this)[top_vertex].draw(graphmat2, cv::Scalar(100));
-// 		(*this)[top_vertex].printLabel(graphmat2);
-// 		cv::imshow("fused 222", graphmat2);
-// 		cv::waitKey(0);	
-		
-		//End condition
-// 		top_vertex_visited.push_back(top_vertex);
-// 		//Stopping condition
-// 		if(top_vertex_visited.size() >= getNumVertices()){
-// 			done = true; 
 // 		}
-// 		else if (top_vertex_visited.size() > getNumVertices()){
-// // 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-// 			throw std::runtime_error("over shoot in the remove ripples");
-// 		}
-// 		else{
-// // 			std::cout << "SIIIIIZE " << top_vertex_visited.size()  << " ALL VERTEX " << getNumVertices() << std::endl;
-// 		}
+		
 	}
 	for(auto it = all_vertex.begin() ; it != all_vertex.end() ; ++it){
 		makeAllUnbreakableEdges(*it);
@@ -1332,17 +1279,17 @@ void AASS::RSI::GraphZone::makeAllUnbreakableEdges(VertexZone& base_vertex){
 		double max_value =  std::max(val_base, val_targ);
 	
 		if((*this)[e_second].wasRipple()){
-			if(min_value >= max_value - ( (double) max_value * _threshold)){
+			
+// 			if(min_value >= max_value - ( (double) max_value * _threshold)){
+				
 				if((*this)[e_second].shouldBeUnbreakable((*this)[base_vertex].getValue(), base_vertex, (*this)[targ].getValue(), targ, _threshold)){
 					(*this)[e_second].makeUnbreakable();
-					double val_base = (*this)[base_vertex].getValue();
-					double val_targ = (*this)[targ].getValue();
 	// 					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 	// 					draw(graphmat2, base_vertex, cv::Scalar(100));
 	// 					cv::imshow("fina", graphmat2);
 	// 					cv::waitKey(0);
 				}
-			}
+// 			}
 		}
 		
 		

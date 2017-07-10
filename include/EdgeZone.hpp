@@ -125,35 +125,7 @@ namespace AASS{
 			
 			//Test if need to be makeUnbreakable thanks to all value of zone fused in it
 			bool shouldBeUnbreakable(double max_start, const VertexZone& start, double max_end, const VertexZone& end, double thresh){
-// 				if(_score_old.empty() == false){
-// 					auto it = _score_old.begin();
-// 					double min = -1;
-// 					for(it; it != _score_old.end() ; ++it){
-// 						std::cout << it->from << " to " << it->toward << std::endl;
-// // 						if( (it->score <= min || min == -1 ) && it->from != start && it->from != end && it->toward != start && it->toward != end){
-// 						if( (it->min_toward <= min || min == -1 ) && ( (it->from == start && it->toward == end) || (it->from == end && it->toward == start) ) ){
-// 							min = it->min_toward;
-// 						}
-// 					}
-// 					std::cout << "min " << min << std::endl;
-// 					if(min != -1){
-// 						double max = std::max(max_start, max_end);
-// 						std::cout << " GOOD max " << max << " min " << min << std::endl;
-// 						if( min <= max - (max * thresh)){
-// 							return true;
-// 						}
-// 					}
-// 					//Original link here
-// 					else if(min == -2){
-// 						return false;
-// 					}
-// 					else{
-// 						std::cout << "NOT FOUND :( " << start << " to " << end << std::endl;
-// 						throw std::runtime_error("two vertex not found");
-// 					}
-// 				}
-// 				return false;
-// 				
+
 				double max = std::max(max_start, max_end);
 // 				std::cout << " GOOD max " << max << " min " << min_toward << std::endl;
 				if(min_toward == -2){

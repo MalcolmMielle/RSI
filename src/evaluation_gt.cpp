@@ -20,11 +20,6 @@
 #include "FuzzyOpening.hpp"
 #include "Kmean.hpp"
 #include "ZoneReducer.hpp"
-#include "hungarian.h"
-#include "HungarianMatcher.hpp"
-
-#include "Uniqueness.hpp"
-
 
 inline bool exists_test3 (const std::string& name) {
   struct stat buffer;   
@@ -254,52 +249,75 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 
 
 
-void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
+void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
 		
-	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-	
-	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
-	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
-	
+	double begin_process, end_process, decompose_time;
 	std::cout << "/************ FUZZY OPENING*************/ \n";
 	AASS::RSI::FuzzyOpening fuzzy_slam;
 	fuzzy_slam.fast(false);
 	
 	cv::Mat out_slam;
+	
+	begin_process = getTime();	
 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
+	end_process = getTime();	decompose_time = end_process - begin_process;
+	time = decompose_time;
+	
+	std::cout << "Fuzzy opening time: " << time << std::endl;
+	
 	out_slam.convertTo(out_slam, CV_8U);
-	
-// 	std::cout << out << std::endl;
-	
+		
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
-	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 2);
-	
 	AASS::RSI::ZoneExtractor zone_maker;
+	
+	begin_process = getTime();
+	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 2);
 	zone_maker.extract(out_tmp_slam);
+	end_process = getTime();	decompose_time = end_process - begin_process;
+	time = time + decompose_time;
 	
-	// 	std::cout << "Getting the graph" << std::endl;
-	
+	std::cout << "Zone reducing: " << decompose_time << std::endl;
+		
 	std::cout << "/*********** MAKING AND TRIMMING THE GRAPH ***************/\n";
-	graph_slam = zone_maker.getGraph();
-	graph_slam.setThreshold(0.30);
-	graph_slam.removeVertexValue(0);
-
+	
 	int size_to_remove2 = 10;
+	
+	begin_process = getTime();
+	graph_slam = zone_maker.getGraph();
+	graph_slam.setThreshold(0.25);
+	graph_slam.removeVertexValue(0);	
 	graph_slam.removeVertexUnderSize(size_to_remove2, true);
 
+	graph_slam.useCvMat(true);
+// 	graph_slam.updatePCA();
+	graph_slam.updateContours();
 	graph_slam.removeRiplesv3();
+	
+	end_process = getTime();	decompose_time = end_process - begin_process;
+	time = time + decompose_time;
+	std::cout << "Ripples: " << decompose_time << std::endl;
+	
+	begin_process = getTime();
+// 	graph_slam.updatePCA();
+	graph_slam.updateContours();
+	
 	//Watershed Algorithm
 	graph_slam.watershed();
 	
 	int size_to_remove = 100;
 	graph_slam.removeVertexUnderSize(size_to_remove, true);
 	graph_slam.removeLonelyVertices();
-	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness");
+	end_process = getTime();	decompose_time = end_process - begin_process;
+	time = time + decompose_time;
 	
+	std::cout << "watershed: " << decompose_time << std::endl;
+	
+	if(graph_slam.lonelyVertices())
+		throw std::runtime_error("Fuck you lonelyness");	
 	
 }
+
 
 
 BOOST_AUTO_TEST_CASE(trying)
@@ -313,10 +331,15 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	std::string file = "../../Test/Thermal/cold.jpg";
 	AASS::RSI::GraphZone graph_slam;
 	
-	double begin_process, end_process, decompose_time;
-	begin_process = getTime();	
-	makeGraph(file, graph_slam);
-	end_process = getTime();	decompose_time = end_process - begin_process;
+	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	
+	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
+	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
+	
+	double time;
+	makeGraph(slam, graph_slam, time);
+	
+	std::cout << "Total time: " << time << std::endl;
 			
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	graph_slam.update();
@@ -339,6 +362,9 @@ BOOST_AUTO_TEST_CASE(trying)
 	//Reading the GT
 	
 	cv::Mat image_GT = cv::imread(full_path_GT,0);
+	cv::imshow("GT raw", image_GT);
+	cv::waitKey(0);
+	
 	cv::Mat GT_segmentation = segment_Ground_Truth(image_GT);
 	
 	cv::imshow("GT", GT_segmentation);
@@ -353,7 +379,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	compare_images(GT_segmentation, graphmat, pixel_precision, pixel_recall, Precisions, Recalls, Times);
 	
 	results pixel, Regions;
-	pixel.time = Regions.time = decompose_time;
+	pixel.time = Regions.time = time;
 	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
 
 	double min, max;

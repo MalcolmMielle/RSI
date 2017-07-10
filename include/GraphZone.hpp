@@ -2,6 +2,7 @@
 #define RSI_GRAPHZONE_19052016
 
 #include <iterator>
+#include <forward_list>
 
 #include "Zone.hpp"
 #include "EdgeZone.hpp"
@@ -26,6 +27,8 @@ namespace AASS{
 			
 		protected:
 			
+			
+			double _margin_factor;
 			
 			///@brief -1 if not init
 			int _nb_of_unique;
@@ -58,7 +61,7 @@ namespace AASS{
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::VertexIterator VertexIteratorZone;
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::EdgeIterator EdgeIteratorZone;
 
-			GraphZone(): _nb_of_unique(-1), _pca_classified(false), _sd_away_fom_mean_for_uniqueness(1), _threshold(0.25){};
+			GraphZone(): _margin_factor(0.10), _nb_of_unique(-1), _pca_classified(false), _sd_away_fom_mean_for_uniqueness(1), _threshold(0.25){};
 			
 			
 			void setThreshold(double t){if(t >= 0 && t<= 1){_threshold = t;}else{throw std::runtime_error("Threhsold needs to be between 0 and 1");}}
@@ -179,7 +182,7 @@ namespace AASS{
 			void useCvMat(bool should_we_use){
 				auto vp = boost::vertices((*this));
 				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
-					std::cout <<"Updating Mat "<< std::endl;
+// 					std::cout <<"Updating Mat "<< std::endl;
 					auto v = *vp.first;
 					++vp.first;
 					(*this)[v].useCvMat(should_we_use);
@@ -191,7 +194,7 @@ namespace AASS{
 // 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 				auto vp = boost::vertices((*this));
 				for(vp = boost::vertices((*this)) ; vp.first != vp.second;){
-// 					std::cout <<"Updating PCA "<< std::endl;
+					std::cout <<"Updating PCA "<< std::endl;
 					auto v = *vp.first;
 					++vp.first;
 					
@@ -738,7 +741,7 @@ namespace AASS{
 			 * @param top_vertex_visited_tmp : empty deque used by the algorithm to remember which node were visited in the recursion
 			 * @param threshold : Threshold at which the difference between the value of top_vertex and a neighborhood vertex is considered enough for the neighborhood vertex not to be fused and to be considered a new zone. Actually no : fraction the new node must be partt of to not be fyused
 			 */
-			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, int direction, std::deque<VertexZone>& to_be_removed);
+			void getAllNodeRemovedWatershed(AASS::RSI::GraphZone::VertexZone& top_vertex, AASS::RSI::GraphZone::VertexZone& first_vertex, const std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited, std::deque< AASS::RSI::GraphZone::VertexZone >& top_vertex_visited_tmp, double threshold, std::deque< AASS::RSI::GraphZone::VertexZone >& to_be_removed);
 
 			/**
 			* @brief get all ripples
