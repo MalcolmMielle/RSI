@@ -59,3 +59,5 @@ target_link_libraries(test_collisionblob ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RS
 # # 
 # add_executable(test_uniqueness test_uniqueness.cpp)
 # target_link_libraries(test_uniqueness ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
+
+add_subdirectory(stats_python)

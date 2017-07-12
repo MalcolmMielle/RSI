@@ -87,29 +87,29 @@ void exportResultsGnuplot(const std::string& file, const results& Regions, doubl
 	}
 	else std::cout << "Unable to open file";
 	
-	int name_int = std::stoi(p.filename().stem().string());
-	double name_d = (double) name_int;
-	name_d = name_d + 0.5;
-	std::ostringstream strs;
-	strs << name_d;
-	std::string name2 = strs.str();
-	
-	std::string result_fileh = "maorishistogram.dat";
-	std::ofstream myfileh;
-	if(!exists_test3(result_fileh)){
-		myfileh.open (result_fileh);
-		myfileh << "place precision place_recall recall time labels size\n";
-	}
-	else{
-		myfileh.open (result_fileh, std::ios::out | std::ios::app);
-	}
-	
-	if (myfileh.is_open())
-	{
-		myfileh << name << " " << Regions.precision << " " << name2 << " " << Regions.recall << " " << Regions.time << " " << max << " " << proper_size << "\n";
-		myfileh.close();
-	}
-	else std::cout << "Unable to open file";
+// 	int name_int = std::stoi(p.filename().stem().string());
+// 	double name_d = (double) name_int;
+// 	name_d = name_d + 0.5;
+// 	std::ostringstream strs;
+// 	strs << name_d;
+// 	std::string name2 = strs.str();
+// 	
+// 	std::string result_fileh = "maorishistogram.dat";
+// 	std::ofstream myfileh;
+// 	if(!exists_test3(result_fileh)){
+// 		myfileh.open (result_fileh);
+// 		myfileh << "place precision place_recall recall time labels size\n";
+// 	}
+// 	else{
+// 		myfileh.open (result_fileh, std::ios::out | std::ios::app);
+// 	}
+// 	
+// 	if (myfileh.is_open())
+// 	{
+// 		myfileh << name << " " << Regions.precision << " " << name2 << " " << Regions.recall << " " << Regions.time << " " << max << " " << proper_size << "\n";
+// 		myfileh.close();
+// 	}
+// 	else std::cout << "Unable to open file";
 	
 	
 	
@@ -540,8 +540,8 @@ void process(const std::string& file, const std::string& full_path_GT){
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 // 	cv::imshow("GRAPH", img_hist_equalized);
 	
-    cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
-    graph_slam.draw(graphmat_vis);
+//     cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
+//     graph_slam.draw(graphmat_vis);
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 // 	cv::imshow("GRAPH Visible", graphmat_vis);
 	
