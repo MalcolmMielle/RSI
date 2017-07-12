@@ -64,9 +64,6 @@ void AASS::RSI::GraphZone::drawEvaluation(cv::Mat& drawmat) const
 	drawmat.convertTo(drawmat_old, CV_8U);
 	
 	cv::Scalar color;
-	cv::RNG rng(12345);
-	int nb_zones = this->getNumVertices();
-	int color_step = 249 / nb_zones;
 	int count = 1;
 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
 	//vertices access all the vertix

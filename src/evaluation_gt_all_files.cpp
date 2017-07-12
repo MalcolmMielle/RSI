@@ -1,10 +1,10 @@
 #include <iostream>
-#define BOOST_TEST_DYN_LINK
+// #define BOOST_TEST_DYN_LINK
 
-#define BOOST_TEST_MODULE MyTest
+// #define BOOST_TEST_MODULE MyTest
 #include <time.h>
 #include <cstdlib>
-#include <boost/test/unit_test.hpp>
+// #include <boost/test/unit_test.hpp>
 #include <fstream>
 #include <ctime> 
 #include <sys/time.h>
@@ -467,16 +467,8 @@ void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
 }
 
 
+void process(const std::string& file, const std::string& full_path_GT){
 
-BOOST_AUTO_TEST_CASE(trying)
-{
-	
-	int argc = boost::unit_test::framework::master_test_suite().argc;
-	char** argv = boost::unit_test::framework::master_test_suite().argv;
-		
-	std::string file = argv[1];
-	std::string full_path_GT = argv[2];
-// 	std::string file = "../../Test/Thermal/cold.jpg";
 	AASS::RSI::GraphZone graph_slam;
 	
 	cv::Mat slam_in = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
@@ -493,7 +485,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	double time = 0;
 	makeGraph(slam, graph_slam, time);
 	
-	std::cout << "Total time: " << time << std::endl;
+// 	std::cout << "Total time: " << time << std::endl;
 			
 	/********** PCA of all zones in Graph and removing the ripples **********/
 	graph_slam.update();
@@ -516,7 +508,7 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 // 	cv::imshow("GRAPH Visible", graphmat_vis);
 	
-	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
+// 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
     
 	
 	//Reading the GT
@@ -540,7 +532,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::vector<double> Times;
 	compare_images(GT_segmentation, graphmat, pixel_precision, pixel_recall, Precisions, Recalls, Times);
 	
-	std::cout << "pixel prec " << pixel_precision << std::endl;
+// 	std::cout << "pixel prec " << pixel_precision << std::endl;
 	
 	results pixel, Regions;
 	pixel.time = Regions.time = time;
@@ -556,5 +548,62 @@ BOOST_AUTO_TEST_CASE(trying)
 	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
 	
 	exportResultsGnuplot(file,Regions, max, proper_size);
+}
+
+
+int main(int argc, char** argv){
+	
+// 	int argc = boost::unit_test::framework::master_test_suite().argc;
+// 	char** argv = boost::unit_test::framework::master_test_suite().argv;
+		
+	std::string path_file = argv[1];
+	std::string path_gt = argv[2];
+// 	std::string file = "../../Test/Thermal/cold.jpg";
+	
+	boost::filesystem::path p(path_file);
+	boost::filesystem::path p_gt(path_gt);
+	try{
+		if(! boost::filesystem::exists(p) || ! boost::filesystem::exists(p_gt) ){
+			std::cout << "need a valid path toward the images" << std::endl;
+			return 0;
+		}
+		if(! boost::filesystem::is_directory(p) || ! boost::filesystem::is_directory(p_gt) ){
+			std::cout << "need a valid path folder toward the images" << std::endl;
+			return 0;
+		}
+		
+		if(boost::filesystem::is_directory(p)){
+			
+			std::vector<boost::filesystem::path> v;
+			//Get all files and sort them
+			std::copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), std::back_inserter(v));
+			std::sort(v.begin(), v.end());
+			
+// 			int i = 0;
+			for (std::vector<boost::filesystem::path>::const_iterator it (v.begin()); it != v.end(); it = ++it)
+			{
+				boost::filesystem::path fn = *it;
+				
+				std::string name = fn.filename().string();
+				std::string model = path_gt + name;
+				
+				std::cout << "Process " << fn.string() << " with model " << model << std::endl;
+				
+				process(fn.string(), model);
+				
+// 				if(i == 3){
+// 					return 0;
+// 				}
+// 				++i;
+			}
+		}
+	}
+	catch (const boost::filesystem::filesystem_error& ex)
+	{
+		std::cout << ex.what() << '\n';
+	}
+	
+	
+	
 
 }

@@ -23,13 +23,14 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	++i ;
 	
-	cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat slam_in = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat slam = slam_in > 250;
 // 	
 // 	cv::imshow("input", slam);
 // 	cv::waitKey(0);
 	
-	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
-	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
+// 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY);
+// 	cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
 	
 	std::cout << "/************ FUZZY OPENING*************/ \n";
 	AASS::RSI::FuzzyOpening fuzzy_slam;
@@ -46,7 +47,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
-	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 2);
+	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 5);
 	
 	cv::imshow("REDUCED", out_tmp_slam);
 	std::cout << "CLICK now" << std::endl;
