@@ -11,6 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
+#include <string>
+#include <sstream>
 
 #include <boost/filesystem.hpp>
 #include <boost/iterator/filter_iterator.hpp>
@@ -20,6 +22,13 @@
 #include "FuzzyOpening.hpp"
 #include "Kmean.hpp"
 #include "ZoneReducer.hpp"
+
+
+double precision_sum = 0;
+double recall_sum = 0;
+int file_nb = 0;
+
+
 
 inline bool exists_test3 (const std::string& name) {
   struct stat buffer;   
@@ -77,6 +86,34 @@ void exportResultsGnuplot(const std::string& file, const results& Regions, doubl
 		myfile.close();
 	}
 	else std::cout << "Unable to open file";
+	
+	int name_int = std::stoi(p.filename().stem().string());
+	double name_d = (double) name_int;
+	name_d = name_d + 0.5;
+	std::ostringstream strs;
+	strs << name_d;
+	std::string name2 = strs.str();
+	
+	std::string result_fileh = "maorishistogram.dat";
+	std::ofstream myfileh;
+	if(!exists_test3(result_fileh)){
+		myfileh.open (result_fileh);
+		myfileh << "place precision place_recall recall time labels size\n";
+	}
+	else{
+		myfileh.open (result_fileh, std::ios::out | std::ios::app);
+	}
+	
+	if (myfileh.is_open())
+	{
+		myfileh << name << " " << Regions.precision << " " << name2 << " " << Regions.recall << " " << Regions.time << " " << max << " " << proper_size << "\n";
+		myfileh.close();
+	}
+	else std::cout << "Unable to open file";
+	
+	
+	
+	
 }
 
 
@@ -547,6 +584,10 @@ void process(const std::string& file, const std::string& full_path_GT){
 			
 	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
 	
+	precision_sum += Regions.precision;
+	recall_sum += Regions.recall;
+	++file_nb;
+	
 	exportResultsGnuplot(file,Regions, max, proper_size);
 }
 
@@ -573,6 +614,8 @@ int main(int argc, char** argv){
 		}
 		
 		if(boost::filesystem::is_directory(p)){
+			
+			
 			
 			std::vector<boost::filesystem::path> v;
 			//Get all files and sort them
@@ -603,7 +646,23 @@ int main(int argc, char** argv){
 		std::cout << ex.what() << '\n';
 	}
 	
+	//add precision mean and recal + nb of file
+	std::string result_file = "maoris.dat";
+	std::ofstream myfile;
+	if(!exists_test3(result_file)){
+		myfile.open (result_file);
+		myfile << "precision recall time labels size\n";
+	}
+	else{
+		myfile.open (result_file, std::ios::out | std::ios::app);
+	}
 	
-	
+	if (myfile.is_open())
+	{
+		myfile << "\n# precision_sum recall_sum file_nb mean_precision mean_recall \n";
+		myfile << precision_sum << " " << recall_sum << " " << file_nb << " " << precision_sum / file_nb << " " << recall_sum / file_nb << "\n";
+		myfile.close();
+	}
+	else std::cout << "Unable to open file";
 
 }
