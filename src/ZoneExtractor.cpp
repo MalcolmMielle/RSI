@@ -62,96 +62,106 @@ void AASS::RSI::ZoneExtractor::makeZones(cv::Mat& input)
 			++step;
 			
 			//If the pixel is not a wall
+			if(_values_to_ignore.count(p[col]) == 0 ){
 
-			std::vector<size_t> zone_index;
-			std::vector<size_t> zone_edges;
-			
-			isolatedOrNot(p[col], in, zones_star, row, col, zone_index, zone_edges);
-			
-			
-			//New zone since the pixel is connected to no  already seen + same value pixel
-			if(zone_index.size() == 0){
-// 				std::cout << "New Zone" << std::endl;
-				Zone new_zone(input.size());
-				new_zone.setValue(p[col]);
-				new_zone.push_back(cv::Point2i(row, col));
-				_zones.push_back(new_zone);
-				p_zone_star[col] = (int)_zones.size() - 1;					
-			}
-			//If the pixel is part of (an) already seen zone(s)
-			else{
-// 				std::cout << " NOT new Zone" << std::endl;
-				_zones[ zone_index[0] ].push_back(cv::Point2i(row, col));
-				p_zone_star[col] = zone_index [0];
+				std::vector<unsigned int> zone_index;
+				std::vector<unsigned int> zone_edges;
 				
-				if(_zones[ zone_index[0] ].getValue() != p[col]){
-					throw std::runtime_error("Different value between the place and the zone it's added to");
+				isolatedOrNot(p[col], in, zones_star, row, col, zone_index, zone_edges);
+				
+				
+				//New zone since the pixel is connected to no  already seen + same value pixel
+				if(zone_index.size() == 0){
+	// 				std::cout << "New Zone" << std::endl;
+					Zone new_zone(input.size());
+					new_zone.setValue(p[col]);
+					new_zone.push_back(cv::Point2i(row, col));
+					_zones.push_back(new_zone);
+					p_zone_star[col] = (int)_zones.size() - 1;					
 				}
-				
-				//If more than one zone push the value of other zones to _index_of_zones_to_fuse_after to fuse them later
-				if(zone_index.size() > 1){
-					bool flag_exist = false;
-					for(size_t i = 1 ; i < zone_index.size() ; ++i){
-						
-						//Sort them by index value
-						size_t min = zone_index[0];
-						size_t max = zone_index[i];
-						if(min > zone_index[i]){
-							min = zone_index[i];
-							max = zone_index[0];
-						}
-						
-						//Make sure the pair does not already exist
-						for(size_t j = 0 ; j < _index_of_zones_to_fuse_after.size() ; ++j){
-							if( (min == _index_of_zones_to_fuse_after[j].first &&\
-								max == _index_of_zones_to_fuse_after[j].second) ){
-								flag_exist = true;
+				//If the pixel is part of (an) already seen zone(s)
+				else{
+	// 				std::cout << " NOT new Zone" << std::endl;
+					_zones[ zone_index[0] ].push_back(cv::Point2i(row, col));
+					p_zone_star[col] = zone_index [0];
+					
+					if(_zones[ zone_index[0] ].getValue() != p[col]){
+						throw std::runtime_error("Different value between the place and the zone it's added to");
+					}
+					
+					//If more than one zone push the value of other zones to _index_of_zones_to_fuse_after to fuse them later
+					if(zone_index.size() > 1){
+						bool flag_exist = false;
+						for(size_t i = 1 ; i < zone_index.size() ; ++i){
+							
+							//Sort them by index value
+							size_t min = std::min(zone_index[0], zone_index[i]);
+							size_t max = std::max(zone_index[0], zone_index[i]);
+// 							if(min > zone_index[i]){
+// 								min = zone_index[i];
+// 								max = zone_index[0];
+// 							}
+							
+							//Make sure the pair does not already exist
+// 							for(size_t j = 0 ; j < _index_of_zones_to_fuse_after.size() ; ++j){
+// 								if( (min == _index_of_zones_to_fuse_after[j].first &&\
+// 									max == _index_of_zones_to_fuse_after[j].second) ){
+// 									flag_exist = true;
+// 								}
+// 							}
+							if(_index_of_zones_to_fuse_after_set.count(std::pair<size_t, size_t>(min, max)) == 0){
+// 							if(flag_exist == false){
+								_index_of_zones_to_fuse_after.push_back(std::pair<size_t, size_t>(min, max) );
+								_index_of_zones_to_fuse_after_set.insert(std::pair<size_t, size_t>(min, max) );
 							}
 						}
-						if(flag_exist == false){
-							_index_of_zones_to_fuse_after.push_back(std::pair<size_t, size_t>(min, max) );
+						
+					}
+				}
+				
+				
+	// 			std::cout << "Zone edge " << zone_edges.size() << std::endl;
+				//Adding edges if needs be done
+				if(zone_edges.size() > 0){
+					
+	// 				std::cout << "Adding edges " << _index_of_edges.size() << std::endl;
+					bool flag_exist = false;
+					for(size_t i = 0 ; i < zone_edges.size() ; ++i){
+						
+						//Sort them by index value
+						
+						unsigned int min = std::min( (unsigned int) p_zone_star[col], zone_edges[i]);
+						unsigned int max = std::max( (unsigned int) p_zone_star[col], zone_edges[i]);
+						
+// 						size_t min = p_zone_star[col];
+// 						size_t max = zone_edges[i];
+// 						if(min > zone_edges[i]){
+// 							min = zone_edges[i];
+// 							max = p_zone_star[col];
+// 						}
+// 						if(min == max){
+// 							throw std::runtime_error("linking zone to itself !");
+// 						}
+						
+						//Make sure the pair does not already exist
+// 						for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
+// 							if( (min == _index_of_edges[j].first &&\
+// 								max == _index_of_edges[j].second) ){
+// 	// 							std::cout << "EDGE ALREADY EXIST ??" << std::endl;
+// 								flag_exist = true;
+// 							}
+// 						}
+						if(_index_of_edges_set.count(std::pair<size_t, size_t>(min, max)) == 0){
+							_index_of_edges_set.insert(std::pair<size_t, size_t>(min, max) );
+							_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
 						}
 					}
 					
 				}
-			}
-			
-			
-// 			std::cout << "Zone edge " << zone_edges.size() << std::endl;
-			//Adding edges if needs be done
-			if(zone_edges.size() > 0){
-				
-// 				std::cout << "Adding edges " << _index_of_edges.size() << std::endl;
-				bool flag_exist = false;
-				for(size_t i = 0 ; i < zone_edges.size() ; ++i){
-					
-					//Sort them by index value
-					size_t min = p_zone_star[col];
-					size_t max = zone_edges[i];
-					if(min > zone_edges[i]){
-						min = zone_edges[i];
-						max = p_zone_star[col];
-					}
-					if(min == max){
-						throw std::runtime_error("linking zone to itself !");
-					}
-					
-					//Make sure the pair does not already exist
-					for(size_t j = 0 ; j < _index_of_edges.size() ; ++j){
-						if( (min == _index_of_edges[j].first &&\
-							max == _index_of_edges[j].second) ){
-// 							std::cout << "EDGE ALREADY EXIST ??" << std::endl;
-							flag_exist = true;
-						}
-					}
-					if(flag_exist == false){
-						_index_of_edges.push_back(std::pair<size_t, size_t>(min, max) );
-					}
-				}
-				
-			}
 			
 // 			std::cout << "end of loop " << std::endl;
+			
+			}
 			
 		}
 		
@@ -161,7 +171,7 @@ void AASS::RSI::ZoneExtractor::makeZones(cv::Mat& input)
 	
 }
 
-void AASS::RSI::ZoneExtractor::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector<size_t>& zone_index, std::vector< size_t >& zone_edges)
+void AASS::RSI::ZoneExtractor::isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< unsigned int >& zone_index, std::vector< unsigned int >& zone_edges)
 {
 
 	if(zones_star.size() != input.size()){

@@ -55,6 +55,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "CLICKed" << std::endl;
 	
 	AASS::RSI::ZoneExtractor zone_maker;
+	zone_maker.addValueToIgnore(0);
 	std::cout << "WHATERSHED SLAM" << std::endl;
 	zone_maker.extract(out_tmp_slam);
 	
@@ -65,7 +66,7 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam){
 	std::cout << "/*********** MAKING AND TRIMMING THE GRAPH ***************/\n";
 	graph_slam = zone_maker.getGraph();
 	graph_slam.setThreshold(0.25);
-	graph_slam.removeVertexValue(0);
+// 	graph_slam.removeVertexValue(0);
 
 	int size_to_remove2 = 10;
 	graph_slam.removeVertexUnderSize(size_to_remove2, true);

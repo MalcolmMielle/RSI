@@ -25,18 +25,24 @@ namespace AASS{
 			typedef typename GraphZone::EdgeIterator EdgeZoneIterator;	
 			
 			std::vector < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after;
+			std::set < std::pair < size_t, size_t > > _index_of_zones_to_fuse_after_set;
 			std::map<size_t, size_t> _mapping;
 			std::map<size_t, int> _mapping_of_node_alive;
 			std::deque< Zone > _zones;
 			//int as edge because we don't care aboput edge 
+			std::set < std::pair < size_t, size_t > > _index_of_edges_set;
 			std::vector < std::pair < size_t, size_t > > _index_of_edges;
 			GraphZone _graph;
+			
+			std::set<unsigned int> _values_to_ignore;
 			
 		public:
 			ZoneExtractor(){
 				//Cheat for obstacle being 0
 // 				Zone z; _zones.push_back(z);
 			}
+			
+			void addValueToIgnore(unsigned int i){_values_to_ignore.insert(i);}
 			
 			size_t size(){return _zones.size();}
 			GraphZone& getGraph(){return _graph;}
@@ -146,7 +152,7 @@ namespace AASS{
 			* @param zone_index std::vector containing the index of all connected pixel from the same type of zone (zone with the same value)
 			* @param zone_edges std::vector containing the index of all connected pixel from a different type of zone (zone with the same value)
 			*/
-			void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< size_t >& zone_index, std::vector< size_t >& zone_edges);
+			void isolatedOrNot(int value, cv::Mat& input, cv::Mat& zones_star, int row, int col, std::vector< unsigned int >& zone_index, std::vector< unsigned int >& zone_edges);
 			
 			void createGraph();
 			

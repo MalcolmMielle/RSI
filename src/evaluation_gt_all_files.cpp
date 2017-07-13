@@ -455,6 +455,7 @@ void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 	cv::Mat out_tmp_slam;
 	AASS::RSI::ZoneExtractor zone_maker;
+	zone_maker.addValueToIgnore(0);
 	
 	begin_process = getTime();
 	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 5);
@@ -471,7 +472,7 @@ void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
 	begin_process = getTime();
 	graph_slam = zone_maker.getGraph();
 	graph_slam.setThreshold(0.25);
-	graph_slam.removeVertexValue(0);	
+// 	graph_slam.removeVertexValue(0);	
 	graph_slam.removeVertexUnderSize(size_to_remove2, true);
 
 	graph_slam.useCvMat(true);
