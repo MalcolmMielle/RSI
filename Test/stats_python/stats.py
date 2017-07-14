@@ -25,7 +25,7 @@ def sd(variance):
 precision = list()
 recall = list()
 
-with open('maorisRobotMap.dat') as f:
+with open('sketchezlec.dat') as f:
     for line in f:
         data = line.split()
         print(data)

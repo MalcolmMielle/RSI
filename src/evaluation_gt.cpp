@@ -192,6 +192,7 @@ cv::Mat segment_Ground_Truth(cv::Mat GroundTruth_BW){
 	return drawing;
 }
 
+
 std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmentation_in, double& pixel_precision, double & pixel_recall, std::vector < std::vector<float> >& Precisions, std::vector < std::vector<float> >& Recalls, std::vector<double>& Times){
 			
 	std::map<int,int> segmented2GT_tags;
@@ -236,10 +237,10 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 		}
 	}
 	
-	std::vector<float> precisions_inside, recalls_inside;			
+	std::vector<float> recalls_inside;			
 	double cum_precision=0, cum_total=0, cum_recall=0;
 
-	std::cout << "Regions in GT: "<< std::endl;
+	std::cout << "Regions in GT or recall: "<< std::endl;
 			
 	
 	for( tag2tagMapper::iterator it = gt_tag2mapper.begin(); it!= gt_tag2mapper.end(); it++ ){
@@ -277,12 +278,13 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 		
 		segmented2GT_tags[gt_tag_max] = it->first;
 				std::cout << "   max is " << max_intersection << " that represents " << 100*max_intersection/total_points   << std::endl;
-		precisions_inside.push_back(100*max_intersection/total_points);
-		cum_precision += max_intersection;
+		recalls_inside.push_back(100*max_intersection/total_points);
+		cum_recall += max_intersection;
 		cum_total += total_points;
 	}	
-	pixel_precision = cum_precision/cum_total;
+	pixel_recall = cum_precision/cum_total;
 			
+	std::vector<float> precisions_inside;	
 	cum_total=0;
 			std::cout << "Regions in DuDe: "<< std::endl;
 	for( tag2tagMapper::iterator it = DuDe_tag2mapper.begin(); it!= DuDe_tag2mapper.end(); it++ ){
@@ -308,13 +310,13 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 
 		int total_points = dude_points[it->first].size();
 
-		recalls_inside.push_back(100*max_intersection/total_points);
+		precisions_inside.push_back(100*max_intersection/total_points);
 		cum_recall += max_intersection;
 		cum_total += total_points;
 // 		cv::imshow("mat recall", DuDe_segmentation_draw);
 // 		cv::waitKey(0);
 	}			
-	pixel_recall=cum_recall/cum_total;
+	pixel_precision=cum_precision/cum_total;
 	
 	
 
@@ -322,6 +324,7 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 	Recalls.push_back   (recalls_inside);
 	return(segmented2GT_tags);
 }
+
 
 
 
@@ -492,41 +495,42 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	cv::waitKey(0);
 	
 	double time = 0;
-	makeGraph(slam, graph_slam, time);
+	//makeGraph(slam, graph_slam, time);
 	
-	std::cout << "Total time: " << time << std::endl;
-			
-	/********** PCA of all zones in Graph and removing the ripples **********/
-	graph_slam.update();
+//	std::cout << "Total time: " << time << std::endl;
+//			
+//	/********** PCA of all zones in Graph and removing the ripples **********/
+//	graph_slam.update();
 
-	
-	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
-    graph_slam.drawEvaluation(graphmat);
-	
-// 	cv::Mat partial = cv::Mat::zeros(slam1.size(), CV_8U);
-//     graph_slam.drawPartial(partial);
-	
-	cv::Mat img_hist_equalized;
-	cv::equalizeHist(graphmat, img_hist_equalized);
-// 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
-// 	cv::imshow("GRAPH", img_hist_equalized);
-	
-    cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
-    graph_slam.draw(graphmat_vis);
-// 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
-// 	cv::imshow("GRAPH Visible", graphmat_vis);
-	
-	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
-    
-	
-	//Reading the GT
+//	
+//	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+//    cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
+//    graph_slam.drawEvaluation(graphmat);
+//	
+//// 	cv::Mat partial = cv::Mat::zeros(slam1.size(), CV_8U);
+////     graph_slam.drawPartial(partial);
+//	
+//	cv::Mat img_hist_equalized;
+//	cv::equalizeHist(graphmat, img_hist_equalized);
+//// 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
+//// 	cv::imshow("GRAPH", img_hist_equalized);
+//	
+//    cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
+//    graph_slam.draw(graphmat_vis);
+//// 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
+//// 	cv::imshow("GRAPH Visible", graphmat_vis);
+//	
+//	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
+//    
+//	
+//	//Reading the GT
 	
 	cv::Mat image_GT = cv::imread(full_path_GT,0);
 // 	cv::imshow("GT raw", image_GT);
 // 	cv::waitKey(0);
 	
 	cv::Mat GT_segmentation = segment_Ground_Truth(image_GT);
+	cv::Mat graphmat = segment_Ground_Truth(slam);
 	
 // 	cv::Mat img_hist_equalizedgt;
 // 	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);

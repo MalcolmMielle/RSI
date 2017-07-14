@@ -273,10 +273,10 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 		}
 	}
 	
-	std::vector<float> precisions_inside, recalls_inside;			
+	std::vector<float> recalls_inside;			
 	double cum_precision=0, cum_total=0, cum_recall=0;
 
-	std::cout << "Regions in GT: "<< std::endl;
+	std::cout << "Regions in GT or recall: "<< std::endl;
 			
 	
 	for( tag2tagMapper::iterator it = gt_tag2mapper.begin(); it!= gt_tag2mapper.end(); it++ ){
@@ -314,12 +314,13 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 		
 		segmented2GT_tags[gt_tag_max] = it->first;
 				std::cout << "   max is " << max_intersection << " that represents " << 100*max_intersection/total_points   << std::endl;
-		precisions_inside.push_back(100*max_intersection/total_points);
-		cum_precision += max_intersection;
+		recalls_inside.push_back(100*max_intersection/total_points);
+		cum_recall += max_intersection;
 		cum_total += total_points;
 	}	
-	pixel_precision = cum_precision/cum_total;
+	pixel_recall = cum_precision/cum_total;
 			
+	std::vector<float> precisions_inside;	
 	cum_total=0;
 			std::cout << "Regions in DuDe: "<< std::endl;
 	for( tag2tagMapper::iterator it = DuDe_tag2mapper.begin(); it!= DuDe_tag2mapper.end(); it++ ){
@@ -345,13 +346,13 @@ std::map<int,int> compare_images(cv::Mat GT_segmentation_in, cv::Mat DuDe_segmen
 
 		int total_points = dude_points[it->first].size();
 
-		recalls_inside.push_back(100*max_intersection/total_points);
+		precisions_inside.push_back(100*max_intersection/total_points);
 		cum_recall += max_intersection;
 		cum_total += total_points;
 // 		cv::imshow("mat recall", DuDe_segmentation_draw);
 // 		cv::waitKey(0);
 	}			
-	pixel_recall=cum_recall/cum_total;
+	pixel_precision=cum_precision/cum_total;
 	
 	
 
