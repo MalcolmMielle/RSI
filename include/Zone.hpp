@@ -44,6 +44,8 @@ namespace AASS{
 			bool _use_cvMat;
 			
 			size_t _value;
+			
+			//Change it for a set for constant time find !
 			std::deque <cv::Point2i> _zone;
 			///@brief sum of all value of x and y of all point in zone. For fast update and get of centroid
 			cv::Point2i _sum_of_x_and_y;
@@ -135,6 +137,21 @@ namespace AASS{
 			void pop_back(){removePoint(_zone.size()-1); _zone.pop_back();}
 			void pop_front(){removePoint(0); _zone.pop_front();}
 			
+			///@breif search and remove the point p(row, col)
+			void removePoint(const cv::Point2i& p){
+				removePoint(p.x, p.y);
+			}
+			
+			void removePoint(int row, int col){
+				auto position = std::find(_zone.begin(), _zone.end(), cv::Point2i(row, col) );
+				if(position != _zone.end()){
+					_zone.erase(position);
+					if(_use_cvMat == true){
+						_zone_mat.at<uchar>(row, col) = 0;
+					}
+				}
+			}
+			
 			bool isEmpty(){return (0 == _zone.size());}
 			int size(){return _zone.size();}
 			void setImageSize(const cv::Size& in){_img_size = in;}
@@ -180,11 +197,7 @@ namespace AASS{
 			void fuse(const Zone& input){
 // 				assert(input.getValue() < _value);
 				for(size_t i = 0 ; i < input.size() ; ++i){
-					
 					this->push_back(input.getZone()[i]);
-					if(_use_cvMat){
-						_zone_mat.at<uchar>(input.getZone()[i].x, input.getZone()[i].y) = 255;
-					}
 				}
 // 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 // 				draw(graphmat2, cv::Scalar(100));
@@ -554,11 +567,17 @@ namespace AASS{
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x + p.x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y + p.y;
 				//TODO drawing function of new point
+				if(_use_cvMat){
+					_zone_mat.at<uchar>(p.x, p.y) = 255;
+				}
 			}
 			void removePoint(int i){
 				_sum_of_x_and_y.x = _sum_of_x_and_y.x - _zone[i].x;
 				_sum_of_x_and_y.y = _sum_of_x_and_y.y - _zone[i].y;
 				//TODO un-drawing function of new point
+				if(_use_cvMat){
+					_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 0;
+				}
 			}
 			
 			void getOrientation(std::vector<cv::Point> &pts){

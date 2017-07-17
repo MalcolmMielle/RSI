@@ -22,6 +22,7 @@
 #include "FuzzyOpening.hpp"
 #include "Kmean.hpp"
 #include "ZoneReducer.hpp"
+#include "Segmentor.hpp"
 
 
 double precision_sum = 0;
@@ -435,75 +436,75 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 
 
 
-void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
-		
-	double begin_process, end_process, decompose_time;
-	std::cout << "/************ FUZZY OPENING*************/ \n";
-	AASS::RSI::FuzzyOpening fuzzy_slam;
-	fuzzy_slam.fast(false);
-	
-	cv::Mat out_slam;
-	
-	begin_process = getTime();	
-	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
-	end_process = getTime();	decompose_time = end_process - begin_process;
-	time = decompose_time;
-	
-	std::cout << "Fuzzy opening time: " << time << std::endl;
-	
-	out_slam.convertTo(out_slam, CV_8U);
-		
-	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
-	cv::Mat out_tmp_slam;
-	AASS::RSI::ZoneExtractor zone_maker;
-	zone_maker.addValueToIgnore(0);
-	
-	begin_process = getTime();
-	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 5);
-	zone_maker.extract(out_tmp_slam);
-	end_process = getTime();	decompose_time = end_process - begin_process;
-	time = time + decompose_time;
-	
-	std::cout << "Zone reducing: " << decompose_time << std::endl;
-		
-	std::cout << "/*********** MAKING AND TRIMMING THE GRAPH ***************/\n";
-	
-	int size_to_remove2 = 10;
-	
-	begin_process = getTime();
-	graph_slam = zone_maker.getGraph();
-	graph_slam.setThreshold(0.25);
-// 	graph_slam.removeVertexValue(0);	
-	graph_slam.removeVertexUnderSize(size_to_remove2, true);
-
-	graph_slam.useCvMat(true);
-// 	graph_slam.updatePCA();
-	graph_slam.updateContours();
-	graph_slam.removeRiplesv3();
-	
-	end_process = getTime();	decompose_time = end_process - begin_process;
-	time = time + decompose_time;
-	std::cout << "Ripples: " << decompose_time << std::endl;
-	
-	begin_process = getTime();
-// 	graph_slam.updatePCA();
-	graph_slam.updateContours();
-	
-	//Watershed Algorithm
-	graph_slam.watershed();
-	
-	int size_to_remove = 100;
-	graph_slam.removeVertexUnderSize(size_to_remove, true);
-	graph_slam.removeLonelyVertices();
-	end_process = getTime();	decompose_time = end_process - begin_process;
-	time = time + decompose_time;
-	
-	std::cout << "watershed: " << decompose_time << std::endl;
-	
-	if(graph_slam.lonelyVertices())
-		throw std::runtime_error("Fuck you lonelyness");	
-	
-}
+// void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
+// 		
+// 	double begin_process, end_process, decompose_time;
+// 	std::cout << "/************ FUZZY OPENING*************/ \n";
+// 	AASS::RSI::FuzzyOpening fuzzy_slam;
+// 	fuzzy_slam.fast(false);
+// 	
+// 	cv::Mat out_slam;
+// 	
+// 	begin_process = getTime();	
+// 	fuzzy_slam.fuzzyOpening(slam, out_slam, 500);
+// 	end_process = getTime();	decompose_time = end_process - begin_process;
+// 	time = decompose_time;
+// 	
+// 	std::cout << "Fuzzy opening time: " << time << std::endl;
+// 	
+// 	out_slam.convertTo(out_slam, CV_8U);
+// 		
+// 	std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
+// 	cv::Mat out_tmp_slam;
+// 	AASS::RSI::ZoneExtractor zone_maker;
+// 	zone_maker.addValueToIgnore(0);
+// 	
+// 	begin_process = getTime();
+// 	AASS::RSI::reduceZone(out_slam, out_tmp_slam, 5);
+// 	zone_maker.extract(out_tmp_slam);
+// 	end_process = getTime();	decompose_time = end_process - begin_process;
+// 	time = time + decompose_time;
+// 	
+// 	std::cout << "Zone reducing: " << decompose_time << std::endl;
+// 		
+// 	std::cout << "/*********** MAKING AND TRIMMING THE GRAPH ***************/\n";
+// 	
+// 	int size_to_remove2 = 10;
+// 	
+// 	begin_process = getTime();
+// 	graph_slam = zone_maker.getGraph();
+// 	graph_slam.setThreshold(0.25);
+// // 	graph_slam.removeVertexValue(0);	
+// 	graph_slam.removeVertexUnderSize(size_to_remove2, true);
+// 
+// 	graph_slam.useCvMat(true);
+// // 	graph_slam.updatePCA();
+// 	graph_slam.updateContours();
+// 	graph_slam.removeRiplesv3();
+// 	
+// 	end_process = getTime();	decompose_time = end_process - begin_process;
+// 	time = time + decompose_time;
+// 	std::cout << "Ripples: " << decompose_time << std::endl;
+// 	
+// 	begin_process = getTime();
+// // 	graph_slam.updatePCA();
+// 	graph_slam.updateContours();
+// 	
+// 	//Watershed Algorithm
+// 	graph_slam.watershed();
+// 	
+// 	int size_to_remove = 100;
+// 	graph_slam.removeVertexUnderSize(size_to_remove, true);
+// 	graph_slam.removeLonelyVertices();
+// 	end_process = getTime();	decompose_time = end_process - begin_process;
+// 	time = time + decompose_time;
+// 	
+// 	std::cout << "watershed: " << decompose_time << std::endl;
+// 	
+// 	if(graph_slam.lonelyVertices())
+// 		throw std::runtime_error("Fuck you lonelyness");	
+// 	
+// }
 
 
 void process(const std::string& file, const std::string& full_path_GT){
@@ -521,8 +522,11 @@ void process(const std::string& file, const std::string& full_path_GT){
 // 	cv::imshow("map in", slam);
 // 	cv::waitKey(0);
 	
+	
 	double time = 0;
-	makeGraph(slam, graph_slam, time);
+// 	makeGraph(slam, graph_slam, time);
+	AASS::RSI::Segmentor segmenteur;
+	time = segmenteur.segmentImage(slam, graph_slam);
 	
 // 	std::cout << "Total time: " << time << std::endl;
 			
