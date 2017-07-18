@@ -3,28 +3,20 @@
 double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& graph_src)
 {
 						
-	//Find contours
-// 	std::vector<std::vector<cv::Point> > contours;
-// 	std::vector<cv::Vec4i> hierarchy;
-// 	cv::findContours( src, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
-// 
-// 	//Draw the outer contours
-// 	cv::Mat outer = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
-// 	// iterate through all contours, filling holes
-// 	for(int i = 0 ; i < contours.size() ; ++i)
-// 	{
-// // 					if(hierarchy[i][3] != -1){
-// 			cv::drawContours( outer, contours, i, 255 , CV_FILLED, 8, hierarchy );
-// // 					}
-// 	}
-// 	
-// 	cv::Mat minus = src - outer;
-// 	cv::Mat minus2 = outer - src;
-// 	cv::imshow("black", minus);
-// 	cv::imshow("alos black", minus2);
-// 	cv::waitKey(0);
-	
-	
+//Find contours
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours( src, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+
+	//Draw the outer contours
+	cv::Mat outer = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
+	// iterate through all contours, filling holes
+	for(int i = 0 ; i < contours.size() ; ++i)
+	{
+// 					if(hierarchy[i][3] != -1){
+			cv::drawContours( outer, contours, i, 255 , CV_FILLED, 8, hierarchy );
+// 					}
+	}
 // 	
 // 	cv::imshow("input", src);
 // 	cv::waitKey(0);
@@ -40,7 +32,7 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	cv::Mat out_slam;
 	
 	begin_process = getTime();	
-	fuzzy_slam.fuzzyOpening(src, out_slam, 500);
+	fuzzy_slam.fuzzyOpening(outer, out_slam, 500);
 	end_process = getTime();	decompose_time = end_process - begin_process;
 	double time = decompose_time;
 	
@@ -74,14 +66,6 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	graph_src.useCvMat(true);
 // 	graph_src.updatePCA();
 	graph_src.updateContours();
-	
-	cv::Mat graphmat = cv::Mat::zeros(src.size(), CV_8U);
-    graph_src.drawSimple(graphmat);
-	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
-	cv::imshow("GRAPH", graphmat);
-	cv::waitKey(0);
-	
-	std::cout << "Remove the ripples" << std::endl;
 	graph_src.removeRiplesv3();
 	
 	end_process = getTime();	decompose_time = end_process - begin_process;
@@ -91,13 +75,6 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	begin_process = getTime();
 // 	graph_src.updatePCA();
 	graph_src.updateContours();
-	
-	cv::Mat graphmat2 = cv::Mat::zeros(src.size(), CV_8U);
-    graph_src.draw(graphmat2);
-	cv::resize(graphmat2, graphmat2, cv::Size(graphmat2.cols * 2, graphmat2.rows * 2));
-	cv::imshow("Ripples", graphmat2);
-	cv::waitKey(0);
-	
 	
 	//Watershed Algorithm
 	graph_src.watershed();
