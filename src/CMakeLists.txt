@@ -3,7 +3,7 @@
 #			)
 
 add_library(RSILIB
-			FuzzyOpening.cpp ZoneExtractor.cpp Kmean.cpp GraphZone.cpp ZoneCompared.cpp Zone.cpp GraphZoneLight.cpp ZoneComparedLight.cpp ZoneLight.cpp
+			FuzzyOpening.cpp ZoneExtractor.cpp Kmean.cpp GraphZone.cpp ZoneCompared.cpp Zone.cpp GraphZoneLight.cpp ZoneComparedLight.cpp ZoneLight.cpp Segmentor.cpp
 			)
 
 

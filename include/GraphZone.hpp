@@ -487,7 +487,7 @@ namespace AASS{
 						out_i != out_end; out_i = ++out_i) {
 						EdgeZone e_second = *out_i;
 						VertexZone targ = boost::target(e_second, (*this));
-						(*this)[e_second].setOldScore(v, targ, -2);
+// 						(*this)[e_second].setOldScore(v, targ, -2);
 						(*this)[e_second].min_toward = -2;
 					}
 				}

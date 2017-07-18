@@ -10,7 +10,8 @@ namespace AASS{
 	namespace RSI{
 		
 		inline bool sortFunction(std::pair < size_t, size_t > i, std::pair < size_t, size_t > j){return (i.second > j.second); }
-		inline bool sortZone(ZoneLight i, ZoneLight j){return (i.size() > j.size  ()); }
+		
+// 		inline bool sortZone(ZoneLight i, ZoneLight j){return (i.size() > j.size  ()); }
 
 		//TODO convert Mat to Eigen !
 

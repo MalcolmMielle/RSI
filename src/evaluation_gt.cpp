@@ -518,7 +518,13 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::Mat img_hist_equalized;
 	cv::equalizeHist(graphmat, img_hist_equalized);
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
-// 	cv::imshow("GRAPH", img_hist_equalized);
+	cv::imshow("GRAPH", img_hist_equalized);
+	
+	cv::Mat minus = graphmat - slam;
+	cv::Mat minus2 = slam - graphmat;
+	cv::imshow("black", minus);
+	cv::imshow("alos black", minus2);
+	cv::waitKey(0);
 	
    cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
    graph_slam.draw(graphmat_vis);

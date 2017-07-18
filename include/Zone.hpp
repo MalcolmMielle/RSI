@@ -7,22 +7,22 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "ZoneLight.hpp"
+// #include "ZoneLight.hpp"
 
 namespace AASS{
 	
 	namespace RSI{
 		
-// 		class ZoneHasMoreThanOneContour : public std::runtime_error {
-// 		public:
-// 			ZoneHasMoreThanOneContour(const std::string& message) 
-// 				: std::runtime_error(message) { };
-// 		};
-// 		class ZoneHasNoContour : public std::runtime_error {
-// 		public:
-// 			ZoneHasNoContour(const std::string& message) 
-// 				: std::runtime_error(message) { };
-// 		};
+		class ZoneHasMoreThanOneContour : public std::runtime_error {
+		public:
+			ZoneHasMoreThanOneContour(const std::string& message) 
+				: std::runtime_error(message) { };
+		};
+		class ZoneHasNoContour : public std::runtime_error {
+		public:
+			ZoneHasNoContour(const std::string& message) 
+				: std::runtime_error(message) { };
+		};
 		
 		class ZoneCompared;
 		class ZoneComparedInterface;
@@ -76,8 +76,8 @@ namespace AASS{
 			};
 			
 			
-			Zone(const ZoneLight& zonel) : _use_cvMat(false), _flag_PCA(false), _uniqueness_calculated(false), _value(zonel.getValue()), _zone(zonel.getZone()), _sum_of_x_and_y(zonel.getSumOfXAndY()), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
-			};
+// 			Zone(const ZoneLight& zonel) : _use_cvMat(false), _flag_PCA(false), _uniqueness_calculated(false), _value(zonel.getValue()), _zone(zonel.getZone()), _sum_of_x_and_y(zonel.getSumOfXAndY()), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1){
+// 			};
 			
 			void print() const {
 				std::cout << "Size classification " <<  _size_classification << " " ;
@@ -91,6 +91,7 @@ namespace AASS{
 					for(int i = 0; i < _zone.size() ; ++i){
 						_zone_mat.at<uchar>(_zone[i].x, _zone[i].y) = 255;
 					}
+					updateContour();
 					
 				}
 				if(_use_cvMat == true && should_use == false){
@@ -100,6 +101,8 @@ namespace AASS{
 				_use_cvMat = should_use;
 				
 			}
+			
+			bool useCvMat() const {return _use_cvMat;}
 			
 			void setSizeClassification(double size){_size_classification = size;}
 			double getSizeClassification() const {if(_size_classification == -1 ){throw std::runtime_error("Classificatio size not set");} return _size_classification;}
@@ -199,6 +202,15 @@ namespace AASS{
 				for(size_t i = 0 ; i < input.size() ; ++i){
 					this->push_back(input.getZone()[i]);
 				}
+				if(_use_cvMat == true){
+					try{
+						updateContour();
+					}
+					catch(const std::runtime_error& e){
+						std::cout << "Warning: " << e.what() << std::endl;
+					}
+				}
+				
 // 				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
 // 				draw(graphmat2, cv::Scalar(100));
 // 				cv::imshow("fused", graphmat2);
@@ -347,6 +359,77 @@ namespace AASS{
 				std::cout << "Next PCA " << std::endl << std::endl;
 			}
 			
+			///@brief return the point in contact between the zones
+			std::vector<cv::Point2i> getContactPoint(const Zone& zone){
+				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
+				assert(zone.useCvMat() == true && "We need the opencv::Mat for this function. input zone");
+				
+				std::vector<cv::Point2i> contact_point;
+
+				cv::Mat copyTest;
+				zone.getZoneMat().copyTo(copyTest);
+				
+// 				cv::imshow("i",zone.getZoneMat());
+// 				cv::imshow("b",_zone_mat);
+// 				cv::Mat copy_tmp;
+// 				_zone_mat.copyTo(copy_tmp);
+				
+// 				std::vector< std::vector< cv::Point> > contours;
+// 				std::vector<cv::Vec4i> hierarchy;
+// 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+								
+				//Do for all contour and add percentage
+				// Calculate the area of each contour
+
+				
+				auto lambda = [](int x, int y, const cv::Mat& mat) -> bool{
+					
+					int xx;
+					for( xx = x - 1 ; xx < x + 2 ; ++xx ){
+						int yy;
+						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
+// 							std::cout << " x y " << xx << " " << yy << std::endl;
+							if(mat.at<uchar>(yy, xx) == 255){
+								return true;
+							}
+						}
+					}
+					return false;
+
+				};
+				
+				assert(_contours.size() > 0 && "there is no contour :S");
+// 				std::cout << "NUMBER OF CONTOUR " << _contours.size() << std::endl;
+// 				for(size_t i = 0 ; i < _contours.size() ; i++){
+// 					auto contour = _contours[i];
+					
+// 					final_size = final_size + contour.size();
+					
+					std::vector<std::pair<int, int > > seen;
+					
+// 					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+					for(auto it = _contours.begin() ; it != _contours.end() ; ++it ){
+// 						matcon.at<uchar>(it->y, it->x) = 255;
+// 						std::cout << "LAMBDAS" << std::endl;
+						bool asbeenseeen = false;
+						for(size_t i = 0 ; i < seen.size() ; ++i){
+							if(seen[i].first == it->x && seen[i].second == it->y){
+								asbeenseeen = true;
+							}
+						}
+						seen.push_back(std::pair<int, int>(it->x, it->y));
+						if(!asbeenseeen){
+							if(lambda(it->x, it->y, copyTest)){
+								contact_point.push_back(*it);
+							}
+						}
+
+					}
+
+				return contact_point;
+// 				}
+			}
+			
 			//Return the number of contact points in percent compared to size of contour. DO NOT need an update from PCA() or updateContours.
 			int contactPoint(const Zone& zone){
 				
@@ -415,47 +498,18 @@ namespace AASS{
 						}
 
 					}
-// 					cv::imshow("3", matcon);
-// 					cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size( 3, 3 ), cv::Point( -1, -1 ) );
-// 		/// Apply the specified morphology operation
-// 					cv::morphologyEx( matcon, matcon, cv::MORPH_DILATE, element);
-// 					cv::Mat diff = matcon - copyTest;
-// 					cv::Mat diff2 = copyTest - matcon;
-// 					cv::Mat fin;
-// 					matcon.copyTo(fin);
-// 					fin = fin - diff;
-// 					fin = fin - diff2;
-// 					
-// 					for(int row = 0; row < fin.rows; ++row) {
-// 						uchar* p = matcon.ptr(row);
-// 						for(int col = 0; col < fin.cols; ++col) {
-// 							if(p[col] != 0){
-// 								test_size++;
-// 							}
-// 						}
-// 					}
-// 					
-// 					
-// 					for(int row = 0; row < fin.rows; ++row) {
-// 						uchar* p = fin.ptr(row);
-// 						for(int col = 0; col < fin.cols; ++col) {
-// 							if(p[col] != 0){
-// 								++whitepix;
-// 							}
-// 						}
-// 					}
+
 				}
-// 				std::cout << "WHITEPIX " << whitepix << std::endl;
-// 				std::cout << "TESTING " << test_size << std::endl;
-// 				std::cout << "FinalSize " << final_size << std::endl;
-// 				std::cout << "PRINT FIN" << std::endl;
-// 				cv::imshow("FIIIn", fin);
 				
-// 				cv::imshow("1", diff);
-// 				cv::imshow("2", diff2);
-// 				cv::waitKey(0);
-				auto percent = whitepix * 100 / final_size;
+// 				auto contact_point = getContactPoint(zone);
+
+				auto percent = whitepix * 100 / _contours.size();
 // 				std::cout << "Percent " << percent << std::endl;
+				
+// 				cv::imshow("input",zone.getZoneMat());
+// 				cv::imshow("base",_zone_mat);
+// 				cv::waitKey(0);
+				
 // 				assert(percent < 50 && "Percentage can't be more than 50% because that means the shape is flat");
 				return percent;
 				

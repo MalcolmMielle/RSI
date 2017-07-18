@@ -126,21 +126,21 @@ void AASS::RSI::Zone::updateContour()
 	
 	if(contours.size() > 1)
 	{
-		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-		drawZone(graphmat2, cv::Scalar(255));
-		drawContour(graphmat2, cv::Scalar(255));
-// 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
-// 					if(contours[0].size() < contours[1].size()){
-// 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-// 						for (int i = 0; i < contours[0].size(); ++i)
-// 						{
-// 							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
-// 						}
-			cv::imshow("fina", graphmat2);
-// 						cv::waitKey(0);	
-// 						throw std::runtime_error("Calculating PCA with zone not in order");
-// 					}
-		cv::waitKey(0);
+// 		cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// 		drawZone(graphmat2, cv::Scalar(255));
+// 		drawContour(graphmat2, cv::Scalar(255));
+// // 					std::cout << contours[0].size() << " " << contours[1].size() << std::endl;
+// // 					if(contours[0].size() < contours[1].size()){
+// // 						cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+// // 						for (int i = 0; i < contours[0].size(); ++i)
+// // 						{
+// // 							graphmat2.at<uchar>(contours[0][i].y, contours[0][i].x) = 255;
+// // 						}
+// 			cv::imshow("fina", graphmat2);
+// // 						cv::waitKey(0);	
+// // 						throw std::runtime_error("Calculating PCA with zone not in order");
+// // 					}
+// 		cv::waitKey(0);
 		
 		throw ZoneHasMoreThanOneContour("MORE THAN ONE CONTOUR !");
 	}

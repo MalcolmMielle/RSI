@@ -768,6 +768,7 @@ void AASS::RSI::GraphZone::watershed(double threshold)
 		}
 	}
 	
+	std::cout << "Removing" << std::endl;
 	for(auto it_rem = all_to_remove_and_in_what.begin() ; it_rem != all_to_remove_and_in_what.end() ; ++it_rem){
 		for(auto it = it_rem->first.begin() ; it != it_rem->first.end() ; ++it){
 			removeVertexWhilePreservingEdges(*it, it_rem->second, false);
@@ -838,8 +839,8 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 			ed_el.min_toward = min_val;
 
 				
-			assert(ed_el.size() == (*this)[e_second].size());
-			ed_el.setOldScore(v_to_fuse_in, targ, (*this)[v].getValue());
+// 			assert(ed_el.size() == (*this)[e_second].size());
+// 			ed_el.setOldScore(v_to_fuse_in, targ, (*this)[v].getValue());
 			
 			if((*this)[e_second].canRemove() == false){
 				ed_el.makeUnbreakable();
