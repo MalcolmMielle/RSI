@@ -472,6 +472,34 @@ void makeGraph(cv::Mat& slam, AASS::RSI::GraphZone& graph_slam, double& time){
 }
 
 
+void compareAndExport(const cv::Mat& seg, const cv::Mat& GT_segmentation, double time, std::string& file){
+	assert(seg.rows == GT_segmentation.rows);
+	assert(seg.cols == GT_segmentation.cols);
+				
+	double pixel_precision, pixel_recall;
+	std::vector < std::vector<float> > Precisions, Recalls;
+	std::vector<double> Times;
+	compare_images(GT_segmentation, seg, pixel_precision, pixel_recall, Precisions, Recalls, Times);
+	
+	std::cout << "pixel prec " << pixel_precision << std::endl;
+	
+	results pixel, Regions;
+	pixel.time = Regions.time = time;
+	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
+
+	double min, max;
+	cv::minMaxLoc(GT_segmentation,&min,&max);
+	float rows = GT_segmentation.rows;
+	float cols = GT_segmentation.cols;
+	float proper_size = rows*cols/1000;
+	proper_size = proper_size/1000;
+			
+	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
+	
+// 	exportResultsGnuplot(file,Regions, max, proper_size);
+
+}
+
 
 BOOST_AUTO_TEST_CASE(trying)
 {
@@ -502,6 +530,10 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	segmenteur.segmentImage(slam, graph_slam);
 	
+	cv::Mat segmented_map = segmenteur.getSegmentedMap();
+	
+	cv::imshow("straight segmented", segmented_map);
+	
 	std::cout << "Total time: " << time << std::endl;
 			
 	/********** PCA of all zones in Graph and removing the ripples **********/
@@ -520,14 +552,14 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 	cv::imshow("GRAPH", img_hist_equalized);
 	
-	cv::Mat minus = graphmat - slam;
-	cv::Mat minus2 = slam - graphmat;
-	cv::imshow("black", minus);
-	cv::imshow("alos black", minus2);
-	cv::waitKey(0);
+// 	cv::Mat minus = graphmat - slam;
+// 	cv::Mat minus2 = slam - graphmat;
+// 	cv::imshow("black", minus);
+// 	cv::imshow("alos black", minus2);
+// 	cv::waitKey(0);
 	
-   cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
-   graph_slam.draw(graphmat_vis);
+	cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.draw(graphmat_vis);
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 	cv::imshow("GRAPH Visible", graphmat_vis);
 	
@@ -541,36 +573,21 @@ BOOST_AUTO_TEST_CASE(trying)
 	cv::waitKey(0);
 	
 	cv::Mat GT_segmentation = segment_Ground_Truth(image_GT);
+	cv::Mat graphmat_straight = segment_Ground_Truth(segmented_map);
 // 	cv::Mat graphmat = segment_Ground_Truth(slam);
 	
-// 	cv::Mat img_hist_equalizedgt;
-// 	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);
-// 	cv::imshow("GT", img_hist_equalizedgt);
-// 	cv::waitKey(0);
+	cv::Mat img_hist_equalizedgt;
+	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);
+	cv::imshow("GT", img_hist_equalizedgt);
 	
-	assert(graphmat.rows == GT_segmentation.rows);
-	assert(graphmat.cols == GT_segmentation.cols);
-				
-	double pixel_precision, pixel_recall;
-	std::vector < std::vector<float> > Precisions, Recalls;
-	std::vector<double> Times;
-	compare_images(GT_segmentation, graphmat, pixel_precision, pixel_recall, Precisions, Recalls, Times);
+	cv::Mat img_hist_equalizedseg;
+	cv::equalizeHist(graphmat_straight, img_hist_equalizedseg);
+	cv::imshow("seg eq", img_hist_equalizedseg);
 	
-	std::cout << "pixel prec " << pixel_precision << std::endl;
+	cv::waitKey(0);
 	
-	results pixel, Regions;
-	pixel.time = Regions.time = time;
-	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
-
-	double min, max;
-	cv::minMaxLoc(GT_segmentation,&min,&max);
-	float rows = GT_segmentation.rows;
-	float cols = GT_segmentation.cols;
-	float proper_size = rows*cols/1000;
-	proper_size = proper_size/1000;
-			
-	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
+	compareAndExport(graphmat, GT_segmentation, time, file);
+	compareAndExport(graphmat_straight, GT_segmentation, time, file);
 	
-	exportResultsGnuplot(file,Regions, max, proper_size);
-
+	
 }

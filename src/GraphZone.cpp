@@ -818,8 +818,8 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 			EdgeElement ed_el((*this)[e_second]);
 			
 			double min_val = (*this)[v].getValue();
-			if(min_val >= (*this)[e_second].min_toward && (*this)[e_second].min_toward != -2){
-				min_val = (*this)[e_second].min_toward;
+			if(min_val >= (*this)[e_second].getMinimum() && (*this)[e_second].getMinimum() != -2){
+				min_val = (*this)[e_second].getMinimum();
 			}
 			
 			//Keep the best minimum score in edge
@@ -828,7 +828,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 				EdgeElement ed_el_tmp;
 				(*this).getEdge(v_to_fuse_in, targ, edz_tmp);
 				ed_el_tmp = (*this)[edz_tmp];
-				double min_val_tmp = ed_el_tmp.min_toward;
+				double min_val_tmp = ed_el_tmp.getMinimum();
 				if(min_val_tmp == -2){
 // 					min_val = min_val_tmp;
 				}
@@ -836,7 +836,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 					min_val = min_val_tmp;
 				}
 			}
-			ed_el.min_toward = min_val;
+			ed_el.setMinimum(min_val);
 
 				
 // 			assert(ed_el.size() == (*this)[e_second].size());
@@ -962,8 +962,10 @@ void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 					int add=0;
 					//Check the neighbor for ripples so we add right after in the list
 					for(int i = 0; i < to_check.size() ; ++i){
-						all_vertex.push_back(to_check[i]);
-						++add;
+						if(std::find(it, all_vertex.end(), to_check[i]) == all_vertex.end()){
+							all_vertex.push_back(to_check[i]);
+							++add;
+						}
 					}
 // 					std::cout << "Added " << add << std::endl;
 	// 				all_vertex.erase(it);

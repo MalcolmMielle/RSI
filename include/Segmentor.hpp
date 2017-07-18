@@ -16,14 +16,16 @@ namespace AASS{
 			
 		protected:
 			std::vector< std::vector< cv::Point> > _contours;
-			
 			std::vector<std::pair<cv::Point, cv::Point> > _limits;
+			cv::Mat _segmented;
 			
 		public:
 			Segmentor(){}
 			
 			double segmentImage(cv::Mat& src, AASS::RSI::GraphZone& graph_src);			
-			 
+			
+			cv::Mat& getSegmentedMap(){return _segmented;}
+			const cv::Mat& getSegmentedMap() const {return _segmented;}
 			
 		private:
 			
@@ -38,7 +40,7 @@ namespace AASS{
 			
 			void addHoles(const cv::Mat& src, std::vector<std::vector<cv::Point> > contours, std::vector<cv::Vec4i> hierarchy, AASS::RSI::GraphZone& graph_src);
 			
-			void findLimits(AASS::RSI::GraphZone& graph_src);
+			void findLimits(const cv::Mat& src, AASS::RSI::GraphZone& graph_src);
 			
 			
 			

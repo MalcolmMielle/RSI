@@ -360,6 +360,89 @@ namespace AASS{
 			}
 			
 			///@brief return the point in contact between the zones
+			std::vector< std::vector<cv::Point2i > > getContactPointSeparated(const Zone& zone){
+				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
+				assert(zone.useCvMat() == true && "We need the opencv::Mat for this function. input zone");
+				
+				std::vector< std::vector< cv::Point2i> > contact_point;
+
+				cv::Mat copyTest;
+				zone.getZoneMat().copyTo(copyTest);
+				
+// 				cv::imshow("i",zone.getZoneMat());
+// 				cv::imshow("b",_zone_mat);
+// 				cv::Mat copy_tmp;
+// 				_zone_mat.copyTo(copy_tmp);
+				
+// 				std::vector< std::vector< cv::Point> > contours;
+// 				std::vector<cv::Vec4i> hierarchy;
+// 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+								
+				//Do for all contour and add percentage
+				// Calculate the area of each contour
+
+				
+				auto lambda = [](int x, int y, const cv::Mat& mat) -> bool{
+					
+					int xx;
+					for( xx = x - 1 ; xx < x + 2 ; ++xx ){
+						int yy;
+						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
+// 							std::cout << " x y " << xx << " " << yy << std::endl;
+							if(mat.at<uchar>(yy, xx) == 255){
+								return true;
+							}
+						}
+					}
+					return false;
+
+				};
+				
+				assert(_contours.size() > 0 && "there is no contour :S");
+				
+				
+				auto it = _contours.begin();
+				while(lambda(it->x, it->y, copyTest)){
+					++it;
+					if(it == _contours.end()){
+						throw std::runtime_error("Terrible contour for zone :(");
+					}
+				}
+				
+				
+				std::vector<std::pair<int, int > > seen;
+				std::vector<cv::Point2i> tmp;
+				bool flag = false;
+				for(int i = 0 ; i < _contours.size() ; ++i){
+				
+					bool asbeenseeen = false;
+					for(size_t i = 0 ; i < seen.size() ; ++i){
+						if(seen[i].first == it->x && seen[i].second == it->y){
+							asbeenseeen = true;
+						}
+					}
+					seen.push_back(std::pair<int, int>(it->x, it->y));
+					if(!asbeenseeen){
+						if(lambda(it->x, it->y, copyTest)){
+							tmp.push_back(*it);
+							flag = true;
+						}
+						else if(flag == true){
+							contact_point.push_back(tmp);
+							tmp.clear();
+							flag = false;
+						}
+					}
+					
+					++it;
+					if(it == _contours.end()) it = _contours.begin();
+					
+				}
+				return contact_point;
+				
+			}
+			
+			///@brief return the point in contact between the zones
 			std::vector<cv::Point2i> getContactPoint(const Zone& zone){
 				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
 				assert(zone.useCvMat() == true && "We need the opencv::Mat for this function. input zone");
@@ -433,77 +516,76 @@ namespace AASS{
 			//Return the number of contact points in percent compared to size of contour. DO NOT need an update from PCA() or updateContours.
 			int contactPoint(const Zone& zone){
 				
-				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
+// 				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
+// 				
+// 				int whitepix = 0 ;
+// 				int final_size = 0;
+// 				int test_size = 0 ;
+// 
+// 				cv::Mat copyTest;
+// 				zone.getZoneMat().copyTo(copyTest);
+// 				
+// // 				cv::imshow("i",zone.getZoneMat());
+// // 				cv::imshow("b",_zone_mat);
+// 				cv::Mat copy_tmp;
+// 				_zone_mat.copyTo(copy_tmp);
+// 				
+// 				std::vector< std::vector< cv::Point> > contours;
+// 				std::vector<cv::Vec4i> hierarchy;
+// 				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+// 								
+// 				//Do for all contour and add percentage
+// 				// Calculate the area of each contour
+// 
+// 				
+// 				auto lambda = [](int x, int y, const cv::Mat& mat) -> bool{
+// 					
+// 					int xx;
+// 					for( xx = x - 1 ; xx < x + 2 ; ++xx ){
+// 						int yy;
+// 						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
+// // 							std::cout << " x y " << xx << " " << yy << std::endl;
+// 							if(mat.at<uchar>(yy, xx) == 255){
+// 								return true;
+// 							}
+// 						}
+// 					}
+// 					return false;
+// 
+// 				};
+// 				
+// // 				std::cout << "NUMBER OF CONTOUR " << contours.size() << " with " << contours[0].size() << std::endl;
+// 				for(size_t i = 0 ; i < contours.size() ; i++){
+// 					auto contour = contours[i];
+// 					
+// // 					final_size = final_size + contour.size();
+// 					
+// 					std::vector<std::pair<int, int > > seen;
+// 					
+// // 					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
+// 					for(auto it = contour.begin() ; it != contour.end() ; ++it ){
+// // 						matcon.at<uchar>(it->y, it->x) = 255;
+// // 						std::cout << "LAMBDAS" << std::endl;
+// 						bool asbeenseeen = false;
+// 						for(size_t i = 0 ; i < seen.size() ; ++i){
+// 							if(seen[i].first == it->x && seen[i].second == it->y){
+// 								asbeenseeen = true;
+// 							}
+// 						}
+// 						seen.push_back(std::pair<int, int>(it->x, it->y));
+// 						if(!asbeenseeen){
+// 							if(lambda(it->x, it->y, copyTest)){
+// 								whitepix++;
+// 							}
+// 							final_size++;
+// 						}
+// 
+// 					}
+// 
+// 				}
 				
-				int whitepix = 0 ;
-				int final_size = 0;
-				int test_size = 0 ;
-
-				cv::Mat copyTest;
-				zone.getZoneMat().copyTo(copyTest);
-				
-// 				cv::imshow("i",zone.getZoneMat());
-// 				cv::imshow("b",_zone_mat);
-				cv::Mat copy_tmp;
-				_zone_mat.copyTo(copy_tmp);
-				
-				std::vector< std::vector< cv::Point> > contours;
-				std::vector<cv::Vec4i> hierarchy;
-				cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-								
-				//Do for all contour and add percentage
-				// Calculate the area of each contour
-
-				
-				auto lambda = [](int x, int y, const cv::Mat& mat) -> bool{
-					
-					int xx;
-					for( xx = x - 1 ; xx < x + 2 ; ++xx ){
-						int yy;
-						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
-// 							std::cout << " x y " << xx << " " << yy << std::endl;
-							if(mat.at<uchar>(yy, xx) == 255){
-								return true;
-							}
-						}
-					}
-					return false;
-
-				};
-				
-// 				std::cout << "NUMBER OF CONTOUR " << contours.size() << " with " << contours[0].size() << std::endl;
-				for(size_t i = 0 ; i < contours.size() ; i++){
-					auto contour = contours[i];
-					
-// 					final_size = final_size + contour.size();
-					
-					std::vector<std::pair<int, int > > seen;
-					
-// 					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
-					for(auto it = contour.begin() ; it != contour.end() ; ++it ){
-// 						matcon.at<uchar>(it->y, it->x) = 255;
-// 						std::cout << "LAMBDAS" << std::endl;
-						bool asbeenseeen = false;
-						for(size_t i = 0 ; i < seen.size() ; ++i){
-							if(seen[i].first == it->x && seen[i].second == it->y){
-								asbeenseeen = true;
-							}
-						}
-						seen.push_back(std::pair<int, int>(it->x, it->y));
-						if(!asbeenseeen){
-							if(lambda(it->x, it->y, copyTest)){
-								whitepix++;
-							}
-							final_size++;
-						}
-
-					}
-
-				}
-				
-// 				auto contact_point = getContactPoint(zone);
-
-				auto percent = whitepix * 100 / _contours.size();
+				auto contact_point = getContactPoint(zone);
+				auto percent = contact_point.size() * 100 / _contours.size();
 // 				std::cout << "Percent " << percent << std::endl;
 				
 // 				cv::imshow("input",zone.getZoneMat());

@@ -2,23 +2,31 @@
 
 double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& graph_src)
 {
-						
-//Find contours
-	std::vector<std::vector<cv::Point> > contours;
-	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours( src, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
-
-	//Draw the outer contours
-	cv::Mat outer = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
-	// iterate through all contours, filling holes
-	for(int i = 0 ; i < contours.size() ; ++i)
-	{
-// 					if(hierarchy[i][3] != -1){
-			cv::drawContours( outer, contours, i, 255 , CV_FILLED, 8, hierarchy );
-// 					}
-	}
+					
+//Draw the outer contours
+	cv::Mat outer;
+	src.copyTo(outer);
+	
+//Find contours - NOT WORKING TODO. TO SIMPLE. TEST CASE WITH NLB map
+// 	std::vector<std::vector<cv::Point> > contours;
+// 	std::vector<cv::Vec4i> hierarchy;
+// 	cv::findContours( src, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE );
+// 
 // 	
-// 	cv::imshow("input", src);
+// 	// iterate through all contours, filling holes
+// 	for(int i = 0 ; i < contours.size() ; ++i)
+// 	{
+// 		
+// 		if(contours.size() < 30){
+// // 					if(hierarchy[i][3] != -1){
+// 			cv::drawContours( outer, contours, i, 255 , CV_FILLED, 8, hierarchy );
+// 			cv::imshow("input", outer);
+// 	cv::waitKey(0);
+// // 					}
+// 		}
+// 	}
+// 	
+// 	cv::imshow("input", outer);
 // 	cv::waitKey(0);
 	
 // 	cv::threshold(src, src, 20, 255, cv::THRESH_BINARY);
@@ -78,6 +86,12 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	
 	//Watershed Algorithm
 	graph_src.watershed();
+// 	cv::Mat copyt;
+// 	outer.copyTo(copyt);
+// 	graph_src.drawSimple(copyt);
+// 	cv::imshow("s", copyt);
+// 	cv::waitKey(0);
+	
 	
 	int size_to_remove = 100;
 	graph_src.removeVertexUnderSize(size_to_remove, true);
@@ -90,8 +104,24 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	if(graph_src.lonelyVertices())
 		throw std::runtime_error("Fuck you lonelyness");	
 	
-	
+	begin_process = getTime();
+	findLimits(outer, graph_src);
 // 	addHoles(src, contours, hierarchy, graph_src);
+	end_process = getTime();	decompose_time = end_process - begin_process;
+	time = time + decompose_time;
+	
+	std::cout << "Drawing" << std::endl;
+	cv::Mat copy;
+	outer.copyTo(copy);
+	
+	begin_process = getTime();
+	for(auto it = _limits.begin() ; it != _limits.end() ; ++it){
+		cv::line(copy, it->first, it->second, cv::Scalar(100), 1);
+	}
+	end_process = getTime();	decompose_time = end_process - begin_process;
+	time = time + decompose_time;
+	
+	_segmented = copy;
 	
 	return time;
 	
@@ -101,6 +131,7 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 void AASS::RSI::Segmentor::addHoles(const cv::Mat& src, std::vector< std::vector< cv::Point > > contours, std::vector< cv::Vec4i > hierarchy, AASS::RSI::GraphZone& graph_src)
 {
 				
+// 	std::cout << "adding holes" << std::endl;
 	//Draw all holes on a Mat
 	cv::Mat drawing = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
 	// iterate through all the top-level contours,
@@ -138,16 +169,54 @@ void AASS::RSI::Segmentor::addHoles(const cv::Mat& src, std::vector< std::vector
 }
 
 
-void AASS::RSI::Segmentor::findLimits(AASS::RSI::GraphZone& graph_src)
+void AASS::RSI::Segmentor::findLimits(const cv::Mat& src_mat, AASS::RSI::GraphZone& graph_src)
 {
 	
-	auto contacttest = [](int x, int y, int x2, int y2) -> bool{
-		if(x + 1 >= x2 && x - 1 <= x2){
-			if(y + 1 >= y2 && y - 1 <= y2){
-				return true;
+// 	auto contacttest = [](int x, int y, int x2, int y2) -> bool{
+// 		if(x + 1 >= x2 && x - 1 <= x2){
+// 			if(y + 1 >= y2 && y - 1 <= y2){
+// 				return true;
+// 			}
+// 		}
+// 		return false;
+// 	};
+// 	std::cout << "find limits" << std::endl;
+	
+	auto touchMat = [&src_mat](int x, int y, cv::Point2i& out) -> bool{
+		
+		int xx;
+		for( xx = x - 2 ; xx < x + 3 ; ++xx ){
+			int yy;
+			for( yy = y - 2 ; yy < y + 3 ; ++yy ){
+// 							std::cout << " x y " << xx << " " << yy << std::endl;
+				if(src_mat.at<uchar>(yy, xx) == 0){
+					out.x = xx;
+					out.y = yy;
+					return true;
+				}
 			}
 		}
 		return false;
+
+	};
+	
+	auto distPointPerimeter = [touchMat](cv::Point2i p, std::vector <cv::Point2i> vp) -> cv::Point2i{
+		
+		double dist = -1;
+		auto it = vp.begin();
+		cv::Point2i p_out = *it;
+		for(it ; it != vp.end() ; ++it){
+			cv::Point2i out;
+			if(touchMat(it->x, it->y, out) == true){
+				auto tdist = cv::norm(*it - p);
+				if(dist == -1 || dist > tdist){
+					dist = tdist;
+					p_out = out;
+				}
+			}
+		}
+		return p_out;
+
 	};
 	
 	
@@ -155,6 +224,7 @@ void AASS::RSI::Segmentor::findLimits(AASS::RSI::GraphZone& graph_src)
 	//vertices access all the vertix
 // 				std::cout << "NEW start lonely" << std::endl;
 // 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
+	std::set < AASS::RSI::GraphZone::EdgeZone > visited_edges;
 	for (vp = boost::vertices(graph_src); vp.first != vp.second;) {
 // 			std::cout << "Looking up vertex " << std::endl;
 		auto v = *vp.first;
@@ -163,39 +233,84 @@ void AASS::RSI::Segmentor::findLimits(AASS::RSI::GraphZone& graph_src)
 		//Since we fuse the old zone in biggest we only need to link them to biggest
 		for (boost::tie(out_i, out_end) = boost::out_edges(v, graph_src); 
 			out_i != out_end; out_i = ++out_i) {
-			AASS::RSI::GraphZone::EdgeZone e_second = *out_i;
-			AASS::RSI::GraphZone::VertexZone targ = boost::target(e_second, graph_src);
-			AASS::RSI::GraphZone::VertexZone src = boost::source(e_second, graph_src);
-		
-			auto contact = graph_src[src].getContactPoint(graph_src[targ]);
 			
-			std::pair<cv::Point2i, cv::Point2i> limits;
-			int min = 15;
-			int min2 = 15;
-		
-		
-			for(auto it = contact.begin(); it != contact.end() ; ++it){
-				int nb_contact = 0;
-				for(auto it2 = contact.begin(); it2 != contact.end() ; ++it2){
-					if(contacttest(it->x, it->y, it2->x, it2->y)){
-						++nb_contact;
+			AASS::RSI::GraphZone::EdgeZone e_second = *out_i;
+			if(std::find(visited_edges.begin(), visited_edges.end(), e_second) == visited_edges.end()){
+			
+				visited_edges.insert(e_second);
+				
+				AASS::RSI::GraphZone::VertexZone targ = boost::target(e_second, graph_src);
+				AASS::RSI::GraphZone::VertexZone src = boost::source(e_second, graph_src);
+			
+				auto contact = graph_src[src].getContactPointSeparated(graph_src[targ]);
+				
+				cv::Point l1, l2;
+				for(auto it3 = contact.begin(); it3 != contact.end() ; ++it3){
+					for(auto it = it3->begin(); it != it3->end() ; ++it){
+						double distance = -1;
+						for(auto it2 = it3->begin(); it2 != it3->end() ; ++it2){
+							auto tdist = cv::norm(*it - *it2);
+		// 					std::cout << distance << " > " << tdist << std::endl;
+							if(distance == -1 || distance < tdist){
+								l1 = *it;
+								l2 = *it2;
+								distance = tdist;
+							}
+						}
 					}
-				}
-				if(nb_contact < min){
-					limits.first = *it;
-				}
-				else if(nb_contact < min2){
-					limits.second = *it;
+					
+					//Find point on contour that touch a wall and close to l1 and l2
+				
+	// 				cv::Mat src_tmp = cv::Mat::zeros(src_mat.size(), CV_8UC1);
+	// 				graph_src[src].drawZone(src_tmp, cv::Scalar(255));
+	// 				cv::imshow("tmp", src_tmp);
+	// 				cv::waitKey(0);
+					
+					auto contour = graph_src[src].getContour();
+					double dist = -1;
+					auto l1_f = distPointPerimeter(l1, contour);
+					auto l2_f = distPointPerimeter(l2, contour);
+					_limits.push_back(std::pair<cv::Point2i, cv::Point2i>(l1_f, l2_f));
 				}
 			}
 			
+// 			auto it2 = it+1;
+// 			while(touchMat(it->x, it->y) != true  touchMat(it2->x, it2->y) != true){
+// 				std::cout << "start " << touchMat(it->x, it->y) << " && " << touchMat(it2->x, it2->y)<< std::endl;
+// 				++it;
+// 				++it2;
+// 				std::cout << "second " << touchMat(it->x, it->y) << " && " << touchMat(it2->x, it2->y)<< std::endl;
+// 				if(it2 == contour.end()){
+// 					throw std::runtime_error("Terrible contour for limits");
+// 				}
+// 			}
+// 			
+// 			std::cout << "start " << touchMat(it->x, it->y) << " && " << touchMat(it2->x, it2->y) << " true is " << true << std::endl;
+// 			
+// 			cv::Point l1, l2;
+// 			bool flag = false;
+// 			for( int i = 0 ; i < contour.size() ; ++i){
+// 				//True if touch on obstacle
+// 				std::cout << touchMat(it->x, it->y) << " && " << !touchMat(it2->x, it2->y) << std::endl;
+// 				if(touchMat(it->x, it->y) == true && touchMat(it2->x, it2->y) != true){
+// 					l1 = *it;
+// 					flag = true;
+// 				}
+// 				if(touchMat(it->x, it->y) != true && touchMat(it2->x, it2->y) == true){
+// 					_limits.push_back(std::pair<cv::Point2i, cv::Point2i>(l1, *it2));
+// 					assert(flag == true);
+// 					flag = false;
+// 				}
+// 				++it;
+// 				++it2;
+// 				if(it == contour.end()) it = contour.begin();
+// 				if(it2 == contour.end()) it2 = contour.begin();
+// 			}
+		
+			
 			
 		}
-		
-		
-		
-		
-		
+
 	}
 
 }

@@ -188,6 +188,8 @@ bool checkAllValue(const cv::Mat& mat_in, const std::vector<int>& all_vals){
 	return true;
 }
 
+
+
 cv::Mat segment_Ground_Truth(cv::Mat GroundTruth_BW){
 	cv::Mat src = GroundTruth_BW.clone();
 	cv::Mat drawing = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
@@ -506,6 +508,33 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 // 	
 // }
 
+void compareAndExport(const cv::Mat& seg, const cv::Mat& GT_segmentation, double time, const std::string& file){
+	assert(seg.rows == GT_segmentation.rows);
+	assert(seg.cols == GT_segmentation.cols);
+				
+	double pixel_precision, pixel_recall;
+	std::vector < std::vector<float> > Precisions, Recalls;
+	std::vector<double> Times;
+	compare_images(GT_segmentation, seg, pixel_precision, pixel_recall, Precisions, Recalls, Times);
+	
+	std::cout << "pixel prec " << pixel_precision << std::endl;
+	
+	results pixel, Regions;
+	pixel.time = Regions.time = time;
+	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
+
+	double min, max;
+	cv::minMaxLoc(GT_segmentation,&min,&max);
+	float rows = GT_segmentation.rows;
+	float cols = GT_segmentation.cols;
+	float proper_size = rows*cols/1000;
+	proper_size = proper_size/1000;
+			
+	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
+	
+	exportResultsGnuplot(file,Regions, max, proper_size);
+
+}
 
 void process(const std::string& file, const std::string& full_path_GT){
 
@@ -527,22 +556,23 @@ void process(const std::string& file, const std::string& full_path_GT){
 // 	makeGraph(slam, graph_slam, time);
 	AASS::RSI::Segmentor segmenteur;
 	time = segmenteur.segmentImage(slam, graph_slam);
+	cv::Mat segmented_map = segmenteur.getSegmentedMap();
 	
 // 	std::cout << "Total time: " << time << std::endl;
 			
 	/********** PCA of all zones in Graph and removing the ripples **********/
-	graph_slam.update();
+// 	graph_slam.update();
 
 	
-	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
-    graph_slam.drawEvaluation(graphmat);
+// 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+//     cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
+//     graph_slam.drawEvaluation(graphmat);
 	
 // 	cv::Mat partial = cv::Mat::zeros(slam1.size(), CV_8U);
 //     graph_slam.drawPartial(partial);
 	
-	cv::Mat img_hist_equalized;
-	cv::equalizeHist(graphmat, img_hist_equalized);
+// 	cv::Mat img_hist_equalized;
+// 	cv::equalizeHist(graphmat, img_hist_equalized);
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 // 	cv::imshow("GRAPH", img_hist_equalized);
 	
@@ -561,40 +591,15 @@ void process(const std::string& file, const std::string& full_path_GT){
 // 	cv::waitKey(0);
 	
 	cv::Mat GT_segmentation = segment_Ground_Truth(image_GT);
+	cv::Mat graphmat_straight = segment_Ground_Truth(segmented_map);
 	
 // 	cv::Mat img_hist_equalizedgt;
 // 	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);
 // 	cv::imshow("GT", img_hist_equalizedgt);
 // 	cv::waitKey(0);
 	
-	assert(graphmat.rows == GT_segmentation.rows);
-	assert(graphmat.cols == GT_segmentation.cols);
-				
-	double pixel_precision, pixel_recall;
-	std::vector < std::vector<float> > Precisions, Recalls;
-	std::vector<double> Times;
-	compare_images(GT_segmentation, graphmat, pixel_precision, pixel_recall, Precisions, Recalls, Times);
 	
-// 	std::cout << "pixel prec " << pixel_precision << std::endl;
-	
-	results pixel, Regions;
-	pixel.time = Regions.time = time;
-	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
-
-	double min, max;
-	cv::minMaxLoc(GT_segmentation,&min,&max);
-	float rows = GT_segmentation.rows;
-	float cols = GT_segmentation.cols;
-	float proper_size = rows*cols/1000;
-	proper_size = proper_size/1000;
-			
-	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
-	
-	precision_sum += Regions.precision;
-	recall_sum += Regions.recall;
-	++file_nb;
-	
-	exportResultsGnuplot(file,Regions, max, proper_size);
+	compareAndExport(graphmat_straight, GT_segmentation, time, file);
 }
 
 
