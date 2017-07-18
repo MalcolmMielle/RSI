@@ -31,10 +31,10 @@ namespace AASS{
 			typedef typename bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex VertexZone;
 // 			std::vector<ElementPairVertex > _score_old;
 			
-			
+			double min_toward;
 		public:
 			///init at -2 
-			double min_toward;
+			
 			EdgeElement() : _diff(0), _breakable(true), _fromFuse(false), min_toward(-2){};
 			
 			EdgeElement(const EdgeElement& ed) : _diff(ed.getDiff()), _breakable(true), min_toward(-2){
@@ -42,6 +42,10 @@ namespace AASS{
 // 					_score_old.push_back(*it);
 // 				}
 			};
+			
+			void setMinimum(double in){_fromFuse = true; min_toward = in;}
+			double getMinimum(){return min_toward;}
+			
 			bool wasRipple(){return _fromFuse;}
 // 			size_t size(){return _score_old.size();}
 // 			size_t size() const {return _score_old.size();}

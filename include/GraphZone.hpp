@@ -142,7 +142,7 @@ namespace AASS{
 			bool lonelyVertices(){
 				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;
 				//vertices access all the vertix
-// 				std::cout << "NEW start lonely" << std::endl;
+				std::cout << "NEW start lonely" << std::endl;
 		// 		std::cout << "num of vertices " << getNumVertices() << std::endl; 
 				for (vp = boost::vertices(*this); vp.first != vp.second;) {
 		// 			std::cout << "Looking up vertex " << std::endl;
@@ -152,6 +152,7 @@ namespace AASS{
 						return true;
 					} 
 				}
+				std::cout << "Checked" << std::endl;
 				return false;
 			
 			}
@@ -488,7 +489,7 @@ namespace AASS{
 						EdgeZone e_second = *out_i;
 						VertexZone targ = boost::target(e_second, (*this));
 // 						(*this)[e_second].setOldScore(v, targ, -2);
-						(*this)[e_second].min_toward = -2;
+						(*this)[e_second].setMinimum(-2);
 					}
 				}
 			}
