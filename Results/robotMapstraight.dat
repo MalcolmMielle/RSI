@@ -1,3 +1,4 @@
+precision recall time labels size
 Freiburg101_scan 99.5294 99.6875 7489.2 16 1.0752
 Freiburg52_scan 94.5714 99.4 2216.08 10 0.227622
 Freiburg79_scan 99.9355 96.92 2380.74 25 0.4352
@@ -18,3 +19,6 @@ office_f 99.8148 99.5185 8253.57 27 0.850226
 office_g 95.8308 98.0833 338314 36 4.7437
 office_h 99.4167 98.6667 22958.6 21 1.05884
 office_i 96.6667 98.9259 339451 27 3.39405
+
+# precision_sum recall_sum file_nb mean_precision mean_recall 
+0 0 0 -nan -nan
