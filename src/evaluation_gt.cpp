@@ -563,6 +563,10 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 	cv::imshow("GRAPH Visible", graphmat_vis);
 	
+	cv::Mat graphmat_c = cv::Mat::zeros(slam1.size(), CV_8U);
+	graph_slam.drawContours(graphmat_c);
+	cv::imshow("contours", graphmat_c);
+	
 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
    
 	

@@ -438,6 +438,7 @@ namespace AASS{
 					if(it == _contours.end()) it = _contours.begin();
 					
 				}
+				if(tmp.size() != 0) contact_point.push_back(tmp);
 				return contact_point;
 				
 			}

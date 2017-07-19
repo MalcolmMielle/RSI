@@ -277,6 +277,38 @@ void AASS::RSI::GraphZone::drawEvaluation(cv::Mat& m, const bettergraph::SimpleG
 		
 }
 
+
+void AASS::RSI::GraphZone::drawContours(cv::Mat& m,  const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
+{
+	(*this)[v].drawContour(m, color);
+}
+
+void AASS::RSI::GraphZone::drawContours(cv::Mat& drawmat) const
+{
+		cv::Mat drawmat_old;
+	drawmat.convertTo(drawmat_old, CV_8U);
+	
+	cv::Scalar color(255);
+	cv::RNG rng(12345);
+	int nb_zones = this->getNumVertices();
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		
+		
+		VertexZone v = *vp.first;
+		
+// 		if((*this)[v].getZone().size() > 100){
+// 				if(getNumEdges(v) > 1){
+			
+		drawContours(drawmat, v, color);
+	}
+
+}
+
+
+
 void AASS::RSI::GraphZone::drawSimple(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
 {
 	(*this)[v].drawZone(m, color);
