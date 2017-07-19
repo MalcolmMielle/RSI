@@ -72,9 +72,23 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	graph_src.removeVertexUnderSize(size_to_remove2, true);
 
 	graph_src.useCvMat(true);
+	
+// 	cv::Mat copyts;
+// 	outer.copyTo(copyts);
+// 	graph_src.drawSimple(copyts);
+// 	cv::imshow("ss", copyts);
+// 	cv::waitKey(0);
+	
+	
 // 	graph_src.updatePCA();
 	graph_src.updateContours();
 	graph_src.removeRiplesv3();
+	
+// 	cv::Mat copyt;
+// 	outer.copyTo(copyt);
+// 	graph_src.drawSimple(copyt);
+// 	cv::imshow("s", copyt);
+// 	cv::waitKey(0);
 	
 	end_process = getTime();	decompose_time = end_process - begin_process;
 	time = time + decompose_time;
@@ -86,11 +100,7 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	
 	//Watershed Algorithm
 	graph_src.watershed();
-// 	cv::Mat copyt;
-// 	outer.copyTo(copyt);
-// 	graph_src.drawSimple(copyt);
-// 	cv::imshow("s", copyt);
-// 	cv::waitKey(0);
+
 	
 	
 	int size_to_remove = 100;
@@ -244,6 +254,7 @@ void AASS::RSI::Segmentor::findLimits(const cv::Mat& src_mat, AASS::RSI::GraphZo
 			
 				auto contact = graph_src[src].getContactPointSeparated(graph_src[targ]);
 				
+				assert(contact.size() > 0);
 				cv::Point l1, l2;
 				for(auto it3 = contact.begin(); it3 != contact.end() ; ++it3){
 					for(auto it = it3->begin(); it != it3->end() ; ++it){
@@ -270,6 +281,7 @@ void AASS::RSI::Segmentor::findLimits(const cv::Mat& src_mat, AASS::RSI::GraphZo
 					double dist = -1;
 					auto l1_f = distPointPerimeter(l1, contour);
 					auto l2_f = distPointPerimeter(l2, contour);
+					std::cout << "Pushing back " << l1_f << " " << l2_f << std::endl;
 					_limits.push_back(std::pair<cv::Point2i, cv::Point2i>(l1_f, l2_f));
 				}
 			}
@@ -312,5 +324,10 @@ void AASS::RSI::Segmentor::findLimits(const cv::Mat& src_mat, AASS::RSI::GraphZo
 		}
 
 	}
+	std::cout << _limits.size() << " == " << graph_src.getNumEdges() << std::endl;
+	if(_limits.size() != graph_src.getNumEdges()){
+		throw std::runtime_error("wtf");
+	}
+	assert(_limits.size() == graph_src.getNumEdges());
 
 }

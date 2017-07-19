@@ -590,7 +590,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	cv::waitKey(0);
 	
-	compareAndExport(graphmat, GT_segmentation, time, file);
+// 	compareAndExport(graphmat, GT_segmentation, time, file);
 	compareAndExport(graphmat_straight, GT_segmentation, time, file);
 	
 	
