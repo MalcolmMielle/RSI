@@ -115,7 +115,7 @@ void AASS::RSI::Zone::updateContour()
 	
 	std::vector< std::vector< cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	cv::findContours(copy_tmp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 	
 // 				assert(contours.size() >= 1 && "More than one shape in Zone");
 	
@@ -142,12 +142,12 @@ void AASS::RSI::Zone::updateContour()
 // // 					}
 // 		cv::waitKey(0);
 		
-		throw ZoneHasMoreThanOneContour("MORE THAN ONE CONTOUR !");
+// 		throw ZoneHasMoreThanOneContour("MORE THAN ONE CONTOUR !");
 	}
 	if(contours.size() == 0 ){
 		throw ZoneHasNoContour("NO CONTOUR IN ZONE !");
 	}
 // 	std::cout << "Contour size " << contours.size() << std::endl;
-	_contours = contours[0];
+	_contours = contours;
 }
 

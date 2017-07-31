@@ -56,7 +56,7 @@ namespace AASS{
 			std::tuple<cv::Point, cv::Point, cv::Point> _pca;
 			double _pca_orientation;
 			
-			std::vector< cv::Point> _contours;
+			std::vector< std::vector< cv::Point> > _contours;
 			
 			bool _isUnique;
 			double _uniqueness_score;
@@ -243,7 +243,10 @@ namespace AASS{
 			void drawContour(cv::Mat& img, const cv::Scalar& color) const{				
 				for (int i = 0; i < _contours.size(); ++i)
 				{
-					img.at<uchar>(_contours[i].y, _contours[i].x) = 255;
+					for (int j = 0; j < _contours[i].size(); ++j)
+					{
+						img.at<uchar>(_contours[i][j].y, _contours[i][j].x) = 255;
+					}
 				}
 			}
 			
@@ -277,13 +280,13 @@ namespace AASS{
 			}
 			
 			///Update the contour before giving it to always be up to date
-			std::vector< cv::Point > getContour(){
+			std::vector< std::vector< cv::Point > > getContour(){
 				updateContour();
 				return _contours;
 			}
 			
 			///Do not update the contour since it's unmmutable. Need to call update before to be sure.
-			std::vector< cv::Point > getContour() const {
+			std::vector< std::vector< cv::Point > > getContour() const {
 // 				updateContour();
 				return _contours;
 			}
@@ -338,8 +341,16 @@ namespace AASS{
 // 				}
 // 				std::cout << "Contour size " << contours.size() << std::endl;
 // 				_contours = contours[0];
-				auto area = cv::contourArea(_contours);
-				getOrientation(_contours);
+				
+				auto contour = _contours[0];
+				for(auto it = _contours.begin() ; it != _contours.end() ; ++it){
+					if(it-> size() > contour.size()){
+						contour = *it;
+					}
+				}
+				
+				auto area = cv::contourArea(contour);
+				getOrientation(contour);
 
 				
 // 				std::cout << "PCAAAAA" << std::endl;
@@ -389,7 +400,7 @@ namespace AASS{
 						int yy;
 						for( yy = y - 1 ; yy < y + 2 ; ++yy ){
 // 							std::cout << " x y " << xx << " " << yy << std::endl;
-							if(mat.at<uchar>(yy, xx) == 255){
+							if(mat.at<uchar>(yy, xx) > 0){
 								return true;
 							}
 						}
@@ -401,50 +412,79 @@ namespace AASS{
 				assert(_contours.size() > 0 && "there is no contour :S");
 				
 				
-				auto it = _contours.begin();
-				while(lambda(it->x, it->y, copyTest)){
-					++it;
-					if(it == _contours.end()){
-						throw std::runtime_error("Terrible contour for zone :(");
-					}
-				}
+				
 				
 				
 				std::vector<std::pair<int, int > > seen;
 				std::vector<cv::Point2i> tmp;
 				bool flag = false;
-				for(int i = 0 ; i < _contours.size() ; ++i){
+				for(int j = 0 ; j < _contours.size() ; ++j){
+					
+					auto it = _contours[j].begin();
+					while(lambda(it->x, it->y, copyTest)){
+						++it;
+						if(it == _contours[j].end()){
+							throw std::runtime_error("Terrible contour for zone :(");
+						}
+					}
+					
+					for(int i = 0 ; i < _contours[j].size() ; ++i){
 				
-					bool asbeenseeen = false;
-					for(size_t i = 0 ; i < seen.size() ; ++i){
-						if(seen[i].first == it->x && seen[i].second == it->y){
-							asbeenseeen = true;
+						bool asbeenseeen = false;
+						for(size_t i = 0 ; i < seen.size() ; ++i){
+							if(seen[i].first == it->x && seen[i].second == it->y){
+								asbeenseeen = true;
+							}
 						}
+						seen.push_back(std::pair<int, int>(it->x, it->y));
+						if(!asbeenseeen){
+							if(lambda(it->x, it->y, copyTest)){
+								tmp.push_back(*it);
+								flag = true;
+							}
+							else if(flag == true){
+								contact_point.push_back(tmp);
+								tmp.clear();
+								flag = false;
+							}
+						}
+						
+						++it;
+						if(it == _contours[j].end()) it = _contours[j].begin();
+						
 					}
-					seen.push_back(std::pair<int, int>(it->x, it->y));
-					if(!asbeenseeen){
-						if(lambda(it->x, it->y, copyTest)){
-							tmp.push_back(*it);
-							flag = true;
-						}
-						else if(flag == true){
-							contact_point.push_back(tmp);
-							tmp.clear();
-							flag = false;
-						}
-					}
-					
-					++it;
-					if(it == _contours.end()) it = _contours.begin();
-					
+					if(tmp.size() != 0) contact_point.push_back(tmp);
 				}
-				if(tmp.size() != 0) contact_point.push_back(tmp);
+				auto contact_test = getContactPoint(zone);
+				int size = 0;
+				for(auto it = contact_point.begin() ; it != contact_point.end() ; ++it){
+					size = size + it->size();
+				}
+				
+				if(contact_point.size() == 0){
+					
+					std::cout << "New contour " << size << " old contour " << contact_test.size() << std::endl;
+					
+					cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
+					for(auto it = _contours.begin() ; it != _contours.end() ; ++it){
+						for(auto it2 = it->begin() ; it2 != it->end() ; ++it2){
+							graphmat2.at<uchar>(it2->y, it2->x) = 255;
+						}
+						
+					}
+					cv::imshow("fina", graphmat2);
+					std::cout << " No contours" << std::endl;
+					cv::imshow("the zone",_zone_mat);
+					cv::imshow("from", copyTest);
+					cv::waitKey(0);
+				}
 				return contact_point;
 				
 			}
 			
 			///@brief return the point in contact between the zones
 			std::vector<cv::Point2i> getContactPoint(const Zone& zone){
+// 				std::cout << "Get contact " << std::endl;
 				assert(_use_cvMat == true && "We need the opencv::Mat for this function");
 				assert(zone.useCvMat() == true && "We need the opencv::Mat for this function. input zone");
 				
@@ -492,22 +532,24 @@ namespace AASS{
 					std::vector<std::pair<int, int > > seen;
 					
 // 					cv::Mat matcon = cv::Mat::zeros(_zone_mat.size(), CV_8U);
-					for(auto it = _contours.begin() ; it != _contours.end() ; ++it ){
-// 						matcon.at<uchar>(it->y, it->x) = 255;
-// 						std::cout << "LAMBDAS" << std::endl;
-						bool asbeenseeen = false;
-						for(size_t i = 0 ; i < seen.size() ; ++i){
-							if(seen[i].first == it->x && seen[i].second == it->y){
-								asbeenseeen = true;
+					for(int j = 0 ; j < _contours.size() ; ++j){
+						for(auto it = _contours[j].begin() ; it != _contours[j].end() ; ++it ){
+	// 						matcon.at<uchar>(it->y, it->x) = 255;
+	// 						std::cout << "LAMBDAS" << std::endl;
+							bool asbeenseeen = false;
+							for(size_t i = 0 ; i < seen.size() ; ++i){
+								if(seen[i].first == it->x && seen[i].second == it->y){
+									asbeenseeen = true;
+								}
 							}
-						}
-						seen.push_back(std::pair<int, int>(it->x, it->y));
-						if(!asbeenseeen){
-							if(lambda(it->x, it->y, copyTest)){
-								contact_point.push_back(*it);
+							seen.push_back(std::pair<int, int>(it->x, it->y));
+							if(!asbeenseeen){
+								if(lambda(it->x, it->y, copyTest)){
+									contact_point.push_back(*it);
+								}
 							}
-						}
 
+						}
 					}
 
 				return contact_point;
@@ -586,7 +628,13 @@ namespace AASS{
 // 				}
 				
 				auto contact_point = getContactPoint(zone);
-				auto percent = contact_point.size() * 100 / _contours.size();
+				
+				int size_c = 0;
+				for(auto it = _contours.begin() ; it != _contours.end() ; ++it){
+					size_c = size_c + it->size();
+				}
+				
+				auto percent = contact_point.size() * 100 / size_c;
 // 				std::cout << "Percent " << percent << std::endl;
 				
 // 				cv::imshow("input",zone.getZoneMat());

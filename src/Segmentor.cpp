@@ -89,7 +89,7 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 // 	graph_src.drawSimple(copyt);
 // 	cv::imshow("s", copyt);
 // 	cv::waitKey(0);
-	
+// 	
 	end_process = getTime();	decompose_time = end_process - begin_process;
 	time = time + decompose_time;
 	std::cout << "Ripples: " << decompose_time << std::endl;
@@ -210,20 +210,25 @@ void AASS::RSI::Segmentor::findLimits(const cv::Mat& src_mat, AASS::RSI::GraphZo
 
 	};
 	
-	auto distPointPerimeter = [touchMat](cv::Point2i p, std::vector <cv::Point2i> vp) -> cv::Point2i{
+	//Return closest point to p, on contour vp, that touches a wall
+	auto distPointPerimeter = [touchMat](cv::Point2i p, std::vector <std::vector <cv::Point2i> > vp) -> cv::Point2i{
 		
 		double dist = -1;
-		auto it = vp.begin();
-		cv::Point2i p_out = *it;
-		for(it ; it != vp.end() ; ++it){
-			cv::Point2i out;
-			if(touchMat(it->x, it->y, out) == true){
-				auto tdist = cv::norm(*it - p);
-				if(dist == -1 || dist > tdist){
-					dist = tdist;
-					p_out = out;
+		auto it_contour = vp.begin();
+		cv::Point2i p_out = (*it_contour)[0];
+		for(it_contour ; it_contour != vp.end() ; ++it_contour){
+			auto it = it_contour->begin();
+			for(it ; it != it_contour->end() ; ++it){
+				cv::Point2i out;
+				if(touchMat(it->x, it->y, out) == true){
+					auto tdist = cv::norm(*it - p);
+					if(dist == -1 || dist > tdist){
+						dist = tdist;
+						p_out = out;
+					}
 				}
 			}
+			
 		}
 		return p_out;
 
@@ -324,10 +329,12 @@ void AASS::RSI::Segmentor::findLimits(const cv::Mat& src_mat, AASS::RSI::GraphZo
 		}
 
 	}
-	std::cout << _limits.size() << " == " << graph_src.getNumEdges() << std::endl;
-	if(_limits.size() != graph_src.getNumEdges()){
-		throw std::runtime_error("wtf");
-	}
-	assert(_limits.size() == graph_src.getNumEdges());
+// 	std::cout << _limits.size() << " == " << graph_src.getNumEdges() << std::endl;
+// 	if(_limits.size() != graph_src.getNumEdges()){
+// 		throw std::runtime_error("wtf");
+// 		std::cout << "SHIT" << std::endl;
+// 		exit(0);
+// 	}
+// 	assert(_limits.size() == graph_src.getNumEdges());
 
 }

@@ -23,7 +23,7 @@ endforeach()
 
 add_definitions(-std=c++11)
 
-include_directories(include ${vodigrex_INCLUDE_DIRS} include/hungarian)
+include_directories(include ${vodigrex_INCLUDE_DIRS} include/hungarian include/Evaluation)
 
 add_subdirectory(src)
 
