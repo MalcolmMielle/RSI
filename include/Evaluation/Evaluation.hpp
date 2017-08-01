@@ -161,6 +161,7 @@ namespace AASS{
 			double getFscore(){return _f1score;}
 			double getGscore(){return _gscore;}
 			double getDOR(){return _dor;}
+			double getAccuracy(){return _accuracy;}
 			
 		private:
 			void computeMeasures();

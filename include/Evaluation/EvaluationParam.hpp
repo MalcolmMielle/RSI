@@ -22,11 +22,12 @@ namespace AASS{
 			std::vector<double> _mathiewCC;
 			std::vector<double> _gscore;
 			std::vector<double> _dor;
+			std::vector<double> _accuracy;
 			
 		public:
 			EvaluationParam(){}
 			
-			void add(double p, double r, double ir, double sdp, double sdr, double sdir, double mCC, double gscore, double f1score, double t, double m){
+			void add(double p, double r, double ir, double sdp, double sdr, double sdir, double mCC, double gscore, double f1score, double acc, double t, double m){
 				_mean_p.push_back(p);
 			    _mean_r.push_back(r);
 			    _mean_ir.push_back(ir);
@@ -39,10 +40,13 @@ namespace AASS{
 				_mathiewCC.push_back(mCC);
 				_gscore.push_back(gscore);
 				_f1_score.push_back(f1score);
-				
+				_accuracy.push_back(acc);
 			}
 			
 			void add(Evaluation eval, double t, double m){
+				
+				eval.calculate();
+				
 				_mean_p.push_back(eval.getMeanPrecision());
 			    _mean_r.push_back(eval.getMeanRecall());
 			    _mean_ir.push_back(eval.getMeanInverseRecall());
@@ -56,6 +60,7 @@ namespace AASS{
 				_gscore.push_back(eval.getGscore());
 				_f1_score.push_back(eval.getFscore());
 				_dor.push_back(eval.getDOR());
+				_accuracy.push_back(eval.getAccuracy());
 			}
 			
 			size_t size(){return _mean_p.size();}
@@ -66,7 +71,7 @@ namespace AASS{
 				std::ofstream myfile;
 				if(!exists_test3(result_file)){
 					myfile.open (result_file);
-					myfile << "# mean_p mean_r mean_ir sd_p sd_r sd_ir f1_score g_score dor matthewsCC t m\n";
+					myfile << "# mean_p mean_r mean_ir sd_p sd_r sd_ir f1_score g_score dor matthewsCC accuracy t m\n";
 				}
 				else{
 					myfile.open (result_file, std::ios::out | std::ios::app);
@@ -76,7 +81,7 @@ namespace AASS{
 				{
 					for(int i = 0 ; i < _mean_p.size() ; ++i){
 						
-						myfile << _mean_p[i] << " " << _mean_r[i] << " " << _mean_ir[i] << " " << _sd_p[i] << " " << _sd_r[i] << " " << _sd_ir[i] << " " << _f1_score[i] << " " << _gscore[i] << " " << _dor[i] << " " << _mathiewCC[i] << " " << _t_value[i] << " " << _m_value[i] <<"\n";
+						myfile << _mean_p[i] << " " << _mean_r[i] << " " << _mean_ir[i] << " " << _sd_p[i] << " " << _sd_r[i] << " " << _sd_ir[i] << " " << _f1_score[i] << " " << _gscore[i] << " " << _dor[i] << " " << _mathiewCC[i] << " " << _accuracy[i] << " " << _t_value[i] << " " << _m_value[i] <<"\n";
 						
 					}
 					

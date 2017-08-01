@@ -290,6 +290,7 @@ int main(int argc, char** argv){
 				std::cout << "Process " << fn.string() << " with model " << model << std::endl;
 				
 				process(fn.string(), model, eval);
+// 				eval.calculate();
 				
 				std::cout << "SIZE " << eval.size() << std::endl;
 // 				if(i == 3){
