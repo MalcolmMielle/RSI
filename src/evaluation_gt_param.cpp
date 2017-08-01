@@ -300,7 +300,7 @@ int main(int argc, char** argv){
 					}
 					
 					eval.calculate();
-					evalparam.add(eval.getMeanPrecision(), eval.getMeanRecall(), eval.getMeanInverseRecall(), eval.getSDPrecision(), eval.getSDRecall(), eval.getSDInverseRecall(), t, m);
+					evalparam.add(eval, t, m);
 					
 				}
 			}

@@ -3,14 +3,16 @@
 void AASS::RSI::Evaluation::compare(const cv::Mat& seg, const cv::Mat& GT_segmentation, double time, const std::string& file)
 {
 	
-	cv::Mat img_hist_equalizedgt;
-	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);
-	cv::imshow("GT", img_hist_equalizedgt);
-	
-	cv::Mat img_hist_equalized;
-	cv::equalizeHist(seg, img_hist_equalized);
-	cv::imshow("seg", img_hist_equalized);
-	cv::waitKey(0);
+// 	cv::Mat img_hist_equalizedgt;
+// 	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);
+// 	cv::imshow("GT", img_hist_equalizedgt);
+// 	
+// 	cv::Mat img_hist_equalized;
+// 	cv::equalizeHist(seg, img_hist_equalized);
+// 	cv::imshow("seg", img_hist_equalized);
+// 	
+// 	
+// 	cv::waitKey(0);
 	
 	double min, max;
 	cv::minMaxLoc(GT_segmentation,&min,&max);
@@ -88,8 +90,8 @@ void AASS::RSI::Evaluation::exportAll(const std::string& file_out)
 			
 		}
 		
-		myfile << "\n\nprecision_mean recall_mean inverse_recall_mean precision_sd recall_sd inverse_recall_sd time_mean f1_score g_score\n";
-		myfile << _mean_p << " " << _mean_r << " " << _mean_ir << " " << _sd_p << " " << _sd_r << " " << _sd_ir << " " << mean<double>(_time) << " " <<_f1score << " " << _gscore <<  "\n";
+		myfile << "\n\nprecision_mean recall_mean inverse_recall_mean precision_sd recall_sd inverse_recall_sd time_mean f1_score g_score dor_score matthewCC\n";
+		myfile << _mean_p << " " << _mean_r << " " << _mean_ir << " " << _sd_p << " " << _sd_r << " " << _sd_ir << " " << mean<double>(_time) << " " <<_f1score << " " << _gscore << " " << _dor << " " << _matthewCC << "\n";
 		myfile.close();
 		
 		

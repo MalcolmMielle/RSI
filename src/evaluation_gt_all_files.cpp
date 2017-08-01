@@ -199,6 +199,14 @@ void process(const std::string& file, const std::string& full_path_GT, AASS::RSI
     cv::Mat graphmat = cv::Mat::zeros(slam1.size(), CV_8U);
     graph_slam.drawEvaluation(graphmat);
 	
+// 	cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
+//     graph_slam.draw(graphmat_vis);
+// 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
+// 	cv::imshow("GRAPH Visible", graphmat_vis);
+// 	
+// 	std::cout << "Zones " << graph_slam.getNumVertices() << std::endl;
+	
+	
 // 	cv::Mat partial = cv::Mat::zeros(slam1.size(), CV_8U);
 //     graph_slam.drawPartial(partial);
 	
@@ -206,11 +214,11 @@ void process(const std::string& file, const std::string& full_path_GT, AASS::RSI
 // 	cv::equalizeHist(graphmat, img_hist_equalized);
 // 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
 // 	cv::imshow("GRAPH", img_hist_equalized);
-	
-//     cv::Mat graphmat_vis = cv::Mat::zeros(slam1.size(), CV_8U);
-//     graph_slam.draw(graphmat_vis);
-// 	cv::resize(graphmat, graphmat, cv::Size(graphmat.cols * 2, graphmat.rows * 2));
-// 	cv::imshow("GRAPH Visible", graphmat_vis);
+// 	cv::waitKey(0);
+// 	
+// 	std::cout << graphmat << std::endl;
+// 	exit(0);
+
 	
 // 	std::cout << "Size of graph" << graph_slam.getNumVertices() << std::endl;
     

@@ -157,6 +157,10 @@ namespace AASS{
 			size_t size(){return _precision.size();}
 			void compare(const cv::Mat& seg, const cv::Mat& GT_segmentation, double time, const std::string& file);
 			void exportAll(const std::string& file_out);
+			double getMatthewsCC(){return _matthewCC;};
+			double getFscore(){return _f1score;}
+			double getGscore(){return _gscore;}
+			double getDOR(){return _dor;}
 			
 		private:
 			void computeMeasures();
