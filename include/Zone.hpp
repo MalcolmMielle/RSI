@@ -56,7 +56,7 @@ namespace AASS{
 			std::tuple<cv::Point, cv::Point, cv::Point> _pca;
 			double _pca_orientation;
 			
-			std::vector< std::vector< cv::Point> > _contours;
+			std::vector< std::vector< cv::Point2i> > _contours;
 			
 			bool _isUnique;
 			double _uniqueness_score;
@@ -629,12 +629,15 @@ namespace AASS{
 				
 				auto contact_point = getContactPoint(zone);
 				
-				int size_c = 0;
+				//Can't store cv::Point directly because no "<" operator.
+				std::set<std::pair<int, int> > all_contour;
 				for(auto it = _contours.begin() ; it != _contours.end() ; ++it){
-					size_c = size_c + it->size();
+					for(auto it2 = it->begin(); it2 != it->end() ; ++it2){
+						all_contour.insert(std::pair<int, int>(it2->x, it2->y) );
+					}
 				}
 				
-				auto percent = contact_point.size() * 100 / size_c;
+				auto percent = contact_point.size() * 100 / all_contour.size();
 // 				std::cout << "Percent " << percent << std::endl;
 				
 // 				cv::imshow("input",zone.getZoneMat());
