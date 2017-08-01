@@ -23,7 +23,7 @@
 #include "Kmean.hpp"
 #include "ZoneReducer.hpp"
 #include "Segmentor.hpp"
-#include "Evaluation.hpp"
+#include "EvaluationParam.hpp"
 
 void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const cv::Mat& obstacle, const cv::Mat& obstacle_model, std::vector< std::pair<AASS::RSI::GraphZone::Vertex, AASS::RSI::GraphZone::Vertex> > matches){
 	
@@ -169,9 +169,11 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 
 
 
-void process(const std::string& file, const std::string& full_path_GT, AASS::RSI::Evaluation& eval){
+void process(const std::string& file, const std::string& full_path_GT, AASS::RSI::Evaluation& eval, double t, double m){
 
 	AASS::RSI::GraphZone graph_slam;
+	graph_slam.setThreshold(t);
+	graph_slam.setMargin(m);
 	
 	cv::Mat slam_in = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	assert(CV_LOAD_IMAGE_GRAYSCALE == 0);
@@ -182,11 +184,11 @@ void process(const std::string& file, const std::string& full_path_GT, AASS::RSI
 // 	cv::imshow("map in", slam);
 // 	cv::waitKey(0);
 	
-	
+	std::cout << "T" << graph_slam.getT() << std::endl;
 	double time = 0;
 // 	makeGraph(slam, graph_slam, time);
 	AASS::RSI::Segmentor segmenteur;
-	time = segmenteur.segmentImage(slam, graph_slam);
+	time = segmenteur.segmentImage(slam, graph_slam, t, m);
 	cv::Mat segmented_map = segmenteur.getSegmentedMap();
 	
 	std::cout << "Total time: " << time << std::endl;
@@ -242,7 +244,7 @@ int main(int argc, char** argv){
 // 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 		
 	
-	AASS::RSI::Evaluation eval;
+	AASS::RSI::EvaluationParam evalparam;
 	
 	std::string path_file = argv[1];
 	std::string path_gt = argv[2];
@@ -262,32 +264,45 @@ int main(int argc, char** argv){
 		
 		if(boost::filesystem::is_directory(p)){
 			
+			double t = 0;
+			double m = 0.1;
+			
+			for(t = 0; t <= 1 ; t = t + 0.05){
+				for(m = 0; m <= 1 ; m = m + 0.05){
 			
 			
-			std::vector<boost::filesystem::path> v;
-			//Get all files and sort them
-			std::copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), std::back_inserter(v));
-			std::sort(v.begin(), v.end());
-			
-			
-			
-// 			int i = 0;
-			for (std::vector<boost::filesystem::path>::const_iterator it (v.begin()); it != v.end(); it = ++it)
-			{
-				boost::filesystem::path fn = *it;
-				
-				std::string name = fn.filename().string();
-				std::string model = path_gt + name;
-				
-				std::cout << "Process " << fn.string() << " with model " << model << std::endl;
-				
-				process(fn.string(), model, eval);
-				
-				std::cout << "SIZE " << eval.size() << std::endl;
-// 				if(i == 3){
-// 					return 0;
-// 				}
-// 				++i;
+					AASS::RSI::Evaluation eval;
+					
+					std::vector<boost::filesystem::path> v;
+					//Get all files and sort them
+					std::copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), std::back_inserter(v));
+					std::sort(v.begin(), v.end());
+					
+					
+					
+		// 			int i = 0;
+					for (std::vector<boost::filesystem::path>::const_iterator it (v.begin()); it != v.end(); it = ++it)
+					{
+						boost::filesystem::path fn = *it;
+						
+						std::string name = fn.filename().string();
+						std::string model = path_gt + name;
+						
+						std::cout << "Process " << fn.string() << " with model " << model << std::endl;
+						
+						process(fn.string(), model, eval, t, m);
+						
+						std::cout << "SIZE " << eval.size() << std::endl;
+		// 				if(i == 3){
+		// 					return 0;
+		// 				}
+		// 				++i;
+					}
+					
+					eval.calculate();
+					evalparam.add(eval.getMeanPrecision(), eval.getMeanRecall(), eval.getMeanInverseRecall(), eval.getSDPrecision(), eval.getSDRecall(), eval.getSDInverseRecall(), t, m);
+					
+				}
 			}
 		}
 	}
@@ -297,8 +312,8 @@ int main(int argc, char** argv){
 	}
 	
 	//add precision mean and recal + nb of file
-	std::string result_file = "maoris_all_measures.dat";
-	std::cout << "SIZE " << eval.size() << std::endl;
-	eval.exportAll(result_file);
+	std::string result_file = "maoris_param_test.dat";
+	std::cout << "SIZE " << evalparam.size() << std::endl;
+	evalparam.exportAll(result_file);
 
 }

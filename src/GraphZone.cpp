@@ -941,6 +941,7 @@ void AASS::RSI::GraphZone::removeVertexWhilePreservingEdges(AASS::RSI::GraphZone
 //Htis is n!*m n is node number and m is max number of edges
 void AASS::RSI::GraphZone::removeRiplesv3(int dist)
 {
+	
 	updateAllEdges();
 	
 	std::list<VertexZone> all_vertex;

@@ -1,8 +1,10 @@
 #include "Segmentor.hpp"
 
-double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& graph_src)
+double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& graph_src, double threshold, double margin)
 {
 					
+	std::cout << "T" << graph_src.getT() << std::endl;
+	
 //Draw the outer contours
 	cv::Mat outer;
 	src.copyTo(outer);
@@ -67,7 +69,8 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	
 	begin_process = getTime();
 	graph_src = zone_maker.getGraph();
-	graph_src.setThreshold(0.25);
+	graph_src.setThreshold(threshold);
+	graph_src.setMargin(margin);
 // 	graph_src.removeVertexValue(0);	
 	graph_src.removeVertexUnderSize(size_to_remove2, true);
 

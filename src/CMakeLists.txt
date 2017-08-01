@@ -2,6 +2,8 @@
 #			FuzzyOpening.cpp ZoneExtractor.cpp Kmean.cpp GraphZone.cpp
 #			)
 
+add_subdirectory(Evaluation)
+
 add_library(RSILIB
 			FuzzyOpening.cpp ZoneExtractor.cpp Kmean.cpp GraphZone.cpp ZoneCompared.cpp Zone.cpp GraphZoneLight.cpp ZoneComparedLight.cpp ZoneLight.cpp Segmentor.cpp
 			)
@@ -13,14 +15,19 @@ add_executable(segmentation_example segmentation_example.cpp)
 target_link_libraries(segmentation_example ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system)
 
 add_executable(evaluation_gt evaluation_gt.cpp)
-target_link_libraries(evaluation_gt ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system)
+target_link_libraries(evaluation_gt ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB Evaluation -lboost_unit_test_framework -lboost_filesystem -lboost_system)
 
 add_executable(evaluation_gt_all_files evaluation_gt_all_files.cpp)
-target_link_libraries(evaluation_gt_all_files ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_filesystem -lboost_system)
+target_link_libraries(evaluation_gt_all_files ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB Evaluation -lboost_filesystem -lboost_system)
+
+
+add_executable(evaluation_gt_param evaluation_gt_param.cpp)
+target_link_libraries(evaluation_gt_param ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB Evaluation -lboost_filesystem -lboost_system)
 
 
 add_executable(evaluation_2gt evaluation_2gt.cpp)
-target_link_libraries(evaluation_2gt ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system)
+target_link_libraries(evaluation_2gt ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB Evaluation -lboost_unit_test_framework -lboost_filesystem -lboost_system)
 
 # add_executable(thermal_segmentation thermal_segmentation.cpp)
 # target_link_libraries(thermal_segmentation ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
+

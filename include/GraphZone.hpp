@@ -65,6 +65,9 @@ namespace AASS{
 			
 			
 			void setThreshold(double t){if(t >= 0 && t<= 1){_threshold = t;}else{throw std::runtime_error("Threhsold needs to be between 0 and 1");}}
+			void setMargin(double m){if(m >= 0 && m<= 1){_margin_factor = m;}else{throw std::runtime_error("Margin needs to be between 0 and 1");}}
+			
+			double getT(){return _threshold;}
 			
 			void setNumUnique(int n){_nb_of_unique = n;}
 			double getNumUnique(){if(_nb_of_unique != -1){return _nb_of_unique;}else{return getNumVertices();}}

@@ -21,6 +21,8 @@
 #include "Kmean.hpp"
 #include "ZoneReducer.hpp"
 
+#include "Evaluation/Evaluation.hpp"
+
 inline bool exists_test3 (const std::string& name) {
   struct stat buffer;   
   return (stat (name.c_str(), &buffer) == 0); 
@@ -457,39 +459,44 @@ BOOST_AUTO_TEST_CASE(trying)
 	double pixel_precision, pixel_recall;
 	std::vector < std::vector<float> > Precisions, Recalls;
 	std::vector<double> Times;
-	compare_images(GT_segmentation, graphmat, pixel_precision, pixel_recall, Precisions, Recalls, Times);
 	
-	results pixel, Regions;
-	pixel.time = Regions.time = 0;
-	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
-
-	double min, max;
-	cv::minMaxLoc(GT_segmentation,&min,&max);
-	float rows = GT_segmentation.rows;
-	float cols = GT_segmentation.cols;
-	float proper_size = rows*cols/1000;
-	proper_size = proper_size/1000;
-			
-	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
+	AASS::RSI::Evaluation eval;
 	
-	boost::filesystem::path p(file);
-	std::string name = p.filename().stem().string();
+	eval.compare(GT_segmentation, graphmat, 0, "out");
 	
-	std::string result_file = "result.txt";
-	std::ofstream myfile;
-	if(!exists_test3(result_file)){
-		myfile.open (result_file);
-		myfile << "Name precision recall time labels size\n";
-	}
-	else{
-		myfile.open (result_file, std::ios::out | std::ios::app);
-	}
+// 	compare_images(GT_segmentation, graphmat, pixel_precision, pixel_recall, Precisions, Recalls, Times);
 	
-	if (myfile.is_open())
-	{
-		myfile << name << " " << Regions.precision << " " << Regions.recall << " " << Regions.time << " " << max << " " << proper_size << "\n";
-		myfile.close();
-	}
-	else std::cout << "Unable to open file";
+// 	results pixel, Regions;
+// 	pixel.time = Regions.time = 0;
+// 	extract_results(pixel, Regions, pixel_precision, pixel_recall, Precisions, Recalls, Times);
+// 
+// 	double min, max;
+// 	cv::minMaxLoc(GT_segmentation,&min,&max);
+// 	float rows = GT_segmentation.rows;
+// 	float cols = GT_segmentation.cols;
+// 	float proper_size = rows*cols/1000;
+// 	proper_size = proper_size/1000;
+// 			
+// 	std::cout << " No_Furniture Precision: " << Regions.precision << " Recall: "<< Regions.recall << " time: "<< Regions.time <<" Labels " << max <<"  size " << proper_size << std::endl;
+// 	
+// 	boost::filesystem::path p(file);
+// 	std::string name = p.filename().stem().string();
+// 	
+// 	std::string result_file = "result.txt";
+// 	std::ofstream myfile;
+// 	if(!exists_test3(result_file)){
+// 		myfile.open (result_file);
+// 		myfile << "Name precision recall time labels size\n";
+// 	}
+// 	else{
+// 		myfile.open (result_file, std::ios::out | std::ios::app);
+// 	}
+// 	
+// 	if (myfile.is_open())
+// 	{
+// 		myfile << name << " " << Regions.precision << " " << Regions.recall << " " << Regions.time << " " << max << " " << proper_size << "\n";
+// 		myfile.close();
+// 	}
+// 	else std::cout << "Unable to open file";
 
 }
