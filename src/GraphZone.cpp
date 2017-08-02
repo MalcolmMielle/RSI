@@ -440,6 +440,76 @@ bool AASS::RSI::GraphZone::asVerticesWithNoEdges()
 }
 
 
+double AASS::RSI::GraphZone::contactPointWithWalls(AASS::RSI::GraphZone::VertexZone v)
+{
+	EdgeIteratorZone out_i, out_end;
+	int contact_point = 0;	
+	
+	for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+		out_i != out_end;) {
+		EdgeZone e_second = *out_i;
+		VertexZone targ = boost::target(e_second, (*this));
+		contact_point = contact_point + (*this)[v].contactPoint((*this)[targ]);
+		out_i++;
+	}
+	assert(contact_point <= 100);
+	return contact_point;
+
+}
+
+
+
+void AASS::RSI::GraphZone::removeDoors()
+{
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	std::map<VertexZone, double> contact_point;
+	
+	int i = 0;
+	for (vp = boost::vertices((*this)); vp.first != vp.second;) {
+// 		std::cout << "Looking up vertex " << i << " with " << getNumVertices() << std::endl;
+		VertexZone v = *vp.first;
+		double contact = contactPointWithWalls(v);
+		++vp.first;
+		contact_point[v] = contact;
+	}
+	
+	i = 0;
+	for(auto it = contact_point.begin() ; it != contact_point.end() ;){
+// 		std::cout << "Looking up vertex " << i << " with " << contact_point.size() << std::endl;
+		++i;
+// 		auto it_copy = it;
+// 		++it;
+		if(it->second > 40){
+			EdgeIteratorZone out_i, out_end;
+			boost::tie(out_i, out_end) = boost::out_edges(it->first, (*this));
+			EdgeZone e_second = *out_i;
+			VertexZone targ = boost::target(e_second, (*this));
+			VertexZone v_to_fuse_in = targ;
+			
+			for (boost::tie(out_i, out_end) = boost::out_edges(it->first, (*this)); 
+				out_i != out_end;) {
+				EdgeZone e_second = *out_i;
+				VertexZone targ = boost::target(e_second, (*this));
+				if(contact_point[targ] < 40){
+					v_to_fuse_in = targ;
+				}
+				out_i++;
+			}
+
+			VertexZone vv = it->first;
+			removeVertexWhilePreservingEdges(vv, v_to_fuse_in, false);
+			(*this)[v_to_fuse_in].updateContour();
+			double contact = contactPointWithWalls(v_to_fuse_in);
+			contact_point[v_to_fuse_in] = contact;
+		}
+		
+		++it;
+
+	}
+
+}
+
+
 // void AASS::RSI::GraphZone::watershed()
 // {
 // 	//Find all "top node"

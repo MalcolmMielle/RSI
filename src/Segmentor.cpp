@@ -103,6 +103,9 @@ double AASS::RSI::Segmentor::segmentImage(cv::Mat& src, AASS::RSI::GraphZone& gr
 	
 	//Watershed Algorithm
 	graph_src.watershed();
+	
+	
+	graph_src.removeDoors();
 
 	
 	

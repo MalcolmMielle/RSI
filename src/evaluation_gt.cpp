@@ -271,4 +271,13 @@ BOOST_AUTO_TEST_CASE(trying)
 	eval.compare(graphmat_straight, GT_segmentation, time, file);
 	eval.exportAll("test.dat");
 	
+	std::vector<int> param;
+	param.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	param.push_back(9);
+	boost::filesystem::path p(file);
+	std::string name = p.filename().stem().string();
+	cv::imwrite(name + "_straighten.png", graphmat_straight, param);
+	cv::imwrite(name + ".png", graphmat, param);
+	
+	
 }

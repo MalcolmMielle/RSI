@@ -267,8 +267,8 @@ int main(int argc, char** argv){
 			double t = 0;
 			double m = 0.1;
 			
-			for(t = 0; t <= 1 ; t = t + 0.05){
-				for(m = 0; m <= 1 ; m = m + 0.05){
+			for(t = 0; t < 0.85 ; t = t + 0.05){
+// 				for(m = 0; m <= 1 ; m = m + 0.05){
 			
 			
 					AASS::RSI::Evaluation eval;
@@ -303,7 +303,7 @@ int main(int argc, char** argv){
 					evalparam.add(eval, t, m);
 					
 				}
-			}
+// 			}
 		}
 	}
 	catch (const boost::filesystem::filesystem_error& ex)

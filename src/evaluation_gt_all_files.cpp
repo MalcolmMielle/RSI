@@ -169,7 +169,7 @@ void draw(AASS::RSI::GraphZone& gp_real, AASS::RSI::GraphZone& gp_model, const c
 
 
 
-void process(const std::string& file, const std::string& full_path_GT, AASS::RSI::Evaluation& eval){
+void process(const std::string& file, const std::string& full_path_GT, AASS::RSI::Evaluation& eval, bool write = false){
 
 	AASS::RSI::GraphZone graph_slam;
 	
@@ -234,6 +234,16 @@ void process(const std::string& file, const std::string& full_path_GT, AASS::RSI
 	cv::Mat GT_segmentation = AASS::RSI::segment_Ground_Truth(image_GT);
 	cv::Mat graphmat_straight = AASS::RSI::segment_Ground_Truth(segmented_map);
 	
+	if(write == true){
+		std::vector<int> param;
+		param.push_back(CV_IMWRITE_PNG_COMPRESSION);
+		param.push_back(9);
+		boost::filesystem::path p(file);
+		std::string name = p.filename().stem().string();
+		cv::imwrite(name + "_straighten.png", graphmat_straight, param);
+		cv::imwrite(name + ".png", graphmat, param);
+	}
+	
 // 	cv::Mat img_hist_equalizedgt;
 // 	cv::equalizeHist(GT_segmentation, img_hist_equalizedgt);
 // 	cv::imshow("GT", img_hist_equalizedgt);
@@ -254,6 +264,8 @@ int main(int argc, char** argv){
 	
 	std::string path_file = argv[1];
 	std::string path_gt = argv[2];
+	
+	bool write = argv[3];
 // 	std::string file = "../../Test/Thermal/cold.jpg";
 	
 	boost::filesystem::path p(path_file);
@@ -289,7 +301,7 @@ int main(int argc, char** argv){
 				
 				std::cout << "Process " << fn.string() << " with model " << model << std::endl;
 				
-				process(fn.string(), model, eval);
+				process(fn.string(), model, eval, write);
 // 				eval.calculate();
 				
 				std::cout << "SIZE " << eval.size() << std::endl;

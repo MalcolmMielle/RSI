@@ -143,7 +143,13 @@ namespace AASS{
 			 * @brief watershed. DO NOT USE DIRECTLY. Indeed, the parameter thrshold is also used by the ripple removal so it should be the same. One should use watershed()
 			 * @param[in] threshold : fraction representing the fraction of the biggest value of cluster until a new cluster must created. If init node got value 100 and threshold = 1/10 then if the new node as 90 or less, it is not fused.
 			 */
-			void watershed(double threshold);			
+			void watershed(double threshold);	
+			
+			/*** Attempt to remove doors that were too big ot be detected by the ripple removal
+			 */
+			void removeDoors();
+			
+			double contactPointWithWalls(AASS::RSI::GraphZone::VertexZone v);
 			
 			bool lonelyVertices(){
 				std::pair<AASS::RSI::GraphZone::VertexIteratorZone, AASS::RSI::GraphZone::VertexIteratorZone> vp;

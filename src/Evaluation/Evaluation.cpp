@@ -86,7 +86,7 @@ void AASS::RSI::Evaluation::exportAll(const std::string& file_out)
 	{
 		for(int i = 0 ; i < _precision.size() ; ++i){
 			
-			myfile << _name[i] << " " << _precision[i] << " " << _recall[i] << " " << _inverse_recall[i] << " " << _time[i] << " " << _labels[i] << " " << _proper_size[i] << "" << _f1_score_individual[i] << " " << _g_score_individual[i] << " " << _dor_individual[i] << " " << _matthewCC_individual[i] << " " << _accuracy_individual[i] <<  " " << "\n";
+			myfile << _name[i] << " " << _precision[i] << " " << _recall[i] << " " << _inverse_recall[i] << " " << _time[i] << " " << _labels[i] << " " << _proper_size[i] << " " << _f1_score_individual[i] << " " << _g_score_individual[i] << " " << _dor_individual[i] << " " << _matthewCC_individual[i] << " " << _accuracy_individual[i] <<  " " << "\n";
 			
 		}
 		
@@ -547,15 +547,15 @@ cv::Mat AASS::RSI::segment_Ground_Truth(cv::Mat GroundTruth_BW)
 	assert(checkAllValue(drawing, all_vals) == true);
 	for( ; idx >= 0; idx = hierarchy[idx][0] )
 	{
-		std::cout << "Contour" << std::endl;
+// 		std::cout << "Contour" << std::endl;
 		cv::drawContours( drawing, contours, idx, count , CV_FILLED, 8, hierarchy );
 // 		std::cout << drawing << std::endl;
 		all_vals.push_back(count);
 // 		cv::imshow("Contours", drawing);
 // 		cv::waitKey(0);
-		assert(checkAllValue(drawing, all_vals) == true && "After draw con");
+// 		assert(checkAllValue(drawing, all_vals) == true && "After draw con");
 		count++;
-		std::cout << "Values " << color*count << std::endl;
+// 		std::cout << "Values " << color*count << std::endl;
 		
 	}
 	assert(checkAllValue(drawing, all_vals) == true);
