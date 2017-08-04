@@ -1,0 +1,266 @@
+ytuple [107, 829] [107, 844] [110, 829]
+Updating PCA 
+getOrinetation
+ytuple [33, 834] [33, 845] [36, 834]
+Size of graph7
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x4989D4: AASS::RSI::GraphZoneRI::zoneUniquenessWasCalculated() (GraphZoneRI.hpp:182)
+==28870==    by 0x49947D: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:89)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58F021A: boost::unit_test::traverse_test_tree(boost::unit_test::test_suite const&, boost::unit_test::test_tree_visitor&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x4989D4: AASS::RSI::GraphZoneRI::zoneUniquenessWasCalculated() (GraphZoneRI.hpp:182)
+==28870==    by 0x49948F: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:89)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58F021A: boost::unit_test::traverse_test_tree(boost::unit_test::test_suite const&, boost::unit_test::test_tree_visitor&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+TATENTIONDKJ 1 sadoifdsgiouh 1
+Creating the smilarity
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x243F5F6E: std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, long) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x243F621F: std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::do_put(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, bool) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x24402C8A: std::ostream& std::ostream::_M_insert<bool>(bool) (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x4E036B: AASS::RSI::ZoneRI::isUnique() const (ZoneRI.hpp:88)
+==28870==    by 0x4DFAAA: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1493)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+==28870== Use of uninitialised value of size 8
+==28870==    at 0x243F4DD3: ??? (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x243F5F99: std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, long) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x243F621F: std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::do_put(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, bool) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x24402C8A: std::ostream& std::ostream::_M_insert<bool>(bool) (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x4E036B: AASS::RSI::ZoneRI::isUnique() const (ZoneRI.hpp:88)
+==28870==    by 0x4DFAAA: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1493)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x243F4DDF: ??? (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x243F5F99: std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, long) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x243F621F: std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::do_put(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, bool) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x24402C8A: std::ostream& std::ostream::_M_insert<bool>(bool) (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x4E036B: AASS::RSI::ZoneRI::isUnique() const (ZoneRI.hpp:88)
+==28870==    by 0x4DFAAA: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1493)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x243F5FCC: std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, long) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x243F621F: std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::do_put(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, bool) const (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x24402C8A: std::ostream& std::ostream::_M_insert<bool>(bool) (in /usr/lib64/libstdc++.so.6.0.21)
+==28870==    by 0x4E036B: AASS::RSI::ZoneRI::isUnique() const (ZoneRI.hpp:88)
+==28870==    by 0x4DFAAA: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1493)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+Watwat uniqueness 237
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x4DFAAD: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1493)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58F021A: boost::unit_test::traverse_test_tree(boost::unit_test::test_suite const&, boost::unit_test::test_tree_visitor&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+Watwat uniqueness 237
+==28870== Conditional jump or move depends on uninitialised value(s)
+==28870==    at 0x4DFAD6: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1493)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58F021A: boost::unit_test::traverse_test_tree(boost::unit_test::test_suite const&, boost::unit_test::test_tree_visitor&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870== 
+PCA diff 
+pca max min 32.0156 17.8045
+Size diff 
+PCA diff 
+pca max min 32.0156 17.8045
+Size diff 
+Similar size
+Similar pca
+OUT
+RES 0
+PRESSED
+WHYYYY-0.59787
+NEXT
+Watwat uniqueness 237
+Watwat uniqueness 237
+PCA diff 
+pca max min 32.0156 17.8045
+Size diff 
+PCA diff 
+pca max min 103.175 20.025
+Size diff 
+Similar size
+Similar pca
+OUT
+RES 0.249059
+PRESSED
+WHYYYY-0.59787
+NEXT
+Watwat uniqueness 237
+Watwat uniqueness 237
+PCA diff 
+pca max min 32.0156 17.8045
+Size diff 
+PCA diff 
+pca max min 385.877 350.708
+Size diff 
+OUT
+==28870== Invalid write of size 1
+==28870==    at 0x495CD7: AASS::maoris::Zone::drawZone(cv::Mat&, cv::Scalar_<double> const&) const (Zone.hpp:181)
+==28870==    by 0x4DFD97: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1507)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==  Address 0x48cb7831 is 209 bytes inside an unallocated block of size 1,045,376 in arena "client"
+==28870== 
+==28870== Invalid write of size 1
+==28870==    at 0x495DD3: AASS::maoris::Zone::drawContour(cv::Mat&, cv::Scalar_<double> const&) const (Zone.hpp:191)
+==28870==    by 0x4DFDF2: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1508)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==  Address 0x48cb7799 is 57 bytes inside an unallocated block of size 1,045,376 in arena "client"
+==28870== 
+RES 1
+PRESSED
+WHYYYY-0.59787
+NEXT
+Watwat uniqueness 237
+Watwat uniqueness 237
+PCA diff 
+pca max min 32.0156 17.8045
+Size diff 
+PCA diff 
+pca max min 830.945 90.802
+Size diff 
+OUT
+RES 1
+PRESSED
+WHYYYY-0.59787
+NEXT
+Watwat uniqueness 237
+Watwat uniqueness 237
+--28870-- VALGRIND INTERNAL ERROR: Valgrind received a signal 11 (SIGSEGV) - exiting
+--28870-- si_code=128;  Faulting address: 0x0;  sp: 0x802ea9df0
+
+valgrind: the 'impossible' happened:
+   Killed by fatal signal
+
+host stacktrace:
+==28870==    at 0x38091043: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+==28870==    by 0x3809256D: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+==28870==    by 0x38050D03: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+==28870==    by 0x38050ECB: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+==28870==    by 0x38051099: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+==28870==    by 0x380D527B: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+==28870==    by 0x380E3C46: ??? (in /usr/lib64/valgrind/memcheck-amd64-linux)
+
+sched status:
+  running_tid=1
+
+Thread 1: status = VgTs_Runnable (lwpid 28870)
+==28870==    at 0x4C29216: operator new(unsigned long) (vg_replace_malloc.c:334)
+==28870==    by 0x4A97F3: __gnu_cxx::new_allocator<cv::Point_<int>*>::allocate(unsigned long, void const*) (new_allocator.h:104)
+==28870==    by 0x4A75DC: std::allocator_traits<std::allocator<cv::Point_<int>*> >::allocate(std::allocator<cv::Point_<int>*>&, unsigned long) (alloc_traits.h:491)
+==28870==    by 0x4A4AE6: std::_Deque_base<cv::Point_<int>, std::allocator<cv::Point_<int> > >::_M_allocate_map(unsigned long) (stl_deque.h:615)
+==28870==    by 0x4A139E: std::_Deque_base<cv::Point_<int>, std::allocator<cv::Point_<int> > >::_M_initialize_map(unsigned long) (stl_deque.h:688)
+==28870==    by 0x49FC5A: std::_Deque_base<cv::Point_<int>, std::allocator<cv::Point_<int> > >::_Deque_base(std::allocator<cv::Point_<int> > const&, unsigned long) (stl_deque.h:498)
+==28870==    by 0x49CD41: std::deque<cv::Point_<int>, std::allocator<cv::Point_<int> > >::deque(std::deque<cv::Point_<int>, std::allocator<cv::Point_<int> > > const&) (stl_deque.h:943)
+==28870==    by 0x497C26: AASS::maoris::Zone::Zone(AASS::maoris::Zone const&) (Zone.hpp:35)
+==28870==    by 0x497CFC: AASS::RSI::ZoneRI::ZoneRI(AASS::RSI::ZoneRI const&) (ZoneRI.hpp:25)
+==28870==    by 0x4E0728: AASS::RSI::ZoneComparedInterface::ZoneComparedInterface(AASS::RSI::ZoneRI const&, AASS::RSI::ZoneRI const&) (ZoneCompared.hpp:37)
+==28870==    by 0x4E03B7: AASS::RSI::ZoneRI::compare(AASS::RSI::ZoneRI const&) const (ZoneRI.cpp:13)
+==28870==    by 0x4DFB40: AASS::RSI::GraphZoneRI::compare(AASS::RSI::GraphZoneRI&) (GraphZoneRI.cpp:1499)
+==28870==    by 0x49950A: AASS::RSI::HungarianMatcher::match(AASS::RSI::GraphZoneRI&, AASS::RSI::GraphZoneRI&, std::vector<int, std::allocator<int> >&) (HungarianMatcher.hpp:95)
+==28870==    by 0x493901: trying::test_method() (test_zone_hungarian_itself.cpp:139)
+==28870==    by 0x493500: trying_invoker() (test_zone_hungarian_itself.cpp:95)
+==28870==    by 0x4B7573: boost::unit_test::ut_detail::unused boost::unit_test::ut_detail::invoker<boost::unit_test::ut_detail::unused>::invoke<void (*)()>(void (*&)()) (callback.hpp:56)
+==28870==    by 0x4B6B55: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+==28870==    by 0x58D2FB0: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BC2B5: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BCAD2: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D30E1: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BED3D: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58F021A: boost::unit_test::traverse_test_tree(boost::unit_test::test_suite const&, boost::unit_test::test_tree_visitor&) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58BDC01: boost::unit_test::framework::run(unsigned long, bool) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x58D1536: boost::unit_test::unit_test_main(bool (*)(), int, char**) (in /usr/lib64/libboost_unit_test_framework.so.1.58.0)
+==28870==    by 0x492B87: main (unit_test.hpp:59)
+
+
+Note: see also the FAQ in the source distribution.
+It contains workarounds to several common problems.
+In particular, if Valgrind aborted or crashed after
+identifying problems in your program, there's a good chance
+that fixing those problems will prevent Valgrind aborting or
+crashing, especially if it happened in m_mallocfree.c.
+
+If that doesn't help, please report this bug to: www.valgrind.org
+
+In the bug report, send all the above text, the valgrind
+version, and what OS and version you are using.  Thanks.
+

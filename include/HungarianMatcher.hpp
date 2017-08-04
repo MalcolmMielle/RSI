@@ -1,7 +1,7 @@
 #ifndef RSI_HUNGARIANMATCHER_23102016
 #define RSI_HUNGARIANMATCHER_23102016
 
-#include "GraphZone.hpp"
+#include "GraphZoneRI.hpp"
 #include "hungarian/hungarian.h"
 
 
@@ -11,14 +11,14 @@ namespace AASS{
 		
 // 		class Match{
 // 		public:
-// 			GraphZone::Vertex source;
-// 			GraphZone::Vertex target;
+// 			GraphZoneRI::Vertex source;
+// 			GraphZoneRI::Vertex target;
 // 			int score;
 // 
-// 			Match(const GraphZone::Vertex& firstt, const GraphZone::Vertex& secondd, int scoree) : source(firstt), target(secondd), score(scoree){}
+// 			Match(const GraphZoneRI::Vertex& firstt, const GraphZoneRI::Vertex& secondd, int scoree) : source(firstt), target(secondd), score(scoree){}
 // 			
 // 			//Return a value ranking the matching between 0 (bad) and 100 (perfect)
-// 			double getRanking(const GraphZone& gsource, const GraphZone& gtarget){
+// 			double getRanking(const GraphZoneRI& gsource, const GraphZoneRI& gtarget){
 // 				double uscore =  gsource[source].getUniquenessScore();
 // 				double uscore0 = gtarget[target].getUniquenessScore();				
 // 				return ((100 * std::min(uscore, uscore0)) + (100 - score)) / 2;
@@ -61,7 +61,7 @@ namespace AASS{
 				
 			}
 			
-			 std::vector< ZoneCompared > match(GraphZone& source, GraphZone& target, std::vector<int>& scores);
+			 std::vector< ZoneCompared > match(GraphZoneRI& source, GraphZoneRI& target, std::vector<int>& scores);
 			 
 			 const hungarian_problem_t& getHungarianProblem() const { return p;}
 			 hungarian_problem_t& getHungarianProblem() { return p;}
@@ -72,7 +72,7 @@ namespace AASS{
 			
 		private:
 			
-			void createCostMatrix(const GraphZone& source, const GraphZone& target);
+			void createCostMatrix(const GraphZoneRI& source, const GraphZoneRI& target);
 			
 		};
 		
@@ -84,7 +84,16 @@ namespace AASS{
 		 * @param[out] scores: list of score for the matching between 0 and 100. 0 is good and 100 is really bad.
 		 * @return vector of paris of matching between vertex.
 		 */
-		inline std::vector< ZoneCompared > AASS::RSI::HungarianMatcher::match(GraphZone& source, GraphZone& target, std::vector<int>& scores){
+		inline std::vector< ZoneCompared > AASS::RSI::HungarianMatcher::match(GraphZoneRI& source, GraphZoneRI& target, std::vector<int>& scores){
+			
+			cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+			source.draw(imgimg);
+			cv::imshow("in", imgimg);
+	
+			target.draw(imgimg);
+			cv::imshow("innnn", imgimg);
+			cv::waitKey(0);
+			
 			
 			std::cout << "TATENTIONDKJ " << source.zoneUniquenessWasCalculated() << " sadoifdsgiouh " << target.zoneUniquenessWasCalculated() << std::endl;
 // 			assert(source.zoneUniquenessWasCalculated() == true);
@@ -201,7 +210,7 @@ namespace AASS{
 // 										   res.at((j * target.getNumUnique()) + i).target, 
 // 										   simi.at( ( i*source.getNumUnique() ) + j));
 // 							out.push_back(m);
-// 							out.push_back(std::pair<GraphZone::Vertex, GraphZone::Vertex>(
+// 							out.push_back(std::pair<GraphZoneRI::Vertex, GraphZoneRI::Vertex>(
 // 								res.at((j * target.getNumUnique()) + i).source, 
 // 								res.at((j * target.getNumUnique()) + i).target)
 // 							);

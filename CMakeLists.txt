@@ -6,6 +6,7 @@ find_package( bettergraph REQUIRED)
 find_package( vodigrex REQUIRED)
 find_package( Boost REQUIRED )
 find_package( editDistance REQUIRED )
+find_package( maoris REQUIRED )
 if ( NOT Boost_FOUND )
   message(STATUS "This project requires the Boost library, and will not be compiled.")
   return()  
@@ -23,7 +24,7 @@ endforeach()
 
 add_definitions(-std=c++11)
 
-include_directories(include ${vodigrex_INCLUDE_DIRS} include/hungarian include/Evaluation)
+include_directories(include ${vodigrex_INCLUDE_DIRS} ${maoris_INCLUDE_DIRS} include/hungarian)
 
 add_subdirectory(src)
 
@@ -42,7 +43,7 @@ add_subdirectory(include)
 
 # install(TARGETS rsi RUNTIME DESTINATION bin)
 
-add_subdirectory(Test)
+add_subdirectory(Test) 
 
 
 # uninstall target

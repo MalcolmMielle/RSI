@@ -3,14 +3,15 @@
 
 #include <iterator>
 
-#include "Zone.hpp"
-#include "EdgeZone.hpp"
+#include "ZoneRI.hpp"
+#include "maoris/EdgeZone.hpp"
+// #include "EdgeZone.hpp"
 #include "bettergraph/SimpleGraph.hpp"
 
 namespace AASS{
 	namespace RSI{
 		
-		class GraphZone;
+		class GraphZoneRI;
 		
 		/**
 		 * @brief store the result of the comparison between two zone_similarity. Can be used without the graph structure at hand
@@ -19,8 +20,8 @@ namespace AASS{
 			protected:
 			//The closer to 0 the better!
 			double _similarity;
-			Zone _source_zone;
-			Zone _target_zone;
+			ZoneRI _source_zone;
+			ZoneRI _target_zone;
 			
 		public:
 			double zone_similarity;
@@ -33,12 +34,12 @@ namespace AASS{
 			double size_source;
 			double size_target;
 			
-			ZoneComparedInterface(const Zone& source, const Zone& target) : _source_zone(source), _target_zone(target), _similarity(-1), zone_size_factor_source(0){};
+			ZoneComparedInterface(const ZoneRI& source, const ZoneRI& target) : _source_zone(source), _target_zone(target), _similarity(-1), zone_size_factor_source(0){};
 			
-			const Zone& getSourceZone() const {return _source_zone;}
-			const Zone& getTargetZone() const {return _target_zone;}
-			Zone& getSourceZone(){return _source_zone;}
-			Zone& getTargetZone(){return _target_zone;}
+			const ZoneRI& getSourceZone() const {return _source_zone;}
+			const ZoneRI& getTargetZone() const {return _target_zone;}
+			ZoneRI& getSourceZone(){return _source_zone;}
+			ZoneRI& getTargetZone(){return _target_zone;}
 			
 			///@brief calculate the similarity value depending on all attributes
 // 			void update(){
@@ -69,7 +70,7 @@ namespace AASS{
 			/**
 			 * @brief use the uniqueness score of the zones AND the similarity score to give a goodness of matching between the two.
 			 */
-			double getRanking(const Zone& source, const Zone& target) const;
+			double getRanking(const ZoneRI& source, const ZoneRI& target) const;
 			
 			virtual void print(){std::cout << " score " << getSimilarity() << " size source " << size_source << " size target " << size_target << " diff size " <<size_diff << " pca diff " << pca_diff ;}
 		};
@@ -83,17 +84,17 @@ namespace AASS{
 		class ZoneCompared : public ZoneComparedInterface{
 			
 		public:
-			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex source;
-			bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex target;
+			bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex source;
+			bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex target;
 			
 			
-			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2, const Zone& source, const Zone& target);
+			ZoneCompared(const bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex& v2, const ZoneRI& source, const ZoneRI& target);
 			
-			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2, const GraphZone& graph);
+			ZoneCompared(const bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex& v2, const GraphZoneRI& graph);
 			
-			ZoneCompared(const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<Zone, EdgeElement>::Vertex& v2, const AASS::RSI::GraphZone& graph, const AASS::RSI::ZoneComparedInterface& in);
+			ZoneCompared(const bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex& v, const bettergraph::SimpleGraph<ZoneRI, maoris::EdgeElement>::Vertex& v2, const AASS::RSI::GraphZoneRI& graph, const AASS::RSI::ZoneComparedInterface& in);
 			
-			double getRanking(const GraphZone& gsource, const GraphZone& gtarget) const;
+			double getRanking(const GraphZoneRI& gsource, const GraphZoneRI& gtarget) const;
 			
 			virtual void print(){std::cout << " score " << getSimilarity() << " size source " << size_source << " size target " << size_target << " diff size " <<size_diff << " pca diff " << pca_diff ;}
 		};
