@@ -188,62 +188,62 @@
 // 
 // }
 // 
-// void AASS::maoris::GraphZone::drawUnique(cv::Mat& drawmat) const
-// {
-// 	
-// 	cv::Mat drawmat_old;
-// 	drawmat.convertTo(drawmat_old, CV_8U);
-// 	
-// 	cv::Scalar color;
-// 	cv::RNG rng(12345);
-// 	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
-// 	//vertices access all the vertix
-// 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
-// 		
-// 		if(drawmat.channels() == 1){
-// 			color = rng.uniform(0, 230);
-// 		}
-// 		else if(drawmat.channels() == 3){
-// 			color[0] = rng.uniform(0, 230);
-// 			color[1] = rng.uniform(0, 230);
-// 			color[2] = rng.uniform(0, 230);
-// 		}
-// 		
-// 		VertexZone v = *vp.first;
-// 		
-// 		if((*this)[v].isUnique()){
-// // 				if(getNumEdges(v) > 1){
-// 			
-// 			draw(drawmat, v, color);
-// 			
-// 			EdgeIteratorZone out_i, out_end;
-// 			EdgeZone e;
-// 			
-// 			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
-// 				out_i != out_end; ++out_i) {
-// 				e = *out_i;
-// 				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
-// 				if( (*this)[targ].getZone().size() > 100 ){
-// // 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
-// 				}
-// 			}
-// // 
-// 		}
-// 	}
-// 		
-// 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
-// 		
-// 		VertexZone v = *vp.first;
-// 		if((*this)[v].isUnique()){
+void AASS::RSI::GraphZoneRI::drawUnique(cv::Mat& drawmat) const
+{
+	
+	cv::Mat drawmat_old;
+	drawmat.convertTo(drawmat_old, CV_8U);
+	
+	cv::Scalar color;
+	cv::RNG rng(12345);
+	std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+	//vertices access all the vertix
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		if(drawmat.channels() == 1){
+			color = rng.uniform(0, 230);
+		}
+		else if(drawmat.channels() == 3){
+			color[0] = rng.uniform(0, 230);
+			color[1] = rng.uniform(0, 230);
+			color[2] = rng.uniform(0, 230);
+		}
+		
+		VertexZone v = *vp.first;
+		
+		if((*this)[v].isUnique()){
+// 				if(getNumEdges(v) > 1){
+			
+			draw(drawmat, v, color);
+			
+			EdgeIteratorZone out_i, out_end;
+			EdgeZone e;
+			
+			for (boost::tie(out_i, out_end) = boost::out_edges(v, (*this)); 
+				out_i != out_end; ++out_i) {
+				e = *out_i;
+				VertexZone src = boost::source(e, (*this)), targ = boost::target(e, (*this));
+				if( (*this)[targ].getZone().size() > 100 ){
+// 					cv::line(drawmat, (*this)[src].getCentroid(), (*this)[targ].getCentroid(), cv::Scalar(255));
+				}
+			}
 // 
-// 			EdgeIteratorZone out_i, out_end;
-// 			EdgeZone e;
-// 			(*this)[v].printLabel(drawmat);
-// 			
-// 		}
-// 	}
-// 
-// }
+		}
+	}
+		
+	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
+		
+		VertexZone v = *vp.first;
+		if((*this)[v].isUnique()){
+
+			EdgeIteratorZone out_i, out_end;
+			EdgeZone e;
+			(*this)[v].printLabel(drawmat);
+			
+		}
+	}
+
+}
 // 
 // 
 // void AASS::maoris::GraphZone::drawEvaluation(cv::Mat& m, const bettergraph::SimpleGraph<Zone, int>::Vertex& v, const cv::Scalar& color) const
@@ -1489,15 +1489,15 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZoneRI::compare(GraphZoneRI
 		for (vp_target = boost::vertices(target); vp_target.first != vp_target.second; ++vp_target.first) {
 			auto v_target = *vp_target.first;
 			
-			std::cout << "Let's go drawing all" << std::endl;
-			cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-			draw(imgimg);
-			cv::imshow("src", imgimg);
-			target.draw(imgimg);
-			cv::imshow("targ", imgimg);
-			cv::waitKey(0);
-			std::cout << "PPPPRESSSED" << std::endl;
-			
+// 			std::cout << "Let's go drawing all" << std::endl;
+// 			cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+// 			draw(imgimg);
+// 			cv::imshow("src", imgimg);
+// 			target.draw(imgimg);
+// 			cv::imshow("targ", imgimg);
+// 			cv::waitKey(0);
+// 			std::cout << "PPPPRESSSED" << std::endl;
+// 			
 			//Compare only if both zone are not non unique
 			if((*this)[v].isUnique() == true && target[v_target].isUnique() == true){
 			
@@ -1507,49 +1507,56 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZoneRI::compare(GraphZoneRI
 // 				ZoneCompared zoneout(v, v_target, *this);
 				auto zoneinterface = (*this)[v].compare(target[v_target]);
 				
-				std::cout << "Let's go drawing before creation" << std::endl;
-// 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-				draw(imgimg);
-				cv::imshow("src", imgimg);
-				target.draw(imgimg);
-				cv::imshow("targ", imgimg);
-				cv::waitKey(0);
-				std::cout << "PPPPRESSSED" << std::endl;
+// 				std::cout << "Let's go drawing before creation" << std::endl;
+// // 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+// 				draw(imgimg);
+// 				cv::imshow("src", imgimg);
+// 				target.draw(imgimg);
+// 				cv::imshow("targ", imgimg);
+// 				cv::waitKey(0);
+// 				std::cout << "PPPPRESSSED" << std::endl;
 				
 				
 				ZoneCompared zoneout(v, v_target, *this, zoneinterface);
 				
-				std::cout << "Let's go drawing all after creation" << std::endl;
-// 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-				draw(imgimg);
-				cv::imshow("src", imgimg);
-				target.draw(imgimg);
-				cv::imshow("targ", imgimg);
-				cv::waitKey(0); 
-				std::cout << "PPPPRESSSED" << std::endl;
+// 				std::cout << "Let's go drawing all after creation" << std::endl;
+// // 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+// 				draw(imgimg);
+// 				cv::imshow("src", imgimg);
+// 				target.draw(imgimg);
+// 				cv::imshow("targ", imgimg);
+// 				cv::waitKey(0); 
+// 				std::cout << "PPPPRESSSED" << std::endl;
 				
-				cv::Mat graphmat2 = cv::Mat::zeros(600,600, CV_8U);
-				(*this)[v].drawZone(graphmat2, cv::Scalar(100));
-				(*this)[v].drawContour(graphmat2, cv::Scalar(100));
-				cv::imshow("firstzone", graphmat2);
-				cv::Mat graphmat22 = cv::Mat::zeros(600,600, CV_8U);
-				target[v_target].drawZone(graphmat22, cv::Scalar(100));
-				target[v_target].drawContour(graphmat22, cv::Scalar(100));
-				cv::imshow("secondzone", graphmat22);
+// 				cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
+// 				std::cout << "Draw Zone" << std::endl;
+// 				(*this)[v].drawZone(graphmat2, cv::Scalar(100));
+// 				std::cout << "DrawContour" << std::endl;
+// 				(*this)[v].drawContour(graphmat2, cv::Scalar(100));
+// 				std::cout << "Done" << std::endl;
+// 				cv::imshow("firstzone", graphmat2);
+// 				cv::Mat graphmat22 = cv::Mat::zeros(1000,1000, CV_8U);
+// 				std::cout << "Draw Zone" << std::endl;
+// 				target[v_target].drawZone(graphmat22, cv::Scalar(100));
+// 				std::cout << "Draw Contour" << std::endl;
+// 				target[v_target].drawContour(graphmat22, cv::Scalar(100));
+// 				std::cout << "Done" << std::endl;
+// 				cv::imshow("secondzone", graphmat22);
+// 				std::cout << "INSHOW done" << std::endl;
+// 				
+// 				std::cout << "RES " << zoneout.getSimilarity() << std::endl;
 				
-				std::cout << "RES " << zoneout.getSimilarity() << std::endl;
-				
-				std::cout << "Let's go drawing all sim" << std::endl;
-// 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-				draw(imgimg);
-				cv::imshow("src", imgimg);
-				target.draw(imgimg);
-				cv::imshow("targ", imgimg);
-				cv::waitKey(0);
-				std::cout << "PPPPRESSSED sim" << std::endl;
+// 				std::cout << "Let's go drawing all sim" << std::endl;
+// // 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+// 				draw(imgimg);
+// 				cv::imshow("src", imgimg);
+// 				target.draw(imgimg);
+// 				cv::imshow("targ", imgimg);
+// 				cv::waitKey(0);
+// 				std::cout << "PPPPRESSSED sim" << std::endl;
 				
 // 				cv::waitKey(0);
-				std::cout << "PRESSED" << std::endl;
+// 				std::cout << "PRESSED" << std::endl;
 				
 				
 				//Create the zone comparison element with all values
@@ -1570,25 +1577,25 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZoneRI::compare(GraphZoneRI
 				
 				//Create the zoneout similarity value
 	// 			zoneout.update();
-								std::cout << "Let's go drawing before push back " << std::endl;
+				std::cout << "Let's go drawing before push back " << std::endl;
 // 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-				draw(imgimg);
-				cv::imshow("src", imgimg);
-				target.draw(imgimg);
-				cv::imshow("targ", imgimg);
-				cv::waitKey(0);
-				std::cout << "PPPPRESSSED sim" << std::endl;
+// 				draw(imgimg);
+// 				cv::imshow("src", imgimg);
+// 				target.draw(imgimg);
+// 				cv::imshow("targ", imgimg);
+// 				cv::waitKey(0);
+// 				std::cout << "PPPPRESSSED sim" << std::endl;
 				
-// 				out.push_back(zoneout);
+				out.push_back(zoneout);
 				
-								std::cout << "Let's go drawing after push back" << std::endl;
-// 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-				draw(imgimg);
-				cv::imshow("src", imgimg);
-				target.draw(imgimg);
-				cv::imshow("targ", imgimg);
-				cv::waitKey(0);
-				std::cout << "PPPPRESSSED sim" << std::endl;
+// 								std::cout << "Let's go drawing after push back" << std::endl;
+// // 				cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+// 				draw(imgimg);
+// 				cv::imshow("src", imgimg);
+// 				target.draw(imgimg);
+// 				cv::imshow("targ", imgimg);
+// 				cv::waitKey(0);
+// 				std::cout << "PPPPRESSSED sim" << std::endl;
 			}
 			else{
 				

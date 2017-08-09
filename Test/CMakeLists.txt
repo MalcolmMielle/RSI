@@ -44,8 +44,8 @@ add_executable(test_zone_hungarian_itself test_zone_hungarian_itself.cpp)
 target_link_libraries(test_zone_hungarian_itself ${OpenCV_LIBS} ${vodigrex_LIBRARIES} ${maoris_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
 # 
 # 
-# add_executable(test_zone_hungarian test_zone_hungarian.cpp)
-# target_link_libraries(test_zone_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
+add_executable(test_zone_hungarian test_zone_hungarian.cpp)
+target_link_libraries(test_zone_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} ${maoris_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
 
 
 # add_executable(test_valgrind_errors test_valgrind_errors.cpp)

@@ -115,10 +115,10 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	AASS::RSI::GraphZoneRI graph_slam(graph_segmented);
 	
+	
 	cv::Mat imgimg = cv::Mat::zeros(slam.size(), CV_8UC1);
 	graph_slam.draw(imgimg);
 	cv::imshow("SLAMish", imgimg);
-	
 	graph_slam.updatePCA();
 	graph_slam.setPCAClassification();
 	graph_slam.setSizesClassification();
@@ -145,7 +145,8 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	}
 	
 	
-	draw(graph_slam, graph_slam, slam , slam, match);
+	cv::Mat slam_tmp = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
+	draw(graph_slam, graph_slam, slam_tmp , slam_tmp, match);
 	cv::waitKey(0);
 	
 	std::cout << "FIN" << std::endl;

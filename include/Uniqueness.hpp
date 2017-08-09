@@ -16,7 +16,7 @@ namespace AASS{
 	namespace RSI{
 		
 		///@brief create a graph from a file image
-		void makeGraphSketch(const std::string& file, AASS::RSI::GraphZone& graph_slam){
+		void makeGraphSketch(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam){
 						
 			cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 		// 	
@@ -89,8 +89,8 @@ namespace AASS{
 			/**
 			 * @brief Match a graph onto itself and check the cost of matching one zone onto all the other. Use a normal distribution to know which ones are relevant.
 			 */
-			std::vector<std::pair<GraphZone::Vertex, double> > uniqueness(AASS::RSI::GraphZone& graph_slam) const {
-				std::vector<std::pair<GraphZone::Vertex, double> > out;
+			std::vector<std::pair<GraphZoneRI::Vertex, double> > uniqueness(AASS::RSI::GraphZoneRI& graph_slam) const {
+				std::vector<std::pair<GraphZoneRI::Vertex, double> > out;
 				//Match it onto itself
 // 				AASS::RSI::HungarianMatcher hungmatch;
 				
@@ -142,7 +142,7 @@ namespace AASS{
 						score = 0 ;
 					}
 					
-					out.push_back(std::pair<GraphZone::Vertex, double>(res[ (graph_slam.getNumVertices() * i)].source, score) );
+					out.push_back(std::pair<GraphZoneRI::Vertex, double>(res[ (graph_slam.getNumVertices() * i)].source, score) );
 					std::cout << "The score of the zone is " << score << std::endl << std::endl;
 					
 					graph_slam[res[ (graph_slam.getNumVertices() * i)].source].setUniqueness(uniq, score);
@@ -156,10 +156,10 @@ namespace AASS{
 				
 			}
 			
-			std::vector<std::pair<GraphZone::Vertex, double> > uniqueness(const std::string& file) const {
+			std::vector<std::pair<GraphZoneRI::Vertex, double> > uniqueness(const std::string& file) const {
 				
 				//Create the graph
-				AASS::RSI::GraphZone graph_slam;
+				AASS::RSI::GraphZoneRI graph_slam;
 				initGraph(file, graph_slam);
 						
 				
@@ -170,7 +170,7 @@ namespace AASS{
 			
 		private:
 			
-			bool initGraph(const std::string& file, AASS::RSI::GraphZone& graph_slam) const {
+			bool initGraph(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam) const {
 				
 				//Create the graph
 				makeGraphSketch(file, graph_slam);

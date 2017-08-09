@@ -50,6 +50,7 @@ namespace AASS{
 			};
 			
 			ZoneRI(const ZoneRI& zone_i){
+				std::cout << "Build ZoneRI" << std::endl;
 				_flag_PCA = zone_i._flag_PCA;
 				_uniqueness_calculated= zone_i._uniqueness_calculated;
 				_isUnique = zone_i._isUnique;
@@ -62,8 +63,11 @@ namespace AASS{
 				//Change it for a set for constant time find !
 // 				_zone = z.getZone();
 				for(auto it = zone_i.getZone().begin() ; it != zone_i.getZone().end() ; ++it){
-					_zone.push_back(*it);
+					auto tmp = *it;
+					_zone.push_back(tmp);
 				}
+				assert(_zone.size() == zone_i.getZone().size());
+				
 				///@brief sum of all value of x and y of all point in zone. For fast update and get of centroid
 				_sum_of_x_and_y = zone_i.getSumXY();
 				///@brief Zone drawn on the Mat
@@ -74,6 +78,7 @@ namespace AASS{
 			}
 			
 			ZoneRI(const maoris::Zone& z) : _flag_PCA(false), _uniqueness_calculated(false), _isUnique(true), _uniqueness_score(0), _size_classification(-1), _pca_classification(-1) {
+				std::cout << "Build ZoneRI from Zone" << std::endl;
 				//TODO
 				_use_cvMat = z.useCvMat();
 				_value = z.getValue();
