@@ -16,7 +16,8 @@ namespace AASS{
 	namespace RSI{
 		
 		///@brief create a graph from a file image
-		void makeGraphSketch(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam){
+		///TODO : wswitch to Segmentor
+		void makeGraphSketch(const std::string& file, AASS::maoris::GraphZone& graph_slam){
 						
 			cv::Mat slam = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 		// 	
@@ -27,7 +28,7 @@ namespace AASS{
 			cv::threshold(slam, slam, 20, 255, cv::THRESH_BINARY_INV);
 			
 			std::cout << "/************ FUZZY OPENING*************/ \n";
-			AASS::RSI::FuzzyOpening fuzzy_slam;
+			AASS::maoris::FuzzyOpening fuzzy_slam;
 			fuzzy_slam.fast(false);
 			
 			cv::Mat out_slam;
@@ -41,11 +42,11 @@ namespace AASS{
 			
 			std::cout << "/************ REDUCING THE SPACE OF VALUES *****************/\n";
 			cv::Mat out_tmp_slam;
-			AASS::RSI::reduceZone(out_slam, out_tmp_slam);
+			AASS::maoris::reduceZone(out_slam, out_tmp_slam);
 		// 	cv::imshow("REDUCED", out_tmp_slam);
 		// 	cv::waitKey(0);
 			
-			AASS::RSI::ZoneExtractor zone_maker;
+			AASS::maoris::ZoneExtractor zone_maker;
 			std::cout << "WHATERSHED SLAM" << std::endl;
 			zone_maker.extract(out_tmp_slam);
 			
@@ -173,19 +174,20 @@ namespace AASS{
 			bool initGraph(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam) const {
 				
 				//Create the graph
-				makeGraphSketch(file, graph_slam);
+				AASS::maoris::GraphZone gz;
+				makeGraphSketch(file, gz);
+				graph_slam = AASS::RSI::GraphZoneRI(gz);
 				
 				/********** PCA of all zones in Graph and removing the ripples **********/
 				
 				graph_slam.updatePCA();
-				graph_slam.removeRiplesv2();
+				//graph_slam.removeRiplesv2();
 								
 			}
 			
 			double variance(std::vector<int> input, double mean) const{
 				double variance = 0 ;
-				auto it = input.begin();
-				for(it ; it != input.end() ; ++it){
+				for(auto it = input.begin(); it != input.end() ; ++it){
 					variance = variance + ( (*it - mean) * (*it - mean) );
 // 					std::cout << "variance " << variance << std::endl;
 				}
@@ -195,8 +197,7 @@ namespace AASS{
 			
 			double mean(std::vector<int> input) const {
 				double sum = 0;
-				auto it = input.begin();
-				for(it ; it != input.end() ; ++it){
+				for(auto it = input.begin(); it != input.end() ; ++it){
 					sum = sum + (*it);
 				}
 				return sum / (double) input.size();
@@ -238,8 +239,7 @@ namespace AASS{
 				boost::math::normal nd(mean_v, sdeviation);
 				
 				bool flag_isUnique = false;
-				auto it = scores.begin();
-				for(it; it != scores.end() ; it++){
+				for(auto it = scores.begin(); it != scores.end() ; it++){
 					if(*it <= mean_v - sdeviation){
 						flag_isUnique = true;
 						double prob1 =  boost::math::cdf(nd, *it + 0.5);

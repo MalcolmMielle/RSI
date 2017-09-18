@@ -61,7 +61,7 @@ FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 FILE(GLOB files_hung "${CMAKE_CURRENT_SOURCE_DIR}/include/hungarian/*.h")
 INSTALL(FILES ${files} DESTINATION include/RSI)
 INSTALL(FILES ${files_hung} DESTINATION include/RSI/hungarian)
-#INSTALL(FILES rsi-config.cmake DESTINATION lib/RSI)
+INSTALL(FILES rsi-config.cmake DESTINATION lib/RSI)
 
 
 

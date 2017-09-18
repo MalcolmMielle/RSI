@@ -54,7 +54,7 @@ target_link_libraries(test_zone_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} $
 # add_executable(test_slam_hungarian test_slam_maps_hungarian.cpp)
 # target_link_libraries(test_slam_hungarian ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
 # # 
-# add_executable(test_uniqueness test_uniqueness.cpp)
-# target_link_libraries(test_uniqueness ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib)
+add_executable(test_uniqueness test_uniqueness.cpp)
+target_link_libraries(test_uniqueness ${OpenCV_LIBS} ${vodigrex_LIBRARIES} RSILIB -lboost_unit_test_framework -lboost_filesystem -lboost_system hungarian_lib ${maoris_LIBRARIES})
 
 add_subdirectory(stats_python)
