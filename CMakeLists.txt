@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(rsi)
 
+
+set(CMAKE_CXX_STANDARD 11)
+
 find_package( OpenCV REQUIRED)
 find_package( bettergraph REQUIRED)
 find_package( vodigrex REQUIRED)
@@ -22,7 +25,7 @@ foreach (_variableName ${_variableNames})
     message(STATUS "${_variableName}=${${_variableName}}")
 endforeach()
 
-add_definitions(-std=c++11)
+#add_definitions(-std=c++11)
 
 include_directories(include ${vodigrex_INCLUDE_DIRS} ${maoris_INCLUDE_DIRS} include/hungarian)
 

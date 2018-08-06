@@ -14,7 +14,7 @@
 
 #include "maoris/ZoneExtractor.hpp"
 #include "maoris/FuzzyOpening.hpp"
-#include "maoris/Kmean.hpp"
+//#include "maoris/Kmean.hpp"
 #include "maoris/ZoneReducer.hpp"
 #include "maoris/Segmentor.hpp"
 
