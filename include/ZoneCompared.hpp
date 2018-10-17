@@ -96,7 +96,7 @@ namespace AASS{
 			
 			double getRanking(const GraphZoneRI& gsource, const GraphZoneRI& gtarget) const;
 			
-			virtual void print(){std::cout << " score " << getSimilarity() << " size source " << size_source << " size target " << size_target << " diff size " <<size_diff << " pca diff " << pca_diff ;}
+			virtual void print() const {std::cout << " score " << getSimilarity() << " size source " << size_source << " size target " << size_target << " diff size " <<size_diff << " pca diff " << pca_diff ;}
 		};
 	}
 }
