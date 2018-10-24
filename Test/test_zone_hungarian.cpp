@@ -97,7 +97,7 @@ void draw(AASS::RSI::GraphZoneRI& gp_real, AASS::RSI::GraphZoneRI& gp_model, con
 
 
 
-void makeGraph(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam){
+cv::Mat makeGraph(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam){
 	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 /** Segmenting the map**/
@@ -117,12 +117,16 @@ void makeGraph(const std::string& file, AASS::RSI::GraphZoneRI& graph_slam){
 	graph_slam.updatePCA();
 	graph_slam.setPCAClassification();
 	graph_slam.setSizesClassification();
+
+	return segmented_map;
 }
 
 
 BOOST_AUTO_TEST_CASE(trying)
 {
-	
+
+	bool is_sketch = false;
+
 	int argc = boost::unit_test::framework::master_test_suite().argc;
 	char** argv = boost::unit_test::framework::master_test_suite().argv;
 	std::string file;
@@ -148,10 +152,10 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 		
 	AASS::RSI::GraphZoneRI graph_slam;
-	makeGraph(file, graph_slam);
+	cv::Mat graph_slam_segmented = makeGraph(file, graph_slam);
 	
 	AASS::RSI::GraphZoneRI graph_slam2;
-	makeGraph(file2, graph_slam2);
+	cv::Mat graph_slam2_segmented = makeGraph(file2, graph_slam2);
 	
 	
 	/********** PCA of all zones in Graph and removing the ripples **********/
@@ -235,18 +239,23 @@ BOOST_AUTO_TEST_CASE(trying)
 	
 	/********** Uniqueness *******************************************/
 	graph_slam.updateUnique();
-	graph_slam2.updateUnique();
+	if(is_sketch) {
+		graph_slam2.updateUnique();
+	}
+	else{
+		graph_slam2.updateUnique(graph_slam);
+	}
 	
 	assert(graph_slam.zoneUniquenessWasCalculated() == true);
 	assert(graph_slam2.zoneUniquenessWasCalculated() == true);
 
 	cv::Mat gmatu = cv::Mat::zeros(slam1.size(), CV_8U);
 	graph_slam.drawUnique(gmatu);
-	cv::imshow("input unique", gmatu);
+	cv::imshow("model unique", gmatu);
 
 	cv::Mat gmat2u = cv::Mat::zeros(slam2.size(), CV_8U);
 	graph_slam2.drawUnique(gmat2u);
-	cv::imshow("model unique", gmat2u);
+	cv::imshow("input unique", gmat2u);
 	cv::waitKey(0);
 	
 	
@@ -260,7 +269,8 @@ BOOST_AUTO_TEST_CASE(trying)
 // 	exit(0);
 	
 	std::sort(match.begin(), match.end(), [&graph_slam, &graph_slam2](AASS::RSI::ZoneCompared &match, AASS::RSI::ZoneCompared &match1){
-		return match.getRanking(graph_slam, graph_slam2) > match1.getRanking(graph_slam, graph_slam2); 
+//		return match.getRanking(graph_slam, graph_slam2) > match1.getRanking(graph_slam, graph_slam2);
+		return match.getSimilarity() < match1.getSimilarity();
 	} );
 	
 
@@ -276,14 +286,14 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " <<  " \nUniqueness : ";
 		
 		std::cout << graph_slam[match[i].source].getUniquenessScore() << " ";
-		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " ";
+		std::cout << graph_slam2[match[i].target].getUniquenessScore() << " sum of uniqueness score ";
 		std::cout << graph_slam[match[i].source].getUniquenessScore() + graph_slam2[match[i].target].getUniquenessScore() << " ";
 		
 		std::cout << "Match print :" << std::endl;
 		
 		match[i].print();
 		
-		std::cout << "\nrank " << match[i].getRanking(graph_slam, graph_slam2) << std::endl;
+		std::cout << "\nrank " << match[i].getSimilarity() << std::endl;
 		
 		std::cout << std::endl << "zone 1 ";
 		graph_slam[match[i].source].print();  
@@ -308,7 +318,7 @@ BOOST_AUTO_TEST_CASE(trying)
 	}
 	
 	cv::imshow("TEST", slam1);
-	draw(graph_slam, graph_slam2, slam1, slam2, match);
+	draw(graph_slam, graph_slam2, graph_slam_segmented, graph_slam2_segmented, match);
 	cv::waitKey(0);
 	
 }

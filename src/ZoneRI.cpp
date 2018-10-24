@@ -33,22 +33,41 @@ AASS::RSI::ZoneComparedInterface AASS::RSI::ZoneRI::compare(const AASS::RSI::Zon
 	//Each attribute can remove half of the res. Since the max distance between then is 1, it should not go under 0 
 	
 // 	std::cout << "score_pca " << score_pca << " score_size " << score_size << " score_pca_target " << score_pca_target << " score_size_target " << score_size_target << std::endl;
-	
-	
-	if(score_size <= score_size_target + 1 && score_size >= score_size_target - 1){
-		std::cout << "Similar size" << std::endl;
 
-		double sum_difference = std::abs(score_size - score_size_target);
-		sum_difference = sum_difference + std::abs(score_pca - score_pca_target);
-		similarity = sum_difference / 2;
 
-//		res = res - (0.5 - (std::abs(score_size - score_size_target) / 2 ));
-//		//If pca is 20% similar
-//// 		if(std::abs(score_pca - score_pca_target) < 0.20){
-//			std::cout << "Similar pca" << std::endl;
-//			res = res - (0.5 - (std::abs(score_pca - score_pca_target) / 2 ));
-//// 		}
+	double min_size = std::min(score_size, score_size_target);
+	double max_size = std::max(score_size, score_size_target);
+	double min_pca = std::min(score_pca, score_pca_target);
+	double max_pca = std::max(score_pca, score_pca_target);
+
+	double sum_difference = max_size - min_size;
+	assert(sum_difference >= 0);
+	sum_difference = sum_difference + (max_pca - min_pca);
+	assert(max_size - min_size >= 0);
+
+	std::cout << max_size<< " - " << min_size << " diff size " << max_size - min_size << " pca " << max_pca << " - " << min_pca << " diff pca " << max_pca - min_pca << std::endl;
+
+	similarity = sum_difference / 2;
+	if(similarity > 1){
+		similarity = 1;
 	}
+
+//	double diff_size = std::abs(score_size - score_size_target)
+	
+//	if(std::abs(score_size - score_size_target) <= 1){
+////		std::cout << "****************************************************** > Similar relative size: " << score_size << score_size_target << std::endl;
+//
+//		double sum_difference = std::abs(score_size - score_size_target);
+//		sum_difference = sum_difference + std::abs(score_pca - score_pca_target);
+//		similarity = sum_difference / 2;
+//
+////		res = res - (0.5 - (std::abs(score_size - score_size_target) / 2 ));
+////		//If pca is 20% similar
+////// 		if(std::abs(score_pca - score_pca_target) < 0.20){
+////			std::cout << "Similar pca" << std::endl;
+////			res = res - (0.5 - (std::abs(score_pca - score_pca_target) / 2 ));
+////// 		}
+//	}
 
 
 	

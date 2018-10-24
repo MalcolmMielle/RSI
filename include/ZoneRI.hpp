@@ -184,8 +184,8 @@ namespace AASS{
 				std::stringstream precisionValue2;
 				precisionValue2.precision(2);
 				precisionValue2 << _pca_classification << std::endl;
-// 				text = text + " sd " + precisionValue.str() + " pd " + precisionValue2.str() ;
-// 				text = text + ":s:" + textsi;
+ 				text = text + " sd " + precisionValue.str() + " \n pd " + precisionValue2.str() + " \n " ;
+ 				text = text + ":s:" + textsi;
 				cv::putText(img, text, getCentroid(), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255));
 			}
 			

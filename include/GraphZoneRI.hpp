@@ -95,7 +95,14 @@ namespace AASS{
 				}
 				
 				
-			};
+			}
+
+			bool isPCAClassified() const {return _pca_classified;}
+			bool isSizeClassified() const {return _size_classified;}
+			double getMeanPCA() const {return _mean_pca;}
+			double getMeanSize() const {return _mean_size;}
+			double getStandardDeviationPCA() const {return _sdeviation_pca;}
+			double getStandardDeviationSize() const {return _sdeviation_size;}
 			
 			
 			void draw(cv::Mat& m, const maoris::GraphZoneInterface<ZoneRI, maoris::EdgeElement>::Vertex& v, const cv::Scalar& color) const
@@ -233,6 +240,37 @@ namespace AASS{
 // 				setSizesClassification();
 // 				setPCAClassification();
 // 			}
+
+
+			void updateUnique(GraphZoneRI& gp_model){
+
+				std::cout << "Update uniqueness" << std::endl;
+// 				update();
+				if(gp_model.isPCAClassified() == false){
+					gp_model.updatePCA();
+					gp_model.setPCAClassification();
+//					throw std::runtime_error("PCA wasn't classified before searching for unique zones in model");
+				}
+				if(gp_model.isSizeClassified() == false){
+					gp_model.setSizesClassification();
+//					throw std::runtime_error("Size wasn't classified before searching for unique zones in model");
+				}
+//				if(_pca_classified == false) {
+					updatePCA();
+					double mean_pca = gp_model.getMeanPCA() ;
+					double standard_deviation_pca = gp_model.getStandardDeviationPCA();
+					setPCAClassification(mean_pca, standard_deviation_pca);
+//				}
+//				if(_size_classified == false) {
+					double mean_size = gp_model.getMeanSize();
+					double standard_deviation_size = gp_model.getStandardDeviationSize();
+					setSizesClassification(mean_size, standard_deviation_size);
+//				}
+
+				updateUnique();
+
+			}
+
 // 			
 			/**
 			 * @brief set if every zone is unique or not
@@ -252,8 +290,8 @@ namespace AASS{
 				
 				int count = 0;
 				
-				boost::math::normal nd_pca(_mean_pca, _sdeviation_pca);
-				boost::math::normal nd_size(_mean_size, _sdeviation_size);
+//				boost::math::normal nd_pca(_mean_pca, _sdeviation_pca);
+//				boost::math::normal nd_size(_mean_size, _sdeviation_size);
 
 				boost::math::normal nd_unit(0, 1);
 
@@ -378,13 +416,64 @@ namespace AASS{
 //				exit(0);
 				
 			}
-			
-			
+
+			//TODO
+			//Use the mean and standard deviation for standardization
+			void setPCAClassification(double mean, double standard_deviation) {
+
+// 				std::cout << "set PCA Classification " << std::endl;
+				std::vector<double> pca_comp;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 				double max = -1, min = -1;
+				auto vp = boost::vertices((*this));
+				for(vp ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					double si = (*this)[v].getPCADiff();
+					pca_comp.push_back(si);
+
+				}
+
+// 				assert(max != -1);
+// 				assert(min != -1);
+				assert(pca_comp.size() == getNumVertices());
+				_mean_pca = maoris::mean<double>(pca_comp);
+				_variance_pca = maoris::variance<double>(pca_comp, _mean_pca);
+				_sdeviation_pca = sqrt(_variance_pca);
+
+				auto standardized = standardization(pca_comp, mean, standard_deviation);
+
+// 				std::cout << "max " << max << " min " << min << std::endl;
+// 				double div = (max - min);
+// 				assert(div != 0);
+// 				std::cout << "div " << div << " min " << min << std::endl;
+
+				std::vector<double> all_scores;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 				int max = -1, min = -1;
+				vp = boost::vertices((*this));
+				int i = 0;
+				for(vp ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+
+					assert((*this)[v].getPCADiff() == pca_comp[i]);
+					std::cout << (pca_comp[i] - _mean_pca) / _sdeviation_pca  << " == " << standardized[i] << std::endl;
+//					assert(((pca_comp[i] - _mean_pca) / _sdeviation_pca) == standardized[i]);
+
+// 					std::cout << "SCORE" << standardized[i] << std::endl;
+					(*this)[v].setPCAClassification(standardized[i]);
+					++i ;
+				}
+
+				_pca_classified = true;
+
+// 				std::cout <<"DONE" << std::endl;
+			}
+
+
 			//TODO 
 			//THAT DOESN*T MAKE SENSE WE DON*T CARE IF THE PCA ARE THE SAME RELATIVE TO OTHER PCA. This could create matching between relatively different pca. PCA is an "exact measure when calculating the difference"
 			///@brief force the value of each zone depending on the uniqueness of the PCA. Normalize it between 0 for the smallest difference and 1 for the largest.
 			void setPCAClassification() {
-				
 				
 // 				std::cout << "set PCA Classification " << std::endl;
 				std::vector<double> pca_comp;
@@ -436,6 +525,57 @@ namespace AASS{
 				_pca_classified = true;
 				
 // 				std::cout <<"DONE" << std::endl;
+			}
+
+			///@brief force the value of each zone depending on the size from biggest zone to smallest. Normalize it between 0 for the smallest zone and 1 for the largest.
+			void setSizesClassification(double mean, double standard_deviation) {
+
+// 				std::cout << "set PCA Classification " << std::endl;
+				std::vector<double> size_comp;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 				double max = -1, min = -1;
+				auto vp = boost::vertices((*this));
+				for(vp ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+					double si = (*this)[v].size();
+					size_comp.push_back(si);
+// 					if(max == -1 || max < si){
+// 						max = si;
+// 					}
+// 					if(min == -1 || min > si){
+// 						min = si;
+// 					}
+				}
+
+// 				assert(max != -1);
+// 				assert(min != -1);
+				assert(size_comp.size() == getNumVertices());
+				_mean_size = maoris::mean<double>(size_comp);
+				_variance_size = maoris::variance<double>(size_comp, _mean_size);
+				_sdeviation_size = sqrt(_variance_size);
+				auto standardized = standardization(size_comp, mean, standard_deviation);
+
+// 				std::cout << "max " << max << " min " << min << std::endl;
+// 				double div = (max - min);
+// 				assert(div != 0);
+// 				std::cout << "div " << div << " min " << min << std::endl;
+
+				std::vector<double> all_scores;
+// 				std::pair<VertexIteratorZone, VertexIteratorZone> vp;
+// 				int max = -1, min = -1;
+				vp = boost::vertices((*this));
+				int i = 0;
+				for(vp ; vp.first != vp.second; ++vp.first){
+					auto v = *vp.first;
+// 					std::cout << "SCORE" << standardized[i] << std::endl;
+					(*this)[v].setSizeClassification(standardized[i]);
+					++i ;
+				}
+
+				_size_classified = true;
+
+// 				std::cout <<"DONE" << std::endl;
+
 			}
 			
 			
