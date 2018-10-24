@@ -12,6 +12,8 @@
 #include "bettergraph/SimpleGraph.hpp"
 #include "ZoneCompared.hpp"
 
+#include <boost/math/distributions/normal.hpp> // for normal_distribution
+
 
 namespace AASS{
 	namespace RSI{
@@ -252,96 +254,128 @@ namespace AASS{
 				
 				boost::math::normal nd_pca(_mean_pca, _sdeviation_pca);
 				boost::math::normal nd_size(_mean_size, _sdeviation_size);
+
+				boost::math::normal nd_unit(0, 1);
+
 				auto vp = boost::vertices((*this));
 				for(vp ; vp.first != vp.second; ++vp.first){
 					
-					double res = 2;
+//					double res = 2;
+					bool is_unique = false;
+					double mean_attributes_proba = 0;
 					
 					auto v = *vp.first;
 					double score_pca = (*this)[v].getPCAClassification();
 					double score_size = (*this)[v].getSizeClassification();
-					
-// 					Test PCA TODO
-					if(score_pca <= 0 - (_sd_away_fom_mean_for_uniqueness * 1)){
-						//Calculate the score. It's under the mean so score is already low
-						double prob1 =  boost::math::cdf(nd_pca, score_pca + 0.5);
-						double prob2 =  boost::math::cdf(nd_pca, score_pca - 0.5);
-						assert(prob1 - prob2 > 0);
-						assert(prob1 - prob2 < 1);
-						
-// 						std::cout << res << " prob " << prob1 - prob2 << std::endl;
-						res = res - (prob1 - prob2) ;
-						
-						if(res > 2 || res < 0){
-							throw std::runtime_error("the cdf pca in base proba failed and it's not supposed to EVER");
-						}
+
+					//Old version for calculating probabilities
+//					double prob1 =  boost::math::cdf(nd_unit, score_pca + 0.05);
+//					double prob2 =  boost::math::cdf(nd_unit, score_pca - 0.05);
+					assert(boost::math::pdf(nd_unit, score_pca) >= 0 && boost::math::pdf(nd_unit, score_pca) <= 1);
+					assert(boost::math::pdf(nd_unit, score_size) >= 0 && boost::math::pdf(nd_unit, score_size) <= 1);
+					mean_attributes_proba = mean_attributes_proba + boost::math::pdf(nd_unit, score_pca);
+					mean_attributes_proba = mean_attributes_proba + boost::math::pdf(nd_unit, score_size);
+
+					if(score_pca <= 0 - (_sd_away_fom_mean_for_uniqueness * 1) || score_pca >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
+						std::cout << "PCA UNIQUE : " << _sd_away_fom_mean_for_uniqueness << std::endl;
+						is_unique = true;
 					}
-					else if(score_pca >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
-						//Score is above so we invert curve
-						double prob1 =  1 - boost::math::cdf(nd_pca, score_pca + 0.5);
-						double prob2 =  1 - boost::math::cdf(nd_pca, score_pca - 0.5);
-						assert(prob2 - prob1 > 0);
-						assert(prob2 - prob1 < 1);
-						
-// 						std::cout << res << " prob " << prob2 - prob1 << std::endl;
-						res = res - (prob2 - prob1) ;
-						
-						if(res > 2 || res < 0){
-							throw std::runtime_error("the cdf pca in base proba failed and it's not supposed to EVER");
-						}
+					if(score_size <= 0 - (_sd_away_fom_mean_for_uniqueness * 1) || score_size >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
+						std::cout << "SIZE UNIQUE" << std::endl;
+						is_unique = true;
 					}
-					else{
-						res = res - 1;
-					}
+
+					double res = 1 - (mean_attributes_proba / 2);
+					std::cout << "Is unique ? -> " << is_unique << " with score of " << res << " since " << boost::math::pdf(nd_unit, score_size) << " and " << boost::math::pdf(nd_unit, score_pca) << std::endl;
+					(*this)[v].setUniqueness(is_unique, res);
+					if(is_unique) count++;
+//
+//// 					Test PCA TODO
+//					if(score_pca <= 0 - (_sd_away_fom_mean_for_uniqueness * 1)){
+//						//Calculate the score. It's under the mean so score is already low
+//						double prob1 =  boost::math::cdf(nd_pca, score_pca + 0.5);
+//						double prob2 =  boost::math::cdf(nd_pca, score_pca - 0.5);
+//						assert(prob1 - prob2 > 0);
+//						assert(prob1 - prob2 < 1);
+//
+//// 						std::cout << res << " prob " << prob1 - prob2 << std::endl;
+//						res = res - (prob1 - prob2) ;
+//
+//						mean_attributes_proba = mean_attributes_proba + (prob1 - prob2);
+//
+//
+//						if(res > 2 || res < 0){
+//							throw std::runtime_error("the cdf pca in base proba failed and it's not supposed to EVER");
+//						}
+//					}
+//					else if(score_pca >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
+//						//Score is above so we invert curve
+//						double prob1 =  1 - boost::math::cdf(nd_pca, score_pca + 0.5);
+//						double prob2 =  1 - boost::math::cdf(nd_pca, score_pca - 0.5);
+//						assert(prob2 - prob1 > 0);
+//						assert(prob2 - prob1 < 1);
+//
+//// 						std::cout << res << " prob " << prob2 - prob1 << std::endl;
+//						res = res - (prob2 - prob1) ;
+//
+//						if(res > 2 || res < 0){
+//							throw std::runtime_error("the cdf pca in base proba failed and it's not supposed to EVER");
+//						}
+//					}
+//					else{
+//						res = res - 1;
+//					}
 					
 					//Test SIZE STANDARDIZED SO mean 0 and sd 1
-					if(score_size <= 0 - (_sd_away_fom_mean_for_uniqueness * 1)){
-						//Calculate the score. It's under the mean so score is already low
-						double prob1 =  boost::math::cdf(nd_size, score_size + 0.5);
-						double prob2 =  boost::math::cdf(nd_size, score_size - 0.5);
-						assert(prob1 - prob2 > 0);
-						assert(prob1 - prob2 < 1);
-						
-						res = res - (prob1 - prob2) ;
-
-// 						std::cout << res << std::endl;
-						if(res > 2 || res < 0){
-							throw std::runtime_error("the cdf size in base proba failed and it's not supposed to EVER");
-						}
-					}
-					else if(score_size >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
-						//Score is above so we invert curve
-						double prob1 =  1 - boost::math::cdf(nd_size, score_size + 0.5);
-						double prob2 =  1 - boost::math::cdf(nd_size, score_size - 0.5);
-						assert(prob2 - prob1 > 0);
-						assert(prob2 - prob1 < 1);
-						
-						res = res - (prob2 - prob1);
-
-// 						std::cout << res << std::endl;
-						if(res > 2 || res < 0){
-							throw std::runtime_error("the cdf size in base proba failed and it's not supposed to EVER");
-						}
-					}
-					else{
-						res = res - 1;
-					}
-					
-					std::cout << "PCA " <<  score_pca << " mean " << _mean_pca << " standar dev " << _sdeviation_pca << " pca " << (*this)[v].getPCADiff() << std::endl;
-					
-					if(res == 0){
-						(*this)[v].setUniqueness(false, res);
-					}
-					else{
-						(*this)[v].setUniqueness(true, res);
-						count++;
-					}
+//					if(score_size <= 0 - (_sd_away_fom_mean_for_uniqueness * 1)){
+//						//Calculate the score. It's under the mean so score is already low
+//						double prob1 =  boost::math::cdf(nd_size, score_size + 0.5);
+//						double prob2 =  boost::math::cdf(nd_size, score_size - 0.5);
+//						assert(prob1 - prob2 > 0);
+//						assert(prob1 - prob2 < 1);
+//
+//						res = res - (prob1 - prob2) ;
+//
+//// 						std::cout << res << std::endl;
+//						if(res > 2 || res < 0){
+//							throw std::runtime_error("the cdf size in base proba failed and it's not supposed to EVER");
+//						}
+//					}
+//					else if(score_size >= 0 + (_sd_away_fom_mean_for_uniqueness * 1)){
+//						//Score is above so we invert curve
+//						double prob1 =  1 - boost::math::cdf(nd_size, score_size + 0.5);
+//						double prob2 =  1 - boost::math::cdf(nd_size, score_size - 0.5);
+//						assert(prob2 - prob1 > 0);
+//						assert(prob2 - prob1 < 1);
+//
+//						res = res - (prob2 - prob1);
+//
+//// 						std::cout << res << std::endl;
+//						if(res > 2 || res < 0){
+//							throw std::runtime_error("the cdf size in base proba failed and it's not supposed to EVER");
+//						}
+//					}
+//					else{
+//						res = res - 1;
+//					}
+//
+//					std::cout << "PCA " <<  score_pca << " mean " << _mean_pca << " standar dev " << _sdeviation_pca << " pca " << (*this)[v].getPCADiff() << std::endl;
+//
+//					if(res == 0){
+//						(*this)[v].setUniqueness(false, res);
+//					}
+//					else{
+//						(*this)[v].setUniqueness(true, res);
+//						count++;
+//					}
 
 				}
 				
 // 				exit(0);
 								
 				_nb_of_unique = count;
+
+//				exit(0);
 				
 			}
 			

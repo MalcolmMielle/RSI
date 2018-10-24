@@ -20,7 +20,7 @@ AASS::RSI::ZoneComparedInterface AASS::RSI::ZoneRI::compare(const AASS::RSI::Zon
 	double score_pca_target = zone_in.getPCADiff();
 	std::cout << "Size diff " << std::endl;
 	double score_size_target = zone_in.getSizeClassification();
-	double res = 1;
+	double similarity = 1;
 // 	
 // 	if(diff <= 0.20 || diff_pca <= 0.50){
 // 		res = (diff + diff_pca) / 2;
@@ -37,13 +37,20 @@ AASS::RSI::ZoneComparedInterface AASS::RSI::ZoneRI::compare(const AASS::RSI::Zon
 	
 	if(score_size <= score_size_target + 1 && score_size >= score_size_target - 1){
 		std::cout << "Similar size" << std::endl;
-		res = res - (0.5 - (std::abs(score_size - score_size_target) / 2 ));
-		//If pca is 20% similar
-// 		if(std::abs(score_pca - score_pca_target) < 0.20){
-			std::cout << "Similar pca" << std::endl;
-			res = res - (0.5 - (std::abs(score_pca - score_pca_target) / 2 ));
-// 		}
+
+		double sum_difference = std::abs(score_size - score_size_target);
+		sum_difference = sum_difference + std::abs(score_pca - score_pca_target);
+		similarity = sum_difference / 2;
+
+//		res = res - (0.5 - (std::abs(score_size - score_size_target) / 2 ));
+//		//If pca is 20% similar
+//// 		if(std::abs(score_pca - score_pca_target) < 0.20){
+//			std::cout << "Similar pca" << std::endl;
+//			res = res - (0.5 - (std::abs(score_pca - score_pca_target) / 2 ));
+//// 		}
 	}
+
+
 	
 // 	//Compare their elongation
 // 	double simi_zone = comparePCA(zone_in);
@@ -79,15 +86,15 @@ AASS::RSI::ZoneComparedInterface AASS::RSI::ZoneRI::compare(const AASS::RSI::Zon
 // 	else{
 // 		res = (diff + 1) / 2;
 // 	}
-	assert(res <= 1);
-	assert(res >= 0); 
+	assert(similarity <= 1);
+	assert(similarity >= 0);
 					
 	//ATTENTION Testing
 	zone_out.size_diff = score_size;
 	zone_out.pca_diff = score_pca;
 	zone_out.size_source = getSizeClassification();
 	zone_out.size_target = zone_in.getSizeClassification();
-	zone_out.setSimilarity(res);
+	zone_out.setSimilarity(similarity);
 	
 	std::cout << "OUT" << std::endl;
 	return zone_out;
