@@ -182,6 +182,7 @@ namespace AASS{
 				precisionValue.precision(2);
 				precisionValue << _size_classification << std::endl;
 				std::stringstream precisionValue2;
+
 				precisionValue2.precision(2);
 				precisionValue2 << _pca_classification << std::endl;
  				text = text + " sd " + precisionValue.str() + " \n pd " + precisionValue2.str() + " \n " ;

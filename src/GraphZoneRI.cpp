@@ -211,7 +211,7 @@ void AASS::RSI::GraphZoneRI::drawUnique(cv::Mat& drawmat) const
 		
 		VertexZone v = *vp.first;
 		
-//		if((*this)[v].isUnique()){
+		if((*this)[v].isUnique()){
 // 				if(getNumEdges(v) > 1){
 			
 			draw(drawmat, v, color);
@@ -228,19 +228,19 @@ void AASS::RSI::GraphZoneRI::drawUnique(cv::Mat& drawmat) const
 				}
 			}
 // 
-//		}
+		}
 	}
 		
 	for (vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first) {
 		
 		VertexZone v = *vp.first;
-//		if((*this)[v].isUnique()){
+		if((*this)[v].isUnique()){
 
 			EdgeIteratorZone out_i, out_end;
 			EdgeZone e;
 			(*this)[v].printLabel(drawmat);
 			
-//		}
+		}
 	}
 
 }
@@ -1531,25 +1531,25 @@ std::vector<AASS::RSI::ZoneCompared> AASS::RSI::GraphZoneRI::compare(GraphZoneRI
 // 				cv::waitKey(0); 
 // 				std::cout << "PPPPRESSSED" << std::endl;
 				
- 				cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
- 				std::cout << "Draw Zone" << std::endl;
- 				(*this)[v].drawZone(graphmat2, cv::Scalar(100));
- 				std::cout << "DrawContour" << std::endl;
- 				(*this)[v].drawContour(graphmat2, cv::Scalar(100));
- 				std::cout << "Done" << std::endl;
- 				cv::imshow("firstzone", graphmat2);
- 				cv::Mat graphmat22 = cv::Mat::zeros(1000,1000, CV_8U);
- 				std::cout << "Draw Zone" << std::endl;
- 				target[v_target].drawZone(graphmat22, cv::Scalar(100));
- 				std::cout << "Draw Contour" << std::endl;
- 				target[v_target].drawContour(graphmat22, cv::Scalar(100));
- 				std::cout << "Done" << std::endl;
- 				cv::imshow("secondzone", graphmat22);
- 				std::cout << "INSHOW done" << std::endl;
-
-
- 				std::cout << "SIMILARITY  " << zoneout.getSimilarity() << std::endl;
- 				cv::waitKey(0);
+// 				cv::Mat graphmat2 = cv::Mat::zeros(1000,1000, CV_8U);
+// 				std::cout << "Draw Zone" << std::endl;
+// 				(*this)[v].drawZone(graphmat2, cv::Scalar(100));
+// 				std::cout << "DrawContour" << std::endl;
+// 				(*this)[v].drawContour(graphmat2, cv::Scalar(100));
+// 				std::cout << "Done" << std::endl;
+// 				cv::imshow("firstzone", graphmat2);
+// 				cv::Mat graphmat22 = cv::Mat::zeros(1000,1000, CV_8U);
+// 				std::cout << "Draw Zone" << std::endl;
+// 				target[v_target].drawZone(graphmat22, cv::Scalar(100));
+// 				std::cout << "Draw Contour" << std::endl;
+// 				target[v_target].drawContour(graphmat22, cv::Scalar(100));
+// 				std::cout << "Done" << std::endl;
+// 				cv::imshow("secondzone", graphmat22);
+// 				std::cout << "INSHOW done" << std::endl;
+//
+//
+// 				std::cout << "SIMILARITY  " << zoneout.getSimilarity() << std::endl;
+// 				cv::waitKey(0);
 //
 				
 // 				std::cout << "Let's go drawing all sim" << std::endl;

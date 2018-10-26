@@ -21,6 +21,7 @@
 // #include "Uniqueness.hpp"
 
 #include <valgrind/callgrind.h>
+#include <sstream>
 
 
 
@@ -74,21 +75,21 @@ void draw(AASS::RSI::GraphZoneRI& gp_real, AASS::RSI::GraphZoneRI& gp_model, con
 		color[3] = rrng.uniform(50, 255);
 		color[2] = rrng.uniform(50, 255);
 	}
-// 	
-// 	cv::Scalar color_model;
-// 
-// 	
+
+ 	cv::Scalar color_model;
+
+
 	auto it = matches.begin();
-	
+
 	for( ; it != matches.end() ; ++it){
 		std::cout << "DRAW LINE " << std::endl;
-		
+
 		auto point = gp_model[it->target].getCentroid();
 		point.y = point.y + obst_copy.size().height;
-		
+
 		cv::line(all, gp_real[it->source].getCentroid(), point, color, 5);
 	}
-	
+
 	cv::imshow("all links", all);
 	
 }
@@ -143,6 +144,14 @@ BOOST_AUTO_TEST_CASE(trying)
 	else{
 		file2 = "../../Test/Saeed/bird2.png";
 	}
+	if(argc > 3){
+		std::stringstream ss(argv[3]);
+		if(!(ss >> std::boolalpha >> is_sketch)) {
+			std::cout << "NOT CORRECT BOOLEAN VALUE" << std::endl;
+		}
+	}
+	if(is_sketch) std::cout << "Is a SKETCH" << std::endl;
+	else std::cout << "Is NOT a sketch" << std::endl;
 	
 	cv::Mat slam1 = cv::imread(file, CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Mat slam2 = cv::imread(file2, CV_LOAD_IMAGE_GRAYSCALE);
