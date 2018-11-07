@@ -86,13 +86,13 @@ namespace AASS{
 		 */
 		inline std::vector< ZoneCompared > AASS::RSI::HungarianMatcher::match(GraphZoneRI& source, GraphZoneRI& target, std::vector<int>& scores){
 			
-			cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
-			source.draw(imgimg);
-			cv::imshow("in", imgimg);
+//			cv::Mat imgimg = cv::Mat::zeros(cv::Size(1000,1000), CV_8UC1);
+//			source.draw(imgimg);
+//			cv::imshow("in", imgimg);
 	
-			target.draw(imgimg);
-			cv::imshow("innnn", imgimg);
-			cv::waitKey(0);
+//			target.draw(imgimg);
+//			cv::imshow("innnn", imgimg);
+//			cv::waitKey(0);
 			
 			
 			std::cout << "TATENTIONDKJ " << source.zoneUniquenessWasCalculated() << " sadoifdsgiouh " << target.zoneUniquenessWasCalculated() << std::endl;
