@@ -103,6 +103,77 @@ namespace AASS{
 			double getMeanSize() const {return _mean_size;}
 			double getStandardDeviationPCA() const {return _sdeviation_pca;}
 			double getStandardDeviationSize() const {return _sdeviation_size;}
+
+
+			double getMeanL2Norm(const GraphZoneRI& graph) const {
+				if(this->getNumVertices() <= graph.getNumVertices()){
+					return this->getMeanL2NormOneWay(graph);
+				}
+				else{
+					return graph.getMeanL2NormOneWay(*this);
+				}
+			}
+
+			double getMeanL2NormOneWay(const GraphZoneRI& graph) const {
+
+				assert(_size_classified == true);
+				double sum_distance = 0;
+
+				for(auto vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first){
+					VertexZoneRI v = *vp.first;
+					double shortest_distance_relative_size = -1;
+					double size_classification = (*this)[v].getSizeClassification();
+
+					for(auto vp_model = boost::vertices(graph); vp_model.first != vp_model.second; ++vp_model.first){
+						VertexZoneRI v_model = *vp_model.first;
+						double size_classification_model = graph[v_model].getSizeClassification();
+						double distance = std::abs(size_classification -  size_classification_model);
+						if(shortest_distance_relative_size == -1 || shortest_distance_relative_size > distance){
+							shortest_distance_relative_size = distance;
+						}
+					}
+
+					sum_distance += shortest_distance_relative_size;
+
+				}
+				return sum_distance / (double) this->getNumVertices();
+
+			}
+
+			double getHausdorffDistanceRelativeSize(const GraphZoneRI& graph) const {
+
+				double shortest_this_to_graph = this->getLongestDistanceOutOfShortestBetweenRegionSize(graph);
+				double shortest_graph_to_this = graph.getLongestDistanceOutOfShortestBetweenRegionSize(*this);
+				return std::max(shortest_graph_to_this, shortest_this_to_graph);
+
+			}
+
+			double getLongestDistanceOutOfShortestBetweenRegionSize(const GraphZoneRI& graph) const{
+
+				assert(_size_classified == true);
+				double longest_distance_relative_size = -1;
+
+				for(auto vp = boost::vertices((*this)); vp.first != vp.second; ++vp.first){
+					VertexZoneRI v = *vp.first;
+					double shortest_distance_relative_size = -1;
+					double size_classification = (*this)[v].getSizeClassification();
+
+					for(auto vp_model = boost::vertices(graph); vp_model.first != vp_model.second; ++vp_model.first){
+						VertexZoneRI v_model = *vp_model.first;
+						double size_classification_model = graph[v_model].getSizeClassification();
+						double distance = std::abs(size_classification -  size_classification_model);
+						if(shortest_distance_relative_size == -1 || shortest_distance_relative_size > distance){
+							shortest_distance_relative_size = distance;
+						}
+					}
+
+					if(shortest_distance_relative_size > longest_distance_relative_size){
+						longest_distance_relative_size = shortest_distance_relative_size;
+					}
+
+				}
+				return longest_distance_relative_size;
+			}
 			
 			
 			void draw(cv::Mat& m, const maoris::GraphZoneInterface<ZoneRI, maoris::EdgeElement>::Vertex& v, const cv::Scalar& color) const

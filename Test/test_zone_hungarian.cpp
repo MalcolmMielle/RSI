@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(trying)
 		std::cout << "matching " << i << " : " << match[i].source << " " << match[i].target << std::endl;
 		cv::imshow("Zone1", graph_slam[match[i].source].getZoneMat());
 		cv::imshow("Zone2", graph_slam2[match[i].target].getZoneMat());
-		
+
 		//TODO: Add uniqueness measurement with it
 		std::cout << "SCORE of similarity (diff than uniqueness), it's the matching score between the zones, 0 is good, 1 is bad : " <<  " \nUniqueness : ";
 		
