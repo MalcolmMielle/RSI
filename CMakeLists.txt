@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 find_package( OpenCV REQUIRED)
 find_package( bettergraph REQUIRED)
-find_package( vodigrex REQUIRED)
+# find_package( vodigrex REQUIRED)
 find_package( Boost REQUIRED )
 find_package( editDistance REQUIRED )
 find_package( maoris REQUIRED )
