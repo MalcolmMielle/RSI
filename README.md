@@ -9,3 +9,9 @@ test_hunagrian : test the hungarian library
 test_zone_hungarian_itself : match a graph zone extracted from an image onto itself
 
 test_zone_hungarian : match two grah from different images but from same environment.
+
+# Dependencies
+
+
+* [Edit distance](https://github.com/MalcolmMielle/edit_distance_cpp)
+* [maoris](https://github.com/MalcolmMielle/maoris)
